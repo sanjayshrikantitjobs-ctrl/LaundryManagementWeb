@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+
+# MAUI
+*.ap_
+*.aab
+*.apk
+
+# Misc
+.DS_Store
+*.log
+appsettings.*.local.json

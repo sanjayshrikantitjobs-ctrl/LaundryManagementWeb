@@ -1,0 +1,23 @@
+<section class="login">
+  <h1>Laundry Management System</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Username or email
+      <input type="text" formControlName="usernameOrEmail" autocomplete="username" />
+    </label>
+
+    <label>
+      Password
+      <input type="password" formControlName="password" autocomplete="current-password" />
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="form.invalid || isSubmitting()">
+      {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+</section>

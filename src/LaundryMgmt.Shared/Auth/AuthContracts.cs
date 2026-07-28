@@ -1,0 +1,17 @@
+namespace LaundryMgmt.Shared.Auth;
+
+public record LoginRequest(string UsernameOrEmail, string Password);
+
+public record LoginResponse(
+    string AccessToken,
+    string RefreshToken,
+    DateTimeOffset ExpiresAtUtc,
+    string UserId,
+    string FullName,
+    string Role);
+
+public record RefreshTokenRequest(string AccessToken, string RefreshToken);
+
+/// <summary>Used by the MAUI delivery-boy app to confirm delivery with an OTP
+/// the customer received via SMS.</summary>
+public record DeliveryOtpConfirmationRequest(Guid OrderId, string Otp);

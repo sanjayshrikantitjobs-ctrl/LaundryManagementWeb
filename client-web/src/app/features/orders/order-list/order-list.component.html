@@ -1,0 +1,32 @@
+<section class="order-list">
+  <h1>Orders</h1>
+
+  @if (isLoading()) {
+    <p>Loading orders…</p>
+  } @else if (orders().length === 0) {
+    <p>No orders yet.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.id) {
+          <tr>
+            <td>{{ order.orderNumber }}</td>
+            <td>{{ order.customerName }}</td>
+            <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
+            <td>{{ order.paymentStatus }}</td>
+            <td>{{ order.totalAmount | currency: 'INR' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

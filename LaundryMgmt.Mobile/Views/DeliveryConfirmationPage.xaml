@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.DeliveryConfirmationPage"
+             x:DataType="vm:DeliveryConfirmationViewModel"
+             Title="Confirm Delivery">
+
+    <VerticalStackLayout Padding="24" Spacing="16">
+        <Label Text="Ask the customer for the OTP sent to their phone." />
+
+        <Entry Placeholder="Enter OTP" Text="{Binding Otp}" Keyboard="Numeric" />
+
+        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+        <!-- TODO: add an InvertedBoolConverter under Resources/Styles if you want
+             the button disabled while IsSubmitting is true. Kept simple here. -->
+        <Button Text="Confirm delivery" Command="{Binding ConfirmCommand}" />
+    </VerticalStackLayout>
+
+</ContentPage>
