@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
        x:Class="LaundryMgmt.Mobile.AppShell"
-       Title="Laundry Staff">
+       Title="Laundry Mgmt">
 
-    <ShellContent Title="My Queue"
-                  ContentTemplate="{DataTemplate views:OrderQueuePage}"
-                  Route="orderqueue" />
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="16,0">
+            <Label Grid.Column="0" Text="Laundry wala" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
+            <Button Grid.Column="1" Text="Logout" Clicked="OnLogoutClicked" />
+        </Grid>
+    </Shell.TitleView>
 
 </Shell>

@@ -1,0 +1,46 @@
+<section class="garment-list">
+  <header>
+    <h1>Garments</h1>
+    <div class="header-actions">
+      <a routerLink="/services" class="link">Services</a>
+      <a routerLink="/garments/pricing" class="link">Pricing Matrix</a>
+      <a routerLink="new" class="btn-primary">+ New Garment</a>
+    </div>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by name or category…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading garments…</p>
+  } @else if (garments().length === 0) {
+    <p>No garments found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Barcode</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (garment of garments(); track garment.id) {
+          <tr>
+            <td>{{ garment.name }}</td>
+            <td>{{ garment.category }}</td>
+            <td>{{ garment.barcode || '—' }}</td>
+            <td class="actions">
+              <a [routerLink]="[garment.id, 'edit']">Edit</a>
+              <button type="button" (click)="deleteGarment(garment)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

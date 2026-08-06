@@ -1,0 +1,52 @@
+<section class="customer-form">
+  <h1>{{ isEditMode() ? 'Edit Customer' : 'New Customer' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Full Name
+      <input type="text" formControlName="fullName" />
+    </label>
+
+    <label>
+      Phone Number
+      <input type="tel" formControlName="phoneNumber" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+
+    <label>
+      Credit Limit
+      <input type="number" formControlName="creditLimit" min="0" />
+    </label>
+
+    @if (isEditMode()) {
+      <label>
+        Membership Tier
+        <select formControlName="membershipTier">
+          @for (tier of membershipTiers; track tier.value) {
+            <option [value]="tier.value">{{ tier.label }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <label>
+      Notes
+      <textarea formControlName="notes" rows="3"></textarea>
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

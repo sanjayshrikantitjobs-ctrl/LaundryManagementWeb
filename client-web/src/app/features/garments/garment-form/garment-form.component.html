@@ -1,0 +1,36 @@
+<section class="garment-form">
+  <h1>{{ isEditMode() ? 'Edit Garment' : 'New Garment' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Name
+      <input type="text" formControlName="name" placeholder="Shirt, Saree, Blanket…" />
+    </label>
+
+    <label>
+      Category
+      <input type="text" formControlName="category" placeholder="Menswear, Womenswear, Home…" />
+    </label>
+
+    <label>
+      Barcode
+      <input type="text" formControlName="barcode" />
+    </label>
+
+    <label>
+      Special Instructions
+      <textarea formControlName="specialInstructions" rows="3"></textarea>
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

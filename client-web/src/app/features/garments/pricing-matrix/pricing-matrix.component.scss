@@ -1,0 +1,43 @@
+.pricing-matrix {
+  padding: 24px;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .link {
+    color: #4338ca;
+  }
+
+  .grid-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    min-width: 100%;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+  }
+
+  .garment-name .category {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  input[type='number'] {
+    width: 90px;
+    padding: 6px 8px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+  }
+}

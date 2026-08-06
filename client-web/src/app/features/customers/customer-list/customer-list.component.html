@@ -1,0 +1,48 @@
+<section class="customer-list">
+  <header>
+    <h1>Customers</h1>
+    <a routerLink="new" class="btn-primary">+ New Customer</a>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by name, phone or email…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading customers…</p>
+  } @else if (customers().length === 0) {
+    <p>No customers found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Membership</th>
+          <th>Wallet</th>
+          <th>Loyalty Points</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (customer of customers(); track customer.id) {
+          <tr>
+            <td>{{ customer.fullName }}</td>
+            <td>{{ customer.phoneNumber }}</td>
+            <td>{{ customer.email || '—' }}</td>
+            <td><span class="badge">{{ membershipLabel(customer.membershipTier) }}</span></td>
+            <td>{{ customer.walletBalance | currency: 'INR' }}</td>
+            <td>{{ customer.loyaltyPoints }}</td>
+            <td class="actions">
+              <a [routerLink]="[customer.id, 'edit']">Edit</a>
+              <button type="button" (click)="deleteCustomer(customer)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

@@ -1,0 +1,49 @@
+<section class="service-list">
+  <header>
+    <h1>Services</h1>
+    <div class="header-actions">
+      <a routerLink="/garments" class="link">Garments</a>
+      <a routerLink="new" class="btn-primary">+ New Service</a>
+    </div>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by name…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading services…</p>
+  } @else if (services().length === 0) {
+    <p>No services found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Base Price</th>
+          <th>GST %</th>
+          <th>Est. Time (hrs)</th>
+          <th>Priority</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (service of services(); track service.id) {
+          <tr>
+            <td>{{ service.name }}</td>
+            <td>{{ service.basePrice | currency: 'INR' }}</td>
+            <td>{{ service.gstPercentage }}%</td>
+            <td>{{ service.estimatedTimeHours }}</td>
+            <td>{{ service.priority }}</td>
+            <td class="actions">
+              <a [routerLink]="[service.id, 'edit']">Edit</a>
+              <button type="button" (click)="deleteService(service)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

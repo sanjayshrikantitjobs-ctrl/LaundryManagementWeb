@@ -18,6 +18,12 @@ export enum PaymentStatus {
   Refunded = 3
 }
 
+export enum OrderChannel {
+  WalkIn = 0,
+  PickupRequest = 1,
+  Express = 2
+}
+
 export interface OrderListItem {
   id: string;
   orderNumber: string;
@@ -45,7 +51,7 @@ export interface CreateOrderItem {
 
 export interface CreateOrderRequest {
   customerId: string;
-  channel: number; // 0 WalkIn, 1 PickupRequest, 2 Express
+  channel: OrderChannel;
   isExpress: boolean;
   items: CreateOrderItem[];
 }

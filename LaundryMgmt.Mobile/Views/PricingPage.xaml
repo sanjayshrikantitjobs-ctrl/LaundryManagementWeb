@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.PricingPage"
+             x:DataType="vm:PricingViewModel"
+             Title="Pricing">
+
+    <Grid RowDefinitions="Auto,*">
+        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="pricing" />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="10">
+                <Frame>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Pick a garment and service to view or set its price." Style="{StaticResource SubtleLabel}" />
+
+                        <Label Text="GARMENT" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding Garments}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedGarment}" />
+
+                        <Label Text="SERVICE" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding Services}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedService}" />
+
+                        <Label Text="PRICING TYPE" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding PricingTypes}" SelectedItem="{Binding PricingType}" />
+
+                        <Label Text="PRICE" Style="{StaticResource SectionLabel}" />
+                        <Entry Text="{Binding PriceText}" Keyboard="Numeric" Placeholder="e.g. 75.00" />
+
+                        <Label Text="{Binding StatusMessage}" TextColor="{StaticResource Success}" />
+
+                        <Button Text="Save Price" Command="{Binding SavePriceCommand}" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

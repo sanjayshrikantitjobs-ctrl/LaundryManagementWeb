@@ -1,0 +1,22 @@
+@if (authService.isAuthenticated()) {
+  <header class="app-header">
+    <span class="brand">Laundry Mgmt</span>
+
+    <nav>
+      <a routerLink="/orders" routerLinkActive="active">Orders</a>
+      <a routerLink="/customers" routerLinkActive="active">Customers</a>
+      <a routerLink="/garments" routerLinkActive="active">Garments</a>
+      <a routerLink="/services" routerLinkActive="active">Services</a>
+      <a routerLink="/garments/pricing" routerLinkActive="active">Pricing</a>
+    </nav>
+
+    <div class="user-info">
+      <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
+      <button type="button" (click)="logout()">Logout</button>
+    </div>
+  </header>
+}
+
+<main>
+  <router-outlet></router-outlet>
+</main>

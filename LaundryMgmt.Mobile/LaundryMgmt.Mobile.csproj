@@ -23,9 +23,9 @@
 
   <ItemGroup>
     <!-- App Icon (commented out while images are missing) -->
-    <!-- <MauiIcon Include="Resources\Images\appicon.svg" ForegroundFile="Resources\Images\appiconfg.svg" Color="#3730A3" /> -->
+     <MauiIcon Include="Resources\Images\AppIcon\appicon.svg" ForegroundFile="Resources\Images\appiconfg.svg" Color="#3730A3" /> 
     <!-- Splash Screen (remove or point to existing file if you don't have a splash.svg) -->
-    <!-- <MauiSplashScreen Include="Resources\Images\splash.svg" Color="#3730A3" BaseSize="128,128" /> -->
+     <MauiSplashScreen Include="Resources\Images\Splash\splash.svg" Color="#3730A3" BaseSize="128,128" /> 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
     <!-- Custom Fonts -->
@@ -41,18 +41,8 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
-    <PackageReference Include="ZXing.Net.MAUI" Version="0.4.2" />
+    <PackageReference Include="ZXing.Net.MAUI" Version="0.10.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-  </ItemGroup>
-
-  <!-- Workaround: avoid duplicate AndroidX tracing classes coming from different AARs
-       by excluding runtime assets for one of the tracing packages if present in the
-       transitive dependency graph. This prevents inclusion of duplicate .class files
-       (e.g., TraceKt$traceAsync$1) that cause R8 compile errors. If the exact
-       package id differs in your transitive graph, update/remove these entries. -->
-  <ItemGroup>
-    <PackageReference Update="Xamarin.AndroidX.Tracing.Tracing" ExcludeAssets="runtime" />
-    <PackageReference Update="Xamarin.AndroidX.Tracing.Tracing.Ktx" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>

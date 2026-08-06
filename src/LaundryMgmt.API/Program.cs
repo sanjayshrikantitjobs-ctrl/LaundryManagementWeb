@@ -2,6 +2,7 @@ using LaundryMgmt.API.Hubs;
 using LaundryMgmt.API.Middleware;
 using LaundryMgmt.Application;
 using LaundryMgmt.Infrastructure;
+using LaundryMgmt.Infrastructure.Identity;
 using MediatR;
 using Serilog;
 
@@ -45,6 +46,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Seeds an Admin and a Customer login so there's something to sign in with out of
+    // the box. Dev-only: seed real users through a proper Register/invite flow elsewhere.
+    await IdentitySeeder.SeedAsync(app.Services);
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

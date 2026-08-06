@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { OrdersService } from '../orders.service';
 import { OrderHubService } from '../../../core/services/order-hub.service';
 import { OrderListItem, OrderStatus } from '../../../core/models/order.models';
@@ -8,7 +9,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.scss'
 })

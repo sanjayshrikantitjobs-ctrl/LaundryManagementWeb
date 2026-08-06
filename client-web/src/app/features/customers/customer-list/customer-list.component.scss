@@ -1,0 +1,59 @@
+.customer-list {
+  padding: 24px;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  input[type='search'] {
+    width: 100%;
+    max-width: 320px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .badge {
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-primary {
+    background: #4338ca;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: #b91c1c;
+    cursor: pointer;
+    padding: 0;
+  }
+}

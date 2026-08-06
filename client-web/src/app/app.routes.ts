@@ -16,6 +16,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/customers/customers.routes').then((m) => m.CUSTOMERS_ROUTES)
   },
+  {
+    path: 'garments',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/garments/garments.routes').then((m) => m.GARMENTS_ROUTES)
+  },
+  {
+    path: 'services',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/services/services.routes').then((m) => m.SERVICES_ROUTES)
+  },
   { path: '', pathMatch: 'full', redirectTo: 'orders' },
   { path: '**', redirectTo: 'orders' }
 ];

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.CustomerFormPage"
+             x:DataType="vm:CustomerFormViewModel"
+             Title="New Customer">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Frame>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="FULL NAME" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding FullName}" />
+
+                    <Label Text="PHONE NUMBER" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding PhoneNumber}" Keyboard="Telephone" />
+
+                    <Label Text="EMAIL" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding Email}" Keyboard="Email" />
+
+                    <Label Text="CREDIT LIMIT" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding CreditLimitText}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -100,22 +100,49 @@ The **Orders** module is built end-to-end as the template for every other module
   `dashboard` group → Angular's `OrderListComponent` and MAUI's `DeliveryOrderHubService` both
   listen for the same `OrderStatusChanged` payload shape
 
-Still missing before login actually works end-to-end: an endpoint/seed data to **create** the
-first `ApplicationUser` + assign a role (there's no `RegisterCommand`/seeder yet — add one or
-seed a user directly via `UserManager` in a startup hook or EF seed data).
+**Login now works end-to-end in Development**: `IdentitySeeder` (`src/LaundryMgmt.Infrastructure/Identity/IdentitySeeder.cs`)
+runs on startup when `ASPNETCORE_ENVIRONMENT=Development`, creates an Identity role for every
+`UserRole` enum value, and seeds two logins if they don't already exist:
+
+| Role     | Username   | Password         |
+|----------|------------|------------------|
+| Admin    | `admin`    | `Admin#12345`    |
+| Customer | `customer` | `Customer#12345` |
+
+Override via configuration (`SeedUsers:Admin:UserName`/`Password`/etc., same for `Customer`) —
+e.g. through `dotnet user-secrets` — before using this anywhere beyond local dev. There's still
+no self-serve `RegisterCommand`/customer sign-up flow; add one when you build the customer
+portal, since the seeder is only meant to bootstrap a first login.
+
+## What's implemented: Customer + Garment/Service catalog
+
+Full CRUD, end-to-end, following the same pattern as Orders:
+- Application: `Customers/` (Create/Update/Delete + AddAddress commands, GetCustomers/GetCustomerById
+  queries), `Garments/` (Create/Update/Delete, GetGarments/GetGarmentById, SetGarmentServicePrice,
+  GetPricingMatrix), `Services/` (Create/Update/Delete, GetServices/GetServiceById) — all MediatR +
+  FluentValidation
+- API: `CustomersController`, `GarmentsController` (incl. `GET /pricing-matrix` and
+  `PUT /{id}/prices/{serviceId}`), `ServicesController`
+- Infrastructure: `CustomerConfiguration`/`CatalogConfiguration` add proper max-lengths, a unique
+  index on `Customer.PhoneNumber`, a unique filtered index on `Garment.Barcode`, and a unique
+  composite index on `GarmentServicePrice(GarmentId, ServiceId)` — see migration
+  `AddCatalogAndCustomerConstraints`
+- Angular: `features/customers` (list + create/edit form), `features/garments` (list, create/edit
+  form, and a full Garment × Service pricing matrix grid), `features/services` (list + create/edit
+  form)
+- Tests: FluentValidation unit tests for the new Create commands
 
 ## What still needs building
 
 Everything else from your spec follows the **same pattern** (Domain entity → Application
-CQRS handlers → API controller → Angular feature module → tests). Entities for Customer,
-Garment, Service, Invoice, Payment, InventoryItem, Employee, Machine, Complaint, and
-PickupDelivery already exist in `LaundryMgmt.Domain/Entities` — they just need their own
-Application handlers, controllers, and Angular feature folders, following exactly what's
-in `Orders/`.
+CQRS handlers → API controller → Angular feature module → tests). Entities for Invoice,
+Payment, InventoryItem, Employee, Machine, Complaint, and PickupDelivery already exist in
+`LaundryMgmt.Domain/Entities` — they just need their own Application handlers, controllers,
+and Angular feature folders, following exactly what's in `Orders/`.
 
 Suggested build order (matches the phased roadmap discussed earlier):
 1. ~~Auth~~ ✅ done — add a `RegisterCommand`/user seeder next so there's actually a user to log in as
-2. Customer + Garment/Service catalog CRUD
+2. ~~Customer + Garment/Service catalog CRUD~~ ✅ done
 3. Billing/Invoicing + Payments
 4. Pickup/Delivery + Barcode/QR + Notifications (Hangfire jobs + Twilio/SendGrid)
 5. Inventory, Employee, Machine management

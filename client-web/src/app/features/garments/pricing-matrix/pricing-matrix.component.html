@@ -1,0 +1,45 @@
+<section class="pricing-matrix">
+  <header>
+    <h1>Pricing Matrix</h1>
+    <a routerLink="/garments" class="link">&larr; Back to Garments</a>
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading pricing matrix…</p>
+  } @else if (!matrix() || matrix()!.garments.length === 0) {
+    <p>Add garments and services first to configure pricing.</p>
+  } @else {
+    <div class="grid-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Garment</th>
+            @for (service of matrix()!.services; track service.id) {
+              <th>{{ service.name }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of matrix()!.garments; track row.garmentId) {
+            <tr>
+              <td class="garment-name">{{ row.garmentName }} <span class="category">{{ row.category }}</span></td>
+              @for (cell of row.prices; track cell.serviceId) {
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [value]="cell.price ?? ''"
+                    placeholder="—"
+                    [disabled]="savingKey() === cellKey(row.garmentId, cell.serviceId)"
+                    (change)="onPriceChange(row.garmentId, cell.serviceId, cell.pricingType, $any($event.target).value)"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

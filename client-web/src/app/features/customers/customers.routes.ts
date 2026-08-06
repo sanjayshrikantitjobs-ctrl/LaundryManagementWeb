@@ -1,5 +1,16 @@
 import { Routes } from '@angular/router';
 
-// Placeholder — build out CustomerListComponent/CustomerDetailComponent next,
-// following the same pattern as features/orders.
-export const CUSTOMERS_ROUTES: Routes = [];
+export const CUSTOMERS_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./customer-list/customer-list.component').then((m) => m.CustomerListComponent)
+  },
+  {
+    path: 'new',
+    loadComponent: () => import('./customer-form/customer-form.component').then((m) => m.CustomerFormComponent)
+  },
+  {
+    path: ':id/edit',
+    loadComponent: () => import('./customer-form/customer-form.component').then((m) => m.CustomerFormComponent)
+  }
+];

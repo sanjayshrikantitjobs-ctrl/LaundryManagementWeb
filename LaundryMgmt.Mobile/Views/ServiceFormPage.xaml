@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.ServiceFormPage"
+             x:DataType="vm:ServiceFormViewModel"
+             Title="New Service">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Frame>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="NAME" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding Name}" Placeholder="Washing, Dry Cleaning, Iron Only…" />
+
+                    <Label Text="BASE PRICE" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding BasePriceText}" Keyboard="Numeric" />
+
+                    <Label Text="ESTIMATED TIME (HOURS)" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding EstimatedTimeHoursText}" Keyboard="Numeric" />
+
+                    <Label Text="GST %" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding GstPercentageText}" Keyboard="Numeric" />
+
+                    <Label Text="PRIORITY" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding PriorityText}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

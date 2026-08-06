@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LaundryMgmt.Mobile.Views.ModuleBreadcrumb">
+
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" BackgroundColor="{StaticResource Gray50}">
+        <HorizontalStackLayout Spacing="8" Padding="16,10">
+
+            <Border x:Name="OrdersChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOrdersTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="OrdersLabel" Text="Orders" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
+            <Border x:Name="CustomersChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCustomersTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="CustomersLabel" Text="Customers" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
+            <Border x:Name="GarmentsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnGarmentsTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="GarmentsLabel" Text="Garments" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
+            <Border x:Name="ServicesChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnServicesTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="ServicesLabel" Text="Services" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
+            <Border x:Name="PricingChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPricingTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="PricingLabel" Text="Pricing" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
+        </HorizontalStackLayout>
+    </ScrollView>
+
+</ContentView>

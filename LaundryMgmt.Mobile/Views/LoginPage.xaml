@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title="Sign in">
+
+    <Grid BackgroundColor="{StaticResource PrimaryDark}">
+        <VerticalStackLayout Padding="32" Spacing="18" VerticalOptions="Center">
+            <Label Text="Laundry Management System" FontSize="24" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" HorizontalTextAlignment="Center" Margin="0,0,0,12" />
+
+            <Frame BackgroundColor="{StaticResource White}" Padding="20">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="USERNAME OR EMAIL" Style="{StaticResource SectionLabel}" />
+                    <Entry Placeholder="admin" Text="{Binding UsernameOrEmail}" />
+
+                    <Label Text="PASSWORD" Style="{StaticResource SectionLabel}" />
+                    <Entry Placeholder="••••••••" Text="{Binding Password}" IsPassword="True" />
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+                    <Button Text="Sign in" Command="{Binding LoginCommand}" Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

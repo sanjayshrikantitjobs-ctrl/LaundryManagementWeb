@@ -1,5 +1,8 @@
 <section class="order-list">
-  <h1>Orders</h1>
+  <header>
+    <h1>Orders</h1>
+    <a routerLink="new" class="btn-primary">+ New Order</a>
+  </header>
 
   @if (isLoading()) {
     <p>Loading orders…</p>

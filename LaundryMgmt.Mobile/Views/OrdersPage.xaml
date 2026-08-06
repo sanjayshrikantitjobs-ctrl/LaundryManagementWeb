@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.OrdersPage"
+             x:DataType="vm:OrdersViewModel"
+             Title="Orders">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ New" Command="{Binding NewOrderCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="orders" />
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Orders}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" VerticalOptions="Center">
+                        <Label Text="No orders yet." HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:OrderListItem">
+                        <Frame Style="{StaticResource ListCard}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding OrderNumber}" FontAttributes="Bold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Badge}" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding CustomerName}" Style="{StaticResource SubtleLabel}" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalAmount, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.CustomersPage"
+             x:DataType="vm:CustomersViewModel"
+             Title="Customers">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ New" Command="{Binding NewCustomerCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="customers" />
+
+        <SearchBar Grid.Row="1"
+                   Placeholder="Search by name, phone or email…"
+                   Text="{Binding SearchText}"
+                   SearchCommand="{Binding RefreshCommand}" />
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Customers}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" VerticalOptions="Center">
+                        <Label Text="No customers found." HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CustomerListItem">
+                        <Frame Style="{StaticResource ListCard}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding PhoneNumber}" Style="{StaticResource SubtleLabel}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="Delete" Style="{StaticResource DangerButton}"
+                                        CommandParameter="{Binding .}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCustomerCommand}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>
