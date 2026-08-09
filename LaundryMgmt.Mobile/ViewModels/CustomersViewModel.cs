@@ -14,6 +14,7 @@ public partial class CustomersViewModel : ObservableObject
 
     [ObservableProperty] private bool isRefreshing;
     [ObservableProperty] private string searchText = string.Empty;
+    [ObservableProperty] private string? errorMessage;
 
     public CustomersViewModel(ApiClient apiClient) => _apiClient = apiClient;
 
@@ -21,12 +22,17 @@ public partial class CustomersViewModel : ObservableObject
     public async Task RefreshAsync()
     {
         IsRefreshing = true;
+        ErrorMessage = null;
         try
         {
             var result = await _apiClient.GetCustomersAsync(search: SearchText);
             Customers.Clear();
             foreach (var customer in result?.Items ?? new List<CustomerListItem>())
                 Customers.Add(customer);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Couldn't load customers: {ex.Message}";
         }
         finally
         {

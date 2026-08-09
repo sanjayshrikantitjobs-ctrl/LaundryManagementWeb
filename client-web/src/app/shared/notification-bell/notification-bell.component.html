@@ -1,0 +1,31 @@
+<div class="notification-bell">
+  <button type="button" class="bell-btn" (click)="toggle()" [attr.aria-expanded]="isOpen()">
+    🔔
+    @if (unreadCount() > 0) {
+      <span class="badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="backdrop" (click)="close()"></div>
+    <div class="panel">
+      <header>Notifications</header>
+
+      @if (isLoading()) {
+        <p class="hint">Loading…</p>
+      } @else if (notifications().length === 0) {
+        <p class="hint">You're all caught up.</p>
+      } @else {
+        <div class="list">
+          @for (n of notifications(); track n.id) {
+            <button type="button" class="item" [class.unread]="!n.isRead" (click)="open(n)">
+              <strong>{{ n.title }}</strong>
+              <span class="message">{{ n.message }}</span>
+              <span class="time">{{ n.createdAtUtc | date: 'short' }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

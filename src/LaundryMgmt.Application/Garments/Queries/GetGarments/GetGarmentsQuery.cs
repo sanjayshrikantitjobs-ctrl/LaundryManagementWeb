@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Garments.Queries.GetGarments;
 
-public record GarmentListItemDto(Guid Id, string Name, string Category, string? Barcode);
+public record GarmentListItemDto(Guid Id, string Name, string Category, string? Barcode, string? ImageUrl);
 
 public record GetGarmentsQuery(
     string? Search = null,
@@ -31,7 +31,7 @@ public class GetGarmentsQueryHandler : IRequestHandler<GetGarmentsQuery, Paginat
             .OrderBy(g => g.Category).ThenBy(g => g.Name)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(g => new GarmentListItemDto(g.Id, g.Name, g.Category, g.Barcode))
+            .Select(g => new GarmentListItemDto(g.Id, g.Name, g.Category, g.Barcode, g.ImageUrl))
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<GarmentListItemDto>(items, totalCount, request.PageNumber, request.PageSize);

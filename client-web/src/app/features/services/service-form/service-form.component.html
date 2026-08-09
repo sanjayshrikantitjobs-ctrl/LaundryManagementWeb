@@ -27,6 +27,27 @@
       <input type="number" formControlName="priority" min="0" />
     </label>
 
+    <label>
+      Express Surcharge (₹, added per item when Channel = Express)
+      <input type="number" formControlName="expressSurcharge" min="0" />
+    </label>
+
+    <label>
+      Express ETA (hours)
+      <input type="number" formControlName="expressEtaHours" min="1" />
+    </label>
+
+    <label>
+      Image
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (isUploading()) {
+      <p>Uploading…</p>
+    } @else if (imageUrl()) {
+      <img [src]="imageUrl()" alt="Service preview" class="image-preview" />
+    }
+
     @if (errorMessage()) {
       <p class="error">{{ errorMessage() }}</p>
     }

@@ -21,6 +21,7 @@
     <table>
       <thead>
         <tr>
+          <th></th>
           <th>Name</th>
           <th>Base Price</th>
           <th>GST %</th>
@@ -32,6 +33,13 @@
       <tbody>
         @for (service of services(); track service.id) {
           <tr>
+            <td class="thumb">
+              @if (service.imageUrl) {
+                <img [src]="service.imageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🧼</span>
+              }
+            </td>
             <td>{{ service.name }}</td>
             <td>{{ service.basePrice | currency: 'INR' }}</td>
             <td>{{ service.gstPercentage }}%</td>

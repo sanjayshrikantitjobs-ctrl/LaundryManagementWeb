@@ -13,6 +13,7 @@ public partial class ServicesViewModel : ObservableObject
     public ObservableCollection<ServiceListItem> Services { get; } = new();
 
     [ObservableProperty] private bool isRefreshing;
+    [ObservableProperty] private string? errorMessage;
 
     public ServicesViewModel(ApiClient apiClient) => _apiClient = apiClient;
 
@@ -20,12 +21,17 @@ public partial class ServicesViewModel : ObservableObject
     public async Task RefreshAsync()
     {
         IsRefreshing = true;
+        ErrorMessage = null;
         try
         {
             var result = await _apiClient.GetServicesAsync();
             Services.Clear();
             foreach (var service in result?.Items ?? new List<ServiceListItem>())
                 Services.Add(service);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Couldn't load services: {ex.Message}";
         }
         finally
         {

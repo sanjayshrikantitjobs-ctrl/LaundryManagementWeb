@@ -40,6 +40,11 @@ export class CustomerFormComponent implements OnInit {
     notes: ['']
   });
 
+  readonly newPassword = signal('');
+  readonly isSavingPassword = signal(false);
+  readonly passwordError = signal<string | null>(null);
+  readonly passwordSaved = signal(false);
+
   ngOnInit(): void {
     this.customerId = this.route.snapshot.paramMap.get('id');
     if (this.customerId) {
@@ -95,5 +100,29 @@ export class CustomerFormComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/customers']);
+  }
+
+  savePassword(): void {
+    if (!this.customerId || this.newPassword().length < 8) {
+      this.passwordError.set('Password must be at least 8 characters.');
+      return;
+    }
+
+    this.isSavingPassword.set(true);
+    this.passwordError.set(null);
+    this.passwordSaved.set(false);
+
+    this.customersService.setPassword(this.customerId, this.newPassword()).subscribe({
+      next: () => {
+        this.isSavingPassword.set(false);
+        this.passwordSaved.set(true);
+        this.newPassword.set('');
+        setTimeout(() => this.passwordSaved.set(false), 2500);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isSavingPassword.set(false);
+        this.passwordError.set(err.error?.title ?? 'Failed to update password.');
+      }
+    });
   }
 }

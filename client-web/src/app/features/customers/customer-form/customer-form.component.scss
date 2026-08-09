@@ -1,6 +1,10 @@
 .customer-form {
   padding: 24px;
   max-width: 480px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 
   form {
     display: flex;
@@ -12,18 +16,20 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
   }
 
   input, select, textarea {
-    padding: 8px 12px;
-    border: 1px solid #d0d0d0;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     font: inherit;
   }
 
   .error {
-    color: #b91c1c;
+    color: var(--color-danger);
   }
 
   .actions {
@@ -33,19 +39,86 @@
   }
 
   .btn-primary {
-    background: #4338ca;
+    background: var(--color-accent);
     color: #fff;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-accent-hover);
+    }
   }
 
   button[type='button'] {
     background: none;
-    border: 1px solid #d0d0d0;
-    padding: 8px 16px;
-    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    color: var(--color-text);
+  }
+}
+
+.password-panel {
+  max-width: 480px;
+  margin: 16px auto 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px;
+
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 4px;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--color-subtle);
+    margin: 0 0 12px;
+  }
+
+  .password-row {
+    display: flex;
+    gap: 10px;
+
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+
+    button {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .error {
+    color: var(--color-danger);
+    font-size: 0.82rem;
+    margin: 8px 0 0;
+  }
+
+  .success {
+    color: #15803d;
+    font-size: 0.82rem;
+    margin: 8px 0 0;
   }
 }

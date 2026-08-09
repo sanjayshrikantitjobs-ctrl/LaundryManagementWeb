@@ -8,7 +8,7 @@ namespace LaundryMgmt.Application.Garments.Queries.GetGarmentById;
 public record GarmentServicePriceDto(Guid ServiceId, string ServiceName, PricingType PricingType, decimal Price);
 
 public record GarmentDetailDto(
-    Guid Id, string Name, string Category, string? Barcode, string? SpecialInstructions,
+    Guid Id, string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl,
     List<GarmentServicePriceDto> ServicePrices);
 
 public record GetGarmentByIdQuery(Guid GarmentId) : IRequest<GarmentDetailDto>;
@@ -27,7 +27,7 @@ public class GetGarmentByIdQueryHandler : IRequestHandler<GetGarmentByIdQuery, G
             ?? throw new KeyNotFoundException($"Garment {request.GarmentId} not found.");
 
         return new GarmentDetailDto(
-            garment.Id, garment.Name, garment.Category, garment.Barcode, garment.SpecialInstructions,
+            garment.Id, garment.Name, garment.Category, garment.Barcode, garment.SpecialInstructions, garment.ImageUrl,
             garment.ServicePrices.Select(p => new GarmentServicePriceDto(
                 p.ServiceId, p.Service!.Name, p.PricingType, p.Price)).ToList());
     }

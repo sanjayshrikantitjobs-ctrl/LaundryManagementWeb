@@ -12,6 +12,10 @@ public record LoginResponse(
 
 public record RefreshTokenRequest(string AccessToken, string RefreshToken);
 
+public record RegisterRequest(string FullName, string PhoneNumber, string Email, string Password);
+
+public record VerifyOtpRequest(string PhoneNumber, string Code);
+
 /// <summary>Used by the MAUI delivery-boy app to confirm delivery with an OTP
 /// the customer received via SMS.</summary>
 public record DeliveryOtpConfirmationRequest(Guid OrderId, string Otp);

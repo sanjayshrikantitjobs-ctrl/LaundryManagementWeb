@@ -20,6 +20,8 @@ public class GarmentsController : ControllerBase
 {
     private readonly ISender _sender;
 
+    private const string ManagementRoles = "Admin,StoreManager,Staff";
+
     public GarmentsController(ISender sender) => _sender = sender;
 
     /// <summary>List garments with optional search, paginated.</summary>
@@ -52,6 +54,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Add a new garment to the catalog.</summary>
     [HttpPost]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreateGarment(CreateGarmentCommand command)
     {
@@ -61,15 +64,17 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Update a garment's catalog details.</summary>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateGarment(Guid id, [FromBody] UpdateGarmentBody body)
     {
-        await _sender.Send(new UpdateGarmentCommand(id, body.Name, body.Category, body.Barcode, body.SpecialInstructions));
+        await _sender.Send(new UpdateGarmentCommand(id, body.Name, body.Category, body.Barcode, body.SpecialInstructions, body.ImageUrl));
         return NoContent();
     }
 
     /// <summary>Remove a garment from the catalog.</summary>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteGarment(Guid id)
     {
@@ -79,6 +84,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Set (create or update) the price for a garment + service combination.</summary>
     [HttpPut("{id:guid}/prices/{serviceId:guid}")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     public async Task<ActionResult<Guid>> SetPrice(Guid id, Guid serviceId, [FromBody] SetPriceBody body)
     {
@@ -87,6 +93,6 @@ public class GarmentsController : ControllerBase
     }
 }
 
-public record UpdateGarmentBody(string Name, string Category, string? Barcode, string? SpecialInstructions);
+public record UpdateGarmentBody(string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl);
 
 public record SetPriceBody(PricingType PricingType, decimal Price);

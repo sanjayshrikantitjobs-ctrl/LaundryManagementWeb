@@ -13,6 +13,7 @@ public partial class GarmentsViewModel : ObservableObject
     public ObservableCollection<GarmentListItem> Garments { get; } = new();
 
     [ObservableProperty] private bool isRefreshing;
+    [ObservableProperty] private string? errorMessage;
 
     public GarmentsViewModel(ApiClient apiClient) => _apiClient = apiClient;
 
@@ -20,12 +21,17 @@ public partial class GarmentsViewModel : ObservableObject
     public async Task RefreshAsync()
     {
         IsRefreshing = true;
+        ErrorMessage = null;
         try
         {
             var result = await _apiClient.GetGarmentsAsync();
             Garments.Clear();
             foreach (var garment in result?.Items ?? new List<GarmentListItem>())
                 Garments.Add(garment);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Couldn't load garments: {ex.Message}";
         }
         finally
         {

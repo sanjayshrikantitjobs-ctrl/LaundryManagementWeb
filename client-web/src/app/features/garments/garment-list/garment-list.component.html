@@ -22,6 +22,7 @@
     <table>
       <thead>
         <tr>
+          <th></th>
           <th>Name</th>
           <th>Category</th>
           <th>Barcode</th>
@@ -31,6 +32,13 @@
       <tbody>
         @for (garment of garments(); track garment.id) {
           <tr>
+            <td class="thumb">
+              @if (garment.imageUrl) {
+                <img [src]="garment.imageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🧺</span>
+              }
+            </td>
             <td>{{ garment.name }}</td>
             <td>{{ garment.category }}</td>
             <td>{{ garment.barcode || '—' }}</td>

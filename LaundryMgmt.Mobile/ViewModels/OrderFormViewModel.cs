@@ -22,33 +22,72 @@ public partial class OrderFormViewModel : ObservableObject
     [ObservableProperty] private OrderChannel channel = OrderChannel.WalkIn;
     [ObservableProperty] private bool isExpress;
     [ObservableProperty] private bool isSaving;
+    [ObservableProperty] private bool isLoading;
     [ObservableProperty] private string? errorMessage;
     [ObservableProperty] private string subtotalDisplay = "₹0.00";
 
-    public OrderFormViewModel(ApiClient apiClient) => _apiClient = apiClient;
+    /// <summary>True once initial load has been attempted, so the UI can show a
+    /// "couldn't load" state (with a Retry) instead of an empty form when it fails.</summary>
+    [ObservableProperty] private bool loadFailed;
 
+    private readonly AuthService _authService;
+
+    /// <summary>Customers place orders only for themselves — no picker, no browsing
+    /// other customers' records (also enforced server-side in CreateOrderCommandHandler).</summary>
+    public bool ShowCustomerPicker => _authService.Role != "Customer";
+
+    public OrderFormViewModel(ApiClient apiClient, AuthService authService)
+    {
+        _apiClient = apiClient;
+        _authService = authService;
+    }
+
+    [RelayCommand]
     public async Task InitializeAsync()
     {
-        var customers = await _apiClient.GetCustomersAsync(pageSize: 100);
-        Customers.Clear();
-        foreach (var customer in customers?.Items ?? new List<CustomerListItem>())
-            Customers.Add(customer);
+        IsLoading = true;
+        LoadFailed = false;
+        ErrorMessage = null;
 
-        var garments = await _apiClient.GetGarmentsAsync();
-        _garments = garments?.Items ?? new List<GarmentListItem>();
+        try
+        {
+            if (ShowCustomerPicker)
+            {
+                var customers = await _apiClient.GetCustomersAsync(pageSize: 100);
+                Customers.Clear();
+                foreach (var customer in customers?.Items ?? new List<CustomerListItem>())
+                    Customers.Add(customer);
+            }
+            else
+            {
+                SelectedCustomer = await _apiClient.GetMyCustomerProfileAsync();
+            }
 
-        var services = await _apiClient.GetServicesAsync();
-        _services = services?.Items ?? new List<ServiceListItem>();
+            var garments = await _apiClient.GetGarmentsAsync();
+            _garments = garments?.Items ?? new List<GarmentListItem>();
 
-        var matrix = await _apiClient.GetPricingMatrixAsync();
-        _priceLookup.Clear();
-        foreach (var row in matrix?.Garments ?? new List<PricingMatrixGarmentRowDto>())
-            foreach (var cell in row.Prices)
-                if (cell.Price is not null && cell.PricingType is not null)
-                    _priceLookup[Key(row.GarmentId, cell.ServiceId)] = (cell.PricingType.Value, cell.Price.Value);
+            var services = await _apiClient.GetServicesAsync();
+            _services = services?.Items ?? new List<ServiceListItem>();
 
-        Items.Clear();
-        AddItem();
+            var matrix = await _apiClient.GetPricingMatrixAsync();
+            _priceLookup.Clear();
+            foreach (var row in matrix?.Garments ?? new List<PricingMatrixGarmentRowDto>())
+                foreach (var cell in row.Prices)
+                    if (cell.Price is not null && cell.PricingType is not null)
+                        _priceLookup[Key(row.GarmentId, cell.ServiceId)] = (cell.PricingType.Value, cell.Price.Value);
+
+            Items.Clear();
+            AddItem();
+        }
+        catch (Exception ex)
+        {
+            LoadFailed = true;
+            ErrorMessage = $"Couldn't load the order form: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]

@@ -9,9 +9,18 @@ export interface CustomerListItem {
   fullName: string;
   phoneNumber: string;
   email?: string;
+  whatsAppNumber?: string;
   membershipTier: MembershipTier;
   walletBalance: number;
   loyaltyPoints: number;
+  createdAtUtc: string;
+  lastOrderAtUtc?: string | null;
+}
+
+export interface UpdateMyProfileRequest {
+  fullName: string;
+  email?: string;
+  whatsAppNumber?: string;
 }
 
 export interface CustomerAddress {

@@ -12,7 +12,7 @@ public class Order : AuditableEntity
     {
         OrderStatus.New, OrderStatus.Received, OrderStatus.Sorting, OrderStatus.Washing,
         OrderStatus.Drying, OrderStatus.Ironing, OrderStatus.Packing,
-        OrderStatus.ReadyForDelivery, OrderStatus.Delivered
+        OrderStatus.ReadyForDelivery, OrderStatus.OutForDelivery, OrderStatus.Delivered
     };
 
     public string OrderNumber { get; set; } = string.Empty; // human-friendly, e.g. ORD-2026-000123
@@ -25,6 +25,7 @@ public class Order : AuditableEntity
 
     public decimal SubTotal { get; set; }
     public decimal DiscountAmount { get; set; }
+    public string? PromoCode { get; set; }
     public decimal GstAmount { get; set; }
     public decimal DeliveryCharge { get; set; }
     public decimal TotalAmount { get; set; }
@@ -44,7 +45,7 @@ public class Order : AuditableEntity
     /// isn't allowed, so callers (handlers/controllers) don't need to
     /// re-implement the workflow rules.
     /// </summary>
-    public void AdvanceTo(OrderStatus newStatus, string? changedBy = null)
+    public OrderStatusHistory AdvanceTo(OrderStatus newStatus, string? changedBy = null)
     {
         if (Status is OrderStatus.Delivered or OrderStatus.Cancelled)
             throw new DomainException($"Order {OrderNumber} is already in a terminal state ({Status}).");
@@ -66,15 +67,49 @@ public class Order : AuditableEntity
                 DeliveredAtUtc = DateTimeOffset.UtcNow;
         }
 
-        StatusHistory.Add(new OrderStatusHistory
+        var history = new OrderStatusHistory
         {
             OrderId = Id,
             Status = Status,
             ChangedAtUtc = DateTimeOffset.UtcNow,
             ChangedBy = changedBy
-        });
+        };
+        StatusHistory.Add(history);
 
         AddDomainEvent(new OrderStatusChangedEvent(Id, OrderNumber, Status));
+
+        return history;
+    }
+
+    /// <summary>Admin override: sets the status directly regardless of pipeline order
+    /// (staff sometimes need to jump straight to "Ready for Delivery" after a manual
+    /// catch-up, or correct a status set in error) — unlike <see cref="AdvanceTo"/>,
+    /// this doesn't enforce "next step only", but still records history and still
+    /// blocks changes once the order is Delivered.</summary>
+    public OrderStatusHistory? SetStatus(OrderStatus newStatus, string? changedBy = null)
+    {
+        if (Status == OrderStatus.Delivered)
+            throw new DomainException($"Order {OrderNumber} is already Delivered and can no longer be changed.");
+
+        if (newStatus == Status)
+            return null;
+
+        Status = newStatus;
+        if (newStatus == OrderStatus.Delivered)
+            DeliveredAtUtc = DateTimeOffset.UtcNow;
+
+        var history = new OrderStatusHistory
+        {
+            OrderId = Id,
+            Status = Status,
+            ChangedAtUtc = DateTimeOffset.UtcNow,
+            ChangedBy = changedBy
+        };
+        StatusHistory.Add(history);
+
+        AddDomainEvent(new OrderStatusChangedEvent(Id, OrderNumber, Status));
+
+        return history;
     }
 }
 

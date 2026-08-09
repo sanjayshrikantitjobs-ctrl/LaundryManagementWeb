@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Services.Commands.UpdateService;
 
 public record UpdateServiceCommand(
-    Guid ServiceId, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority) : IRequest;
+    Guid ServiceId, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    string? ImageUrl = null, decimal ExpressSurcharge = 0, int ExpressEtaHours = 24) : IRequest;
 
 public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceCommand>
 {
@@ -18,6 +19,9 @@ public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceComm
         RuleFor(x => x.EstimatedTimeHours).GreaterThan(0);
         RuleFor(x => x.GstPercentage).InclusiveBetween(0, 100);
         RuleFor(x => x.Priority).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.ImageUrl).MaximumLength(500);
+        RuleFor(x => x.ExpressSurcharge).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.ExpressEtaHours).GreaterThan(0);
     }
 }
 
@@ -38,6 +42,9 @@ public class UpdateServiceCommandHandler : IRequestHandler<UpdateServiceCommand>
         service.EstimatedTimeHours = request.EstimatedTimeHours;
         service.GstPercentage = request.GstPercentage;
         service.Priority = request.Priority;
+        service.ImageUrl = request.ImageUrl;
+        service.ExpressSurcharge = request.ExpressSurcharge;
+        service.ExpressEtaHours = request.ExpressEtaHours;
 
         await _db.SaveChangesAsync(cancellationToken);
     }

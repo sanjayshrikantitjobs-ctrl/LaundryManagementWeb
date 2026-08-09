@@ -6,62 +6,76 @@
              x:DataType="vm:OrderFormViewModel"
              Title="New Order">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="10">
+    <Grid>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-            <Frame>
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="CUSTOMER" Style="{StaticResource SectionLabel}" />
-                    <Picker ItemsSource="{Binding Customers}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding SelectedCustomer}" />
-
-                    <Label Text="CHANNEL" Style="{StaticResource SectionLabel}" />
-                    <Picker ItemsSource="{Binding Channels}" SelectedItem="{Binding Channel}" />
-
-                    <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
-                        <Switch IsToggled="{Binding IsExpress}" />
-                        <Label Text="Express Service" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <Label Text="ITEMS" Style="{StaticResource SectionLabel}" />
-
-            <CollectionView ItemsSource="{Binding Items}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:OrderItemRowViewModel">
-                        <Frame Margin="0,4">
-                            <VerticalStackLayout Spacing="8">
-                                <Picker Title="Garment" ItemsSource="{Binding AvailableGarments}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedGarment}" />
-                                <Picker Title="Service" ItemsSource="{Binding AvailableServices}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedService}" />
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                                    <Entry Grid.Column="0" Placeholder="Qty" Keyboard="Numeric" Text="{Binding Quantity}" />
-                                    <Entry Grid.Column="1" Placeholder="Weight (kg)" Keyboard="Numeric" Text="{Binding WeightKgText}" />
-                                </Grid>
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Grid.Column="0" Text="{Binding LineTotalDisplay}" FontAttributes="Bold" VerticalOptions="Center" />
-                                    <Button Grid.Column="1" Text="Remove" Style="{StaticResource DangerButton}"
-                                            CommandParameter="{Binding .}"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveItemCommand}" />
-                                </Grid>
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <Button Text="+ Add item" Style="{StaticResource OutlineButton}" Command="{Binding AddItemCommand}" />
-
-            <Label Text="{Binding SubtotalDisplay, StringFormat='Estimated Subtotal: {0}'}" FontAttributes="Bold" FontSize="16" />
-
-            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
-
-            <Button Text="Set missing prices →" Style="{StaticResource OutlineButton}"
-                    Command="{Binding GoToPricingCommand}"
-                    IsVisible="{Binding HasMissingPrices}" />
-
-            <Button Text="Place Order" Command="{Binding PlaceOrderCommand}" />
-
+        <VerticalStackLayout IsVisible="{Binding LoadFailed}" Padding="24" Spacing="12" VerticalOptions="Center">
+            <Label Text="Couldn't load the order form." HorizontalTextAlignment="Center" />
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" HorizontalTextAlignment="Center" />
+            <Button Text="Retry" Command="{Binding InitializeCommand}" HorizontalOptions="Center" />
         </VerticalStackLayout>
-    </ScrollView>
+
+        <ScrollView IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <VerticalStackLayout Padding="16" Spacing="10" IsVisible="{Binding LoadFailed, Converter={StaticResource InvertedBoolConverter}}">
+
+                <Frame>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="CUSTOMER" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding Customers}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding SelectedCustomer}"
+                                IsVisible="{Binding ShowCustomerPicker}" />
+                        <Label Text="{Binding SelectedCustomer.FullName}" FontAttributes="Bold"
+                               IsVisible="{Binding ShowCustomerPicker, Converter={StaticResource InvertedBoolConverter}}" />
+
+                        <Label Text="CHANNEL" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding Channels}" SelectedItem="{Binding Channel}" />
+
+                        <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                            <Switch IsToggled="{Binding IsExpress}" />
+                            <Label Text="Express Service" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="ITEMS" Style="{StaticResource SectionLabel}" />
+
+                <CollectionView ItemsSource="{Binding Items}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:OrderItemRowViewModel">
+                            <Frame Margin="0,4">
+                                <VerticalStackLayout Spacing="8">
+                                    <Picker Title="Garment" ItemsSource="{Binding AvailableGarments}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedGarment}" />
+                                    <Picker Title="Service" ItemsSource="{Binding AvailableServices}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedService}" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <Entry Grid.Column="0" Placeholder="Qty" Keyboard="Numeric" Text="{Binding Quantity}" />
+                                        <Entry Grid.Column="1" Placeholder="Weight (kg)" Keyboard="Numeric" Text="{Binding WeightKgText}" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding LineTotalDisplay}" FontAttributes="Bold" VerticalOptions="Center" />
+                                        <Button Grid.Column="1" Text="Remove" Style="{StaticResource DangerButton}"
+                                                CommandParameter="{Binding .}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveItemCommand}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="+ Add item" Style="{StaticResource OutlineButton}" Command="{Binding AddItemCommand}" />
+
+                <Label Text="{Binding SubtotalDisplay, StringFormat='Estimated Subtotal: {0}'}" FontAttributes="Bold" FontSize="16" />
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+                <Button Text="Set missing prices →" Style="{StaticResource OutlineButton}"
+                        Command="{Binding GoToPricingCommand}"
+                        IsVisible="{Binding HasMissingPrices}" />
+
+                <Button Text="Place Order" Command="{Binding PlaceOrderCommand}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

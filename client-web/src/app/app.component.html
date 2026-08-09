@@ -1,16 +1,53 @@
 @if (authService.isAuthenticated()) {
   <header class="app-header">
-    <span class="brand">Laundry Mgmt</span>
+    <span class="brand" (click)="closeMenu()" [routerLink]="isCustomer ? '/shop' : '/orders'">🧺 Laundry Mgmt</span>
 
-    <nav>
-      <a routerLink="/orders" routerLinkActive="active">Orders</a>
-      <a routerLink="/customers" routerLinkActive="active">Customers</a>
-      <a routerLink="/garments" routerLinkActive="active">Garments</a>
-      <a routerLink="/services" routerLinkActive="active">Services</a>
-      <a routerLink="/garments/pricing" routerLinkActive="active">Pricing</a>
+    <button type="button" class="menu-toggle" (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen()">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav [class.open]="isMenuOpen()">
+      @if (isCustomer) {
+        <a routerLink="/shop" routerLinkActive="active" (click)="closeMenu()">Home</a>
+
+        <div class="nav-dropdown">
+          <a href="#" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" routerLink="/services-info/laundry" (click)="toggleServicesMenu($event)">
+            Services ▾
+          </a>
+          @if (isServicesMenuOpen()) {
+            <div class="dropdown-backdrop" (click)="closeMenu()"></div>
+            <div class="dropdown-panel">
+              @for (cat of serviceCategories; track cat.slug) {
+                <a [routerLink]="['/services-info', cat.slug]" (click)="closeMenu()">{{ cat.icon }} {{ cat.name }}</a>
+              }
+            </div>
+          }
+        </div>
+
+        <a routerLink="/promotions" routerLinkActive="active" (click)="closeMenu()">Promotions</a>
+        <a routerLink="/my-requests" routerLinkActive="active" (click)="closeMenu()">My Requests</a>
+        <a routerLink="/orders" routerLinkActive="active" (click)="closeMenu()">My Orders</a>
+        <a routerLink="/price-list" routerLinkActive="active" (click)="closeMenu()">Price List</a>
+        <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
+        <a routerLink="/contact-us" routerLinkActive="active" (click)="closeMenu()">Contact Us</a>
+      } @else {
+        <a routerLink="/orders" routerLinkActive="active" (click)="closeMenu()">Orders</a>
+        <a routerLink="/customers" routerLinkActive="active" (click)="closeMenu()">Customers</a>
+        <a routerLink="/garments" routerLinkActive="active" (click)="closeMenu()">Garments</a>
+        <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Services</a>
+        <a routerLink="/garments/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a>
+        <a routerLink="/admin/promotions" routerLinkActive="active" (click)="closeMenu()">Promotions</a>
+      }
+
+      <div class="user-info mobile-only">
+        <app-notification-bell />
+        <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
+        <button type="button" (click)="logout()">Logout</button>
+      </div>
     </nav>
 
-    <div class="user-info">
+    <div class="user-info desktop-only">
+      <app-notification-bell />
       <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
       <button type="button" (click)="logout()">Logout</button>
     </div>

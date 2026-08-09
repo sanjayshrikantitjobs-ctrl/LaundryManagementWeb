@@ -54,6 +54,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // serves wwwroot/uploads/* (see UploadsController) at /uploads/*
 app.UseCors(AngularCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();

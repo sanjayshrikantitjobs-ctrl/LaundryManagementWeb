@@ -17,6 +17,8 @@ public class ServicesController : ControllerBase
 {
     private readonly ISender _sender;
 
+    private const string ManagementRoles = "Admin,StoreManager,Staff";
+
     public ServicesController(ISender sender) => _sender = sender;
 
     /// <summary>List services with optional search, paginated.</summary>
@@ -40,6 +42,7 @@ public class ServicesController : ControllerBase
 
     /// <summary>Add a new service (Washing, Dry Cleaning, Iron Only, ...).</summary>
     [HttpPost]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreateService(CreateServiceCommand command)
     {
@@ -49,16 +52,19 @@ public class ServicesController : ControllerBase
 
     /// <summary>Update a service's pricing/timing details.</summary>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateService(Guid id, [FromBody] UpdateServiceBody body)
     {
         await _sender.Send(new UpdateServiceCommand(
-            id, body.Name, body.BasePrice, body.EstimatedTimeHours, body.GstPercentage, body.Priority));
+            id, body.Name, body.BasePrice, body.EstimatedTimeHours, body.GstPercentage, body.Priority, body.ImageUrl,
+            body.ExpressSurcharge, body.ExpressEtaHours));
         return NoContent();
     }
 
     /// <summary>Remove a service from the catalog.</summary>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteService(Guid id)
     {
@@ -67,4 +73,6 @@ public class ServicesController : ControllerBase
     }
 }
 
-public record UpdateServiceBody(string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority);
+public record UpdateServiceBody(
+    string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority, string? ImageUrl,
+    decimal ExpressSurcharge, int ExpressEtaHours);

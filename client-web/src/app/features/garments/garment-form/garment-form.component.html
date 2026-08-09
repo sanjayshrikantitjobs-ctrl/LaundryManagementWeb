@@ -22,6 +22,17 @@
       <textarea formControlName="specialInstructions" rows="3"></textarea>
     </label>
 
+    <label>
+      Image
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (isUploading()) {
+      <p>Uploading…</p>
+    } @else if (imageUrl()) {
+      <img [src]="imageUrl()" alt="Garment preview" class="image-preview" />
+    }
+
     @if (errorMessage()) {
       <p class="error">{{ errorMessage() }}</p>
     }

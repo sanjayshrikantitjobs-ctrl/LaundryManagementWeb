@@ -18,7 +18,8 @@ public enum OrderChannel
 
 public record OrderListItem(
     Guid Id, string OrderNumber, string CustomerName, OrderStatus Status,
-    decimal TotalAmount, PaymentStatus PaymentStatus, DateTimeOffset CreatedAtUtc);
+    decimal TotalAmount, PaymentStatus PaymentStatus, DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? PromisedByUtc);
 
 public record CreateOrderItemRequest(Guid GarmentId, Guid ServiceId, int Quantity, decimal? WeightKg, string? SpecialInstructions);
 

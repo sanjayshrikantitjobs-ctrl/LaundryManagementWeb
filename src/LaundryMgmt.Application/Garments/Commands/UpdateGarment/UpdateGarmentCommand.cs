@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Garments.Commands.UpdateGarment;
 
 public record UpdateGarmentCommand(
-    Guid GarmentId, string Name, string Category, string? Barcode, string? SpecialInstructions) : IRequest;
+    Guid GarmentId, string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl = null) : IRequest;
 
 public class UpdateGarmentCommandValidator : AbstractValidator<UpdateGarmentCommand>
 {
@@ -16,6 +16,7 @@ public class UpdateGarmentCommandValidator : AbstractValidator<UpdateGarmentComm
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Barcode).MaximumLength(64);
+        RuleFor(x => x.ImageUrl).MaximumLength(500);
     }
 }
 
@@ -35,6 +36,7 @@ public class UpdateGarmentCommandHandler : IRequestHandler<UpdateGarmentCommand>
         garment.Category = request.Category.Trim();
         garment.Barcode = request.Barcode;
         garment.SpecialInstructions = request.SpecialInstructions;
+        garment.ImageUrl = request.ImageUrl;
 
         await _db.SaveChangesAsync(cancellationToken);
     }

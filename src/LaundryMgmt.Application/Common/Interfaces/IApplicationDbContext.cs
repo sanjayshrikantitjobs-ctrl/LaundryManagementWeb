@@ -16,6 +16,7 @@ public interface IApplicationDbContext
     DbSet<GarmentServicePrice> GarmentServicePrices { get; }
     DbSet<Order> Orders { get; }
     DbSet<OrderItem> OrderItems { get; }
+    DbSet<OrderStatusHistory> OrderStatusHistories { get; }
     DbSet<Invoice> Invoices { get; }
     DbSet<Payment> Payments { get; }
     DbSet<InventoryItem> InventoryItems { get; }
@@ -23,6 +24,10 @@ public interface IApplicationDbContext
     DbSet<Machine> Machines { get; }
     DbSet<Complaint> Complaints { get; }
     DbSet<PickupDelivery> PickupDeliveries { get; }
+    DbSet<OtpChallenge> OtpChallenges { get; }
+    DbSet<Promotion> Promotions { get; }
+    DbSet<ContactMessage> ContactMessages { get; }
+    DbSet<Notification> Notifications { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -33,15 +33,17 @@ public partial class AppShell : Shell
         var isCustomer = role == "Customer";
 
         if (isManagement || isCustomer)
-            tabBar.Items.Add(CreateTab("Orders", "orders", typeof(OrdersPage)));
+            tabBar.Items.Add(CreateTab(isCustomer ? "My Orders" : "Orders", "orders", typeof(OrdersPage)));
 
         if (isManagement)
         {
             tabBar.Items.Add(CreateTab("Customers", "customers", typeof(CustomersPage)));
             tabBar.Items.Add(CreateTab("Garments", "garments", typeof(GarmentsPage)));
             tabBar.Items.Add(CreateTab("Services", "services", typeof(ServicesPage)));
-            tabBar.Items.Add(CreateTab("Pricing", "pricing", typeof(PricingPage)));
         }
+
+        if (isManagement || isCustomer)
+            tabBar.Items.Add(CreateTab("Pricing", "pricing", typeof(PricingPage)));
 
         if (isManagement || isDeliveryBoy)
             tabBar.Items.Add(CreateTab("My Queue", "queue", typeof(OrderQueuePage)));

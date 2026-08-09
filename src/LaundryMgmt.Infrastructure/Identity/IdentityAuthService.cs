@@ -1,4 +1,5 @@
 using LaundryMgmt.Application.Common.Interfaces;
+using LaundryMgmt.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace LaundryMgmt.Infrastructure.Identity;
@@ -27,9 +28,66 @@ public class IdentityAuthService : IIdentityAuthService
         if (!passwordValid)
             return null;
 
-        return new AuthenticatedUserDto(user.Id, user.UserName ?? user.Email ?? string.Empty,
-            user.Email ?? string.Empty, user.FullName, user.Role);
+        return ToDto(user);
     }
+
+    public async Task<Guid> RegisterCustomerAsync(
+        string fullName, string phoneNumber, string? email, string password, CancellationToken cancellationToken = default)
+    {
+        if (await _userManager.FindByNameAsync(phoneNumber) is not null)
+            throw new InvalidOperationException($"An account with phone number {phoneNumber} already exists.");
+
+        var user = new ApplicationUser
+        {
+            UserName = phoneNumber,
+            PhoneNumber = phoneNumber,
+            PhoneNumberConfirmed = false,
+            Email = email,
+            EmailConfirmed = false,
+            FullName = fullName,
+            Role = UserRole.Customer,
+            IsActive = true
+        };
+
+        var result = await _userManager.CreateAsync(user, password);
+        if (!result.Succeeded)
+            throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+        await _userManager.AddToRoleAsync(user, UserRole.Customer.ToString());
+        return user.Id;
+    }
+
+    public async Task<AuthenticatedUserDto?> ConfirmPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByNameAsync(phoneNumber);
+        if (user is null) return null;
+
+        user.PhoneNumberConfirmed = true;
+        var result = await _userManager.UpdateAsync(user);
+        return result.Succeeded ? ToDto(user) : null;
+    }
+
+    public async Task<(Guid UserId, string? PhoneNumber)?> FindUserForPasswordResetAsync(
+        string usernameOrEmail, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByNameAsync(usernameOrEmail)
+                   ?? await _userManager.FindByEmailAsync(usernameOrEmail);
+        return user is null ? null : (user.Id, user.PhoneNumber);
+    }
+
+    public async Task<bool> SetPasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null) return false;
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        return result.Succeeded;
+    }
+
+    private static AuthenticatedUserDto ToDto(ApplicationUser user) => new(
+        user.Id, user.UserName ?? user.Email ?? string.Empty,
+        user.Email ?? string.Empty, user.FullName, user.Role, user.PhoneNumberConfirmed);
 }
 
 /// <summary>Adapts the concrete JwtTokenService (which speaks ApplicationUser)

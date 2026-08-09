@@ -16,6 +16,16 @@ public partial class OrderFormPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _viewModel.InitializeAsync();
+
+        try
+        {
+            await _viewModel.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            // Belt-and-braces: InitializeAsync already catches its own errors, but an
+            // unhandled exception reaching this async void method would crash the app.
+            await DisplayAlert("Something went wrong", ex.Message, "OK");
+        }
     }
 }

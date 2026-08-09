@@ -1,0 +1,117 @@
+<section class="order-detail-page">
+  <a routerLink="/orders" class="back-link">← Back to Orders</a>
+
+  @if (isLoading()) {
+    <p class="hint">Loading order…</p>
+  } @else if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  } @else if (order(); as order) {
+    <header class="order-header">
+      <div>
+        <h1>{{ order.orderNumber }}</h1>
+        <span class="status-badge">{{ orderStatusLabel(order.status) }}</span>
+      </div>
+      <div class="total">₹{{ order.totalAmount }}</div>
+    </header>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="label">Order Placed</span>
+        <span class="value">{{ order.createdAtUtc | date: 'medium' }}</span>
+      </div>
+      @if (order.pickupScheduledAtUtc) {
+        <div class="timeline-item">
+          <span class="label">Pickup Scheduled</span>
+          <span class="value">{{ order.pickupScheduledAtUtc | date: 'medium' }}</span>
+        </div>
+      }
+      @if (order.promisedByUtc) {
+        <div class="timeline-item">
+          <span class="label">Expected By</span>
+          <span class="value">{{ order.promisedByUtc | date: 'medium' }}</span>
+        </div>
+      }
+      @if (order.deliveredAtUtc) {
+        <div class="timeline-item">
+          <span class="label">Delivered</span>
+          <span class="value">{{ order.deliveredAtUtc | date: 'medium' }}</span>
+        </div>
+      }
+    </div>
+
+    <h2>Items</h2>
+    <div class="item-list">
+      @for (item of order.items; track item.id) {
+        <div class="item-row">
+          <div class="item-info">
+            <strong>{{ item.garmentName }}</strong>
+            <span>{{ item.serviceName }}</span>
+          </div>
+          <div class="item-qty">
+            {{ item.weightKg ? item.weightKg + ' kg' : item.quantity + ' pcs' }}
+          </div>
+          <div class="item-total">₹{{ item.lineTotal }}</div>
+        </div>
+      }
+    </div>
+
+    <div class="summary">
+      <div class="row"><span>Subtotal</span><span>₹{{ order.subTotal }}</span></div>
+      @if (order.discountAmount) {
+        <div class="row discount">
+          <span>Discount{{ order.promoCode ? ' (' + order.promoCode + ')' : '' }}</span>
+          <span>−₹{{ order.discountAmount }}</span>
+        </div>
+      }
+      <div class="row"><span>GST</span><span>₹{{ order.gstAmount }}</span></div>
+      @if (order.deliveryCharge) { <div class="row"><span>Delivery</span><span>₹{{ order.deliveryCharge }}</span></div> }
+      <div class="row total"><span>Total</span><span>₹{{ order.totalAmount }}</span></div>
+      <div class="row payment"><span>Payment Status</span><span>{{ paymentStatusLabel(order.paymentStatus) }}</span></div>
+    </div>
+
+    @if (isManagement) {
+      <div class="admin-panel">
+        <h2>Manage Order</h2>
+
+        <div class="field-row">
+          <label>
+            Status
+            <select [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
+              @for (opt of statusOptions; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Payment Status
+            <select [ngModel]="editPaymentStatus()" (ngModelChange)="editPaymentStatus.set($event)">
+              @for (opt of paymentStatusOptions; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label>
+            Amount Paid (₹)
+            <input type="number" min="0" [ngModel]="editAmountPaid()" (ngModelChange)="editAmountPaid.set($event)" />
+          </label>
+
+          <label>
+            Expected Delivery
+            <input type="datetime-local" [ngModel]="editPromisedAt()" (ngModelChange)="editPromisedAt.set($event)" />
+          </label>
+        </div>
+
+        @if (saveError()) { <p class="error">{{ saveError() }}</p> }
+        @if (saved()) { <p class="success">Order updated — customer notified.</p> }
+
+        <button type="button" class="btn-save" [disabled]="isSaving()" (click)="saveChanges()">
+          {{ isSaving() ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </div>
+    }
+  }
+</section>

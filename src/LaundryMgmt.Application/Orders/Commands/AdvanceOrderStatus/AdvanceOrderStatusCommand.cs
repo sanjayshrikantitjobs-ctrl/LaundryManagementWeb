@@ -28,7 +28,8 @@ public class AdvanceOrderStatusCommandHandler : IRequestHandler<AdvanceOrderStat
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken)
             ?? throw new KeyNotFoundException($"Order {request.OrderId} not found.");
 
-        order.AdvanceTo(request.NewStatus, _currentUser.UserName);
+        var history = order.AdvanceTo(request.NewStatus, _currentUser.UserName);
+        _db.OrderStatusHistories.Add(history);
 
         await _db.SaveChangesAsync(cancellationToken);
 

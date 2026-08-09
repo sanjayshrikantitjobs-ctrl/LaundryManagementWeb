@@ -12,7 +12,7 @@
         <ToolbarItem Text="+ New" Command="{Binding NewCustomerCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="customers" />
 
         <SearchBar Grid.Row="1"
@@ -20,11 +20,16 @@
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding RefreshCommand}" />
 
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Customers}">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout Padding="24" VerticalOptions="Center">
-                        <Label Text="No customers found." HorizontalTextAlignment="Center" />
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="👤" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No customers found." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 

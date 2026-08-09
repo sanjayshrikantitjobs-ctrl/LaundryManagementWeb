@@ -1,5 +1,6 @@
 using FluentValidation;
 using LaundryMgmt.Application.Common.Interfaces;
+using LaundryMgmt.Domain.Enums;
 using MediatR;
 
 namespace LaundryMgmt.Application.Auth.Commands.Login;
@@ -34,6 +35,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResultDto>
     {
         var user = await _identityAuth.ValidateCredentialsAsync(request.UsernameOrEmail, request.Password, cancellationToken)
             ?? throw new UnauthorizedAccessException("Invalid username or password.");
+
+        if (user.Role == UserRole.Customer && !user.PhoneNumberConfirmed)
+            throw new UnauthorizedAccessException("Verify your phone number with the code we sent you before logging in.");
 
         var (accessToken, expiresAtUtc) = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();

@@ -19,6 +19,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.DeliveryCharge).HasPrecision(18, 2);
         builder.Property(o => o.TotalAmount).HasPrecision(18, 2);
         builder.Property(o => o.AmountPaid).HasPrecision(18, 2);
+        builder.Property(o => o.PromoCode).HasMaxLength(30);
 
         builder.HasOne(o => o.Customer)
             .WithMany(c => c.Orders)
@@ -36,6 +37,20 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Ignore(o => o.DomainEvents);
+    }
+}
+
+public class OrderStatusHistoryConfiguration : IEntityTypeConfiguration<OrderStatusHistory>
+{
+    public void Configure(EntityTypeBuilder<OrderStatusHistory> builder)
+    {
+        // Explicitly pinned: the table was created as "OrderStatusHistory" (singular)
+        // back when no DbSet existed for it, so EF fell back to the CLR type name.
+        // Adding IApplicationDbContext.OrderStatusHistories (plural, matching every
+        // other DbSet in this codebase) would otherwise shift EF's naming convention
+        // to "OrderStatusHistories" and break every query against the real table.
+        builder.ToTable("OrderStatusHistory");
+        builder.HasKey(h => h.Id);
     }
 }
 

@@ -8,6 +8,7 @@ export interface GarmentListItem {
   name: string;
   category: string;
   barcode?: string;
+  imageUrl?: string;
 }
 
 export interface GarmentServicePriceItem {
@@ -23,6 +24,7 @@ export interface GarmentDetail {
   category: string;
   barcode?: string;
   specialInstructions?: string;
+  imageUrl?: string;
   servicePrices: GarmentServicePriceItem[];
 }
 
@@ -31,6 +33,7 @@ export interface CreateGarmentRequest {
   category: string;
   barcode?: string;
   specialInstructions?: string;
+  imageUrl?: string;
 }
 
 export type UpdateGarmentRequest = CreateGarmentRequest;
@@ -42,6 +45,9 @@ export interface ServiceListItem {
   estimatedTimeHours: number;
   gstPercentage: number;
   priority: number;
+  imageUrl?: string;
+  expressSurcharge: number;
+  expressEtaHours: number;
 }
 
 export interface ServiceDetail {
@@ -51,6 +57,9 @@ export interface ServiceDetail {
   estimatedTimeHours: number;
   gstPercentage: number;
   priority: number;
+  imageUrl?: string;
+  expressSurcharge: number;
+  expressEtaHours: number;
 }
 
 export interface CreateServiceRequest {
@@ -59,6 +68,9 @@ export interface CreateServiceRequest {
   estimatedTimeHours: number;
   gstPercentage: number;
   priority: number;
+  imageUrl?: string;
+  expressSurcharge: number;
+  expressEtaHours: number;
 }
 
 export type UpdateServiceRequest = CreateServiceRequest;

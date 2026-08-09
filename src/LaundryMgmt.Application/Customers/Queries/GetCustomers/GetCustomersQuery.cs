@@ -7,8 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Customers.Queries.GetCustomers;
 
 public record CustomerListItemDto(
-    Guid Id, string FullName, string PhoneNumber, string? Email,
-    MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints);
+    Guid Id, string FullName, string PhoneNumber, string? Email, string? WhatsAppNumber,
+    MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints,
+    DateTimeOffset CreatedAtUtc, DateTimeOffset? LastOrderAtUtc);
 
 public record GetCustomersQuery(
     string? Search = null,
@@ -38,7 +39,8 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, Pagin
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new CustomerListItemDto(
-                c.Id, c.FullName, c.PhoneNumber, c.Email, c.MembershipTier, c.WalletBalance, c.LoyaltyPoints))
+                c.Id, c.FullName, c.PhoneNumber, c.Email, c.WhatsAppNumber, c.MembershipTier, c.WalletBalance, c.LoyaltyPoints,
+                c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<CustomerListItemDto>(items, totalCount, request.PageNumber, request.PageSize);

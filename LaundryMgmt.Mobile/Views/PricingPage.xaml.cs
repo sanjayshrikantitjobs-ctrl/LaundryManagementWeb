@@ -16,6 +16,14 @@ public partial class PricingPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _viewModel.InitializeAsync();
+
+        try
+        {
+            await _viewModel.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Something went wrong", ex.Message, "OK");
+        }
     }
 }

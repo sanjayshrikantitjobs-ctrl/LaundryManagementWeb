@@ -8,7 +8,8 @@ namespace LaundryMgmt.Application.Orders.Queries.GetOrders;
 
 public record OrderListItemDto(
     Guid Id, string OrderNumber, string CustomerName, OrderStatus Status,
-    decimal TotalAmount, PaymentStatus PaymentStatus, DateTimeOffset CreatedAtUtc);
+    decimal TotalAmount, PaymentStatus PaymentStatus, DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? PromisedByUtc);
 
 public record GetOrdersQuery(
     OrderStatus? Status = null,
@@ -42,7 +43,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
             .Take(request.PageSize)
             .Select(o => new OrderListItemDto(
                 o.Id, o.OrderNumber, o.Customer!.FullName, o.Status,
-                o.TotalAmount, o.PaymentStatus, o.CreatedAtUtc))
+                o.TotalAmount, o.PaymentStatus, o.CreatedAtUtc, o.PromisedByUtc))
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<OrderListItemDto>(items, totalCount, request.PageNumber, request.PageSize);

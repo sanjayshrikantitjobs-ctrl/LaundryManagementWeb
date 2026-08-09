@@ -36,4 +36,11 @@ public partial class LoginPage : ContentPage
         if (window is not null)
             window.Page = _serviceProvider.GetRequiredService<AppShell>();
     }
+
+    private void OnCreateAccountTapped(object? sender, EventArgs e)
+    {
+        var window = Application.Current?.Windows.FirstOrDefault();
+        if (window is not null)
+            window.Page = _serviceProvider.GetRequiredService<RegisterPage>();
+    }
 }

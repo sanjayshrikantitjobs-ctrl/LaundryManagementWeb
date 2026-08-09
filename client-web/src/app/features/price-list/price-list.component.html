@@ -1,0 +1,62 @@
+<section class="price-list-page">
+  <header>
+    <h1>Price List</h1>
+    <p>Transparent pricing for every garment and service.</p>
+
+    <div class="channel-select">
+      <label for="channel">Channel</label>
+      <select id="channel" [ngModel]="channel()" (ngModelChange)="channel.set($event)">
+        <option [ngValue]="ChannelType.WalkIn">Walk-in</option>
+        <option [ngValue]="ChannelType.PickupRequest">Pickup Request</option>
+        <option [ngValue]="ChannelType.Express">Express</option>
+      </select>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <p class="hint">Loading price list…</p>
+  } @else if (matrix(); as matrix) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Garment</th>
+            <th>Category</th>
+            @for (service of matrix.services; track service.id) {
+              <th>{{ service.name }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of matrix.garments; track row.garmentId) {
+            <tr>
+              <td class="garment-name">{{ row.garmentName }}</td>
+              <td>{{ row.category }}</td>
+              @for (service of matrix.services; track service.id) {
+                <td>
+                  @if (cellFor(row, service.id); as cell) {
+                    @if (cell.price !== null) {
+                      <div class="cell">
+                        <span class="cell-price">₹{{ displayPrice(cell.price, cell.serviceId) }}</span>
+                        <span class="cell-unit">{{ cell.pricingType === PricingType.WeightBased ? '/kg' : '/pc' }}</span>
+                        <span class="cell-eta">{{ displayEta(cell.serviceId) }}</span>
+                      </div>
+                    } @else {
+                      <span class="cell-empty">—</span>
+                    }
+                  } @else {
+                    <span class="cell-empty">—</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (channel() === ChannelType.Express) {
+      <p class="note">Express pricing shown above already includes the per-service surcharge and shortened turnaround.</p>
+    }
+  }
+</section>

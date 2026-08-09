@@ -1,0 +1,69 @@
+<section class="promotion-form">
+  <h1>{{ isEditMode() ? 'Edit Promotion' : 'New Promotion' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Title
+      <input type="text" formControlName="title" placeholder="Independence Day Special" />
+    </label>
+
+    <label>
+      Description
+      <textarea rows="3" formControlName="description" placeholder="Flat 20% off on Dry Clean orders"></textarea>
+    </label>
+
+    <label>
+      Promo Code (optional)
+      <input type="text" formControlName="code" placeholder="e.g. IND20" />
+    </label>
+
+    <div class="two-col">
+      <label>
+        Discount %
+        <input type="number" formControlName="discountPercent" min="0" max="100" />
+      </label>
+      <label>
+        Discount ₹
+        <input type="number" formControlName="discountAmount" min="0" />
+      </label>
+    </div>
+
+    <div class="two-col">
+      <label>
+        Valid From
+        <input type="date" formControlName="validFrom" />
+      </label>
+      <label>
+        Valid To
+        <input type="date" formControlName="validTo" />
+      </label>
+    </div>
+
+    <label class="checkbox">
+      <input type="checkbox" formControlName="isActive" />
+      Active (visible to customers)
+    </label>
+
+    <label>
+      Image
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (isUploading()) {
+      <p>Uploading…</p>
+    } @else if (imageUrl()) {
+      <img [src]="imageUrl()" alt="Promotion preview" class="image-preview" />
+    }
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

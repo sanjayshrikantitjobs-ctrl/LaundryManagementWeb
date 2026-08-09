@@ -24,6 +24,13 @@
                     <Button Text="Sign in" Command="{Binding LoginCommand}" Margin="0,8,0,0" />
                 </VerticalStackLayout>
             </Frame>
+
+            <Label Text="New customer? Create an account" TextColor="{StaticResource White}"
+                   HorizontalTextAlignment="Center" Margin="0,8,0,0">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCreateAccountTapped" />
+                </Label.GestureRecognizers>
+            </Label>
         </VerticalStackLayout>
     </Grid>
 

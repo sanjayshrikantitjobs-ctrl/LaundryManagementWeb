@@ -8,6 +8,12 @@ public class Customer : AuditableEntity
     public string FullName { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string? Email { get; set; }
+    public string? WhatsAppNumber { get; set; }
+
+    /// <summary>Links this catalog record to the Identity login the customer signs in
+    /// with (set on self-registration). Null for walk-in customers staff created by
+    /// hand who have no portal login.</summary>
+    public Guid? IdentityUserId { get; set; }
 
     public decimal WalletBalance { get; set; }
     public decimal CreditLimit { get; set; }

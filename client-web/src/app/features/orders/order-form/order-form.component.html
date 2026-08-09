@@ -6,9 +6,11 @@
     @if (selectedCustomer(); as customer) {
       <div class="selected-customer">
         <span>{{ customer.fullName }} &middot; {{ customer.phoneNumber }}</span>
-        <button type="button" (click)="selectedCustomer.set(null); searchCustomers('')">Change</button>
+        @if (showCustomerPicker) {
+          <button type="button" (click)="selectedCustomer.set(null); searchCustomers('')">Change</button>
+        }
       </div>
-    } @else {
+    } @else if (showCustomerPicker) {
       <input
         type="search"
         placeholder="Search customer by name or phone…"

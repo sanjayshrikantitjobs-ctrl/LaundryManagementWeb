@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateOrderRequest, OrderListItem, OrderStatus, PaginatedList } from '../../core/models/order.models';
+import {
+  CreateOrderRequest,
+  OrderDetail,
+  OrderListItem,
+  OrderStatus,
+  PaginatedList,
+  UpdateOrderRequest
+} from '../../core/models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
@@ -25,11 +32,27 @@ export class OrdersService {
     return this.http.get<PaginatedList<OrderListItem>>(this.baseUrl, { params });
   }
 
+  getMyOrders(opts: { pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<OrderListItem>> {
+    const params = new HttpParams()
+      .set('pageNumber', opts.pageNumber ?? 1)
+      .set('pageSize', opts.pageSize ?? 20);
+
+    return this.http.get<PaginatedList<OrderListItem>>(`${this.baseUrl}/mine`, { params });
+  }
+
+  getOrderById(orderId: string): Observable<OrderDetail> {
+    return this.http.get<OrderDetail>(`${this.baseUrl}/${orderId}`);
+  }
+
   createOrder(request: CreateOrderRequest): Observable<string> {
     return this.http.post<string>(this.baseUrl, request);
   }
 
   advanceStatus(orderId: string, newStatus: OrderStatus): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${orderId}/status`, newStatus);
+  }
+
+  updateOrder(orderId: string, request: UpdateOrderRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${orderId}`, request);
   }
 }

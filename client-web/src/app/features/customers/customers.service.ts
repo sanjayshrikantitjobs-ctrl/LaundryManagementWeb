@@ -3,9 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   CreateCustomerRequest,
+  CustomerAddress,
+  CreateCustomerAddressRequest,
   CustomerDetail,
   CustomerListItem,
-  UpdateCustomerRequest
+  UpdateCustomerRequest,
+  UpdateMyProfileRequest
 } from '../../core/models/customer.models';
 import { PaginatedList } from '../../core/models/order.models';
 
@@ -27,6 +30,34 @@ export class CustomersService {
 
   getCustomerById(id: string): Observable<CustomerDetail> {
     return this.http.get<CustomerDetail>(`${this.baseUrl}/${id}`);
+  }
+
+  getMyProfile(): Observable<CustomerListItem> {
+    return this.http.get<CustomerListItem>(`${this.baseUrl}/me`);
+  }
+
+  updateMyProfile(request: UpdateMyProfileRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/me`, request);
+  }
+
+  getMyAddresses(): Observable<CustomerAddress[]> {
+    return this.http.get<CustomerAddress[]>(`${this.baseUrl}/me/addresses`);
+  }
+
+  addMyAddress(request: CreateCustomerAddressRequest): Observable<string> {
+    return this.http.post<string>(`${this.baseUrl}/me/addresses`, request);
+  }
+
+  setPrimaryAddress(addressId: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/me/addresses/${addressId}/primary`, {});
+  }
+
+  deleteMyAddress(addressId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/me/addresses/${addressId}`);
+  }
+
+  setPassword(customerId: string, newPassword: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${customerId}/password`, { newPassword });
   }
 
   createCustomer(request: CreateCustomerRequest): Observable<string> {

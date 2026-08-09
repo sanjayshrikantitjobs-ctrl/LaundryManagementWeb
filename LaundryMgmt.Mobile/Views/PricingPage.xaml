@@ -10,8 +10,16 @@
     <Grid RowDefinitions="Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="pricing" />
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16" Spacing="10">
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            Color="{StaticResource Primary}" VerticalOptions="Center" />
+
+        <VerticalStackLayout Grid.Row="1" IsVisible="{Binding LoadFailed}" Padding="24" Spacing="12" VerticalOptions="Center">
+            <Label Text="{Binding StatusMessage}" TextColor="{StaticResource Danger}" HorizontalTextAlignment="Center" />
+            <Button Text="Retry" Command="{Binding InitializeCommand}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <VerticalStackLayout Padding="16" Spacing="10" IsVisible="{Binding LoadFailed, Converter={StaticResource InvertedBoolConverter}}">
                 <Frame>
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Pick a garment and service to view or set its price." Style="{StaticResource SubtleLabel}" />
@@ -23,14 +31,14 @@
                         <Picker ItemsSource="{Binding Services}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedService}" />
 
                         <Label Text="PRICING TYPE" Style="{StaticResource SectionLabel}" />
-                        <Picker ItemsSource="{Binding PricingTypes}" SelectedItem="{Binding PricingType}" />
+                        <Picker ItemsSource="{Binding PricingTypes}" SelectedItem="{Binding PricingType}" IsEnabled="{Binding CanEditPrice}" />
 
                         <Label Text="PRICE" Style="{StaticResource SectionLabel}" />
-                        <Entry Text="{Binding PriceText}" Keyboard="Numeric" Placeholder="e.g. 75.00" />
+                        <Entry Text="{Binding PriceText}" Keyboard="Numeric" Placeholder="e.g. 75.00" IsReadOnly="{Binding CanEditPrice, Converter={StaticResource InvertedBoolConverter}}" />
 
                         <Label Text="{Binding StatusMessage}" TextColor="{StaticResource Success}" />
 
-                        <Button Text="Save Price" Command="{Binding SavePriceCommand}" />
+                        <Button Text="Save Price" Command="{Binding SavePriceCommand}" IsVisible="{Binding CanEditPrice}" />
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>

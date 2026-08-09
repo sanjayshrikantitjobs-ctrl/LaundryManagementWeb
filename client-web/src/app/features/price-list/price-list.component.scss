@@ -1,0 +1,105 @@
+.price-list-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    p {
+      color: var(--color-subtle);
+      margin: 4px 0 0;
+    }
+  }
+
+  .channel-select {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    select {
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      min-width: 180px;
+    }
+  }
+
+  .hint {
+    color: var(--color-subtle);
+  }
+
+  .note {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--color-subtle);
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  th {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .garment-name {
+    font-weight: 600;
+    white-space: normal;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+
+    .cell-price {
+      font-weight: 700;
+      color: var(--color-primary-dark);
+    }
+
+    .cell-unit {
+      font-size: 0.7rem;
+      color: var(--color-subtle);
+    }
+
+    .cell-eta {
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+  }
+
+  .cell-empty {
+    color: var(--color-subtle);
+  }
+}

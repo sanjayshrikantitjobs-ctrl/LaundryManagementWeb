@@ -1,7 +1,9 @@
 <section class="pricing-matrix">
   <header>
     <h1>Pricing Matrix</h1>
-    <a routerLink="/garments" class="link">&larr; Back to Garments</a>
+    @if (canEdit) {
+      <a routerLink="/garments" class="link">&larr; Back to Garments</a>
+    }
   </header>
 
   @if (isLoading()) {
@@ -31,7 +33,7 @@
                     step="0.01"
                     [value]="cell.price ?? ''"
                     placeholder="—"
-                    [disabled]="savingKey() === cellKey(row.garmentId, cell.serviceId)"
+                    [disabled]="!canEdit || savingKey() === cellKey(row.garmentId, cell.serviceId)"
                     (change)="onPriceChange(row.garmentId, cell.serviceId, cell.pricingType, $any($event.target).value)"
                   />
                 </td>

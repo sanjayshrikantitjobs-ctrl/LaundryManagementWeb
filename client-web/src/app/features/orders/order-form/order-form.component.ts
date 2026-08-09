@@ -7,6 +7,7 @@ import { OrdersService } from '../orders.service';
 import { CustomersService } from '../../customers/customers.service';
 import { GarmentsService } from '../../garments/garments.service';
 import { ServicesService } from '../../services/services.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { OrderChannel } from '../../../core/models/order.models';
 import { CustomerListItem } from '../../../core/models/customer.models';
 import { GarmentListItem, PricingType, ServiceListItem } from '../../../core/models/catalog.models';
@@ -29,10 +30,15 @@ export class OrderFormComponent implements OnInit {
   private readonly customersService = inject(CustomersService);
   private readonly garmentsService = inject(GarmentsService);
   private readonly servicesService = inject(ServicesService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly OrderChannel = OrderChannel;
   readonly PricingType = PricingType;
+
+  /// Customers place orders only for themselves — no search/browse of other
+  /// customers' records (also enforced server-side in CreateOrderCommandHandler).
+  readonly showCustomerPicker = this.authService.currentUser()?.role !== 'Customer';
 
   readonly customerSearch = signal('');
   readonly customerResults = signal<CustomerListItem[]>([]);
@@ -76,7 +82,11 @@ export class OrderFormComponent implements OnInit {
       }
       this.priceLookup.set(lookup);
     });
-    this.searchCustomers('');
+    if (this.showCustomerPicker) {
+      this.searchCustomers('');
+    } else {
+      this.customersService.getMyProfile().subscribe((customer) => this.selectedCustomer.set(customer));
+    }
   }
 
   priceKey(garmentId: string, serviceId: string): string {
@@ -118,8 +128,13 @@ export class OrderFormComponent implements OnInit {
 
   save(): void {
     const customer = this.selectedCustomer();
-    if (!customer || this.form.invalid) {
+    if (!customer) {
+      this.errorMessage.set('Select a customer before placing the order.');
+      return;
+    }
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.errorMessage.set('Every item needs a garment, service, and quantity before you can place the order.');
       return;
     }
 

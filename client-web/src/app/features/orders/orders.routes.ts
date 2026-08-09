@@ -8,5 +8,9 @@ export const ORDERS_ROUTES: Routes = [
   {
     path: 'new',
     loadComponent: () => import('./order-form/order-form.component').then((m) => m.OrderFormComponent)
+  },
+  {
+    path: ':id',
+    loadComponent: () => import('./order-detail/order-detail.component').then((m) => m.OrderDetailComponent)
   }
 ];

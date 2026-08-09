@@ -74,6 +74,19 @@ public enum ComplaintStatus
     Rejected = 3
 }
 
+public enum ContactMessageType
+{
+    Feedback = 0,
+    Complaint = 1,
+    Query = 2
+}
+
+public enum ContactMessageStatus
+{
+    Open = 0,
+    Resolved = 1
+}
+
 public enum MachineStatus
 {
     Idle = 0,

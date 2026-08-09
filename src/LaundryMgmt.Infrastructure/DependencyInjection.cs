@@ -4,6 +4,7 @@ using LaundryMgmt.Infrastructure.Identity;
 using LaundryMgmt.Infrastructure.Interceptors;
 using LaundryMgmt.Infrastructure.Persistence;
 using LaundryMgmt.Infrastructure.Services;
+using LaundryMgmt.Infrastructure.Services.WhatsApp;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -35,6 +36,16 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        // WhatsApp OTP sender — Strategy pattern (see IWhatsAppSender). Defaults to logging
+        // only; set "WhatsApp:Provider" to "Twilio" once you have real Twilio credentials
+        // (WhatsApp:Twilio:AccountSid/AuthToken/FromNumber) to actually send messages.
+        services.AddHttpClient<TwilioWhatsAppSender>();
+        services.AddScoped<IWhatsAppSender>(sp =>
+            configuration["WhatsApp:Provider"]?.Equals("Twilio", StringComparison.OrdinalIgnoreCase) == true
+                ? sp.GetRequiredService<TwilioWhatsAppSender>()
+                : ActivatorUtilities.CreateInstance<LoggingWhatsAppSender>(sp));
+        services.AddScoped<Application.Common.Interfaces.IOtpService, OtpService>();
 
         // ASP.NET Core Identity — backs Admin/StoreManager/Staff/DeliveryBoy logins.
         services.AddIdentityCore<ApplicationUser>(options =>

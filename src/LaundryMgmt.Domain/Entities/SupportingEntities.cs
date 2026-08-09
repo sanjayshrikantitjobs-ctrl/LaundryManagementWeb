@@ -85,12 +85,32 @@ public class Complaint : AuditableEntity
     public decimal? CompensationAmount { get; set; }
 }
 
+/// <summary>A customer-submitted "Contact Us" message (feedback, complaint, or query),
+/// distinct from <see cref="Complaint"/> which always ties to a specific order.</summary>
+public class ContactMessage : AuditableEntity
+{
+    public Guid CustomerId { get; set; }
+    public Customer? Customer { get; set; }
+
+    public ContactMessageType Type { get; set; }
+    public ContactMessageStatus Status { get; set; } = ContactMessageStatus.Open;
+    public string Message { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public string? Response { get; set; }
+}
+
 public class PickupDelivery : AuditableEntity
 {
     public Guid OrderId { get; set; }
     public Order? Order { get; set; }
 
     public bool IsPickup { get; set; } // true = pickup, false = delivery
+
+    /// <summary>The customer's own address this pickup/delivery is scheduled against
+    /// (chosen at checkout, e.g. from their saved address book).</summary>
+    public Guid? AddressId { get; set; }
+    public CustomerAddress? Address { get; set; }
+
     public Guid? DeliveryBoyEmployeeId { get; set; }
     public Employee? DeliveryBoy { get; set; }
 

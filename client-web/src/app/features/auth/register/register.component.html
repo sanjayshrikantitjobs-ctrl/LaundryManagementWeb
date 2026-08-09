@@ -1,0 +1,35 @@
+<section class="register">
+  <h1>Create your account</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Full name
+      <input type="text" formControlName="fullName" autocomplete="name" />
+    </label>
+
+    <label>
+      Phone number (WhatsApp)
+      <input type="tel" formControlName="phoneNumber" placeholder="e.g. 9876543210" autocomplete="tel" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" formControlName="email" autocomplete="email" />
+    </label>
+
+    <label>
+      Password
+      <input type="password" formControlName="password" autocomplete="new-password" />
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="form.invalid || isSubmitting()">
+      {{ isSubmitting() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+
+  <p class="switch">Already have an account? <a routerLink="/login">Sign in</a></p>
+</section>

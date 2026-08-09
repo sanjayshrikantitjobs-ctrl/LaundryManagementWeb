@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GarmentsService } from '../garments.service';
+import { UploadService } from '../../../core/services/upload.service';
 
 @Component({
   selector: 'app-garment-form',
@@ -16,12 +17,15 @@ import { GarmentsService } from '../garments.service';
 export class GarmentFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly garmentsService = inject(GarmentsService);
+  private readonly uploadService = inject(UploadService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly isEditMode = signal(false);
   readonly isSaving = signal(false);
+  readonly isUploading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly imageUrl = signal<string | undefined>(undefined);
 
   private garmentId: string | null = null;
 
@@ -43,8 +47,27 @@ export class GarmentFormComponent implements OnInit {
           barcode: garment.barcode,
           specialInstructions: garment.specialInstructions
         });
+        this.imageUrl.set(garment.imageUrl);
       });
     }
+  }
+
+  onImageSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.isUploading.set(true);
+    this.errorMessage.set(null);
+    this.uploadService.uploadImage(file).subscribe({
+      next: (result) => {
+        this.imageUrl.set(result.url);
+        this.isUploading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to upload image.');
+        this.isUploading.set(false);
+      }
+    });
   }
 
   save(): void {
@@ -60,7 +83,8 @@ export class GarmentFormComponent implements OnInit {
       name: value.name!,
       category: value.category!,
       barcode: value.barcode || undefined,
-      specialInstructions: value.specialInstructions || undefined
+      specialInstructions: value.specialInstructions || undefined,
+      imageUrl: this.imageUrl()
     };
 
     const request$: Observable<unknown> = this.garmentId

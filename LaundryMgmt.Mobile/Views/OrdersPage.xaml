@@ -12,25 +12,33 @@
         <ToolbarItem Text="+ New" Command="{Binding NewOrderCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="orders" />
 
-        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Orders}">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout Padding="24" VerticalOptions="Center">
-                        <Label Text="No orders yet." HorizontalTextAlignment="Center" />
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="📦" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No orders yet." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:OrderListItem">
                         <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding OrderNumber}" FontAttributes="Bold" />
                                 <Label Grid.Row="0" Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Badge}" />
                                 <Label Grid.Row="1" Grid.Column="0" Text="{Binding CustomerName}" Style="{StaticResource SubtleLabel}" />
                                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalAmount, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" />
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource SubtleLabel}"
+                                       Text="{Binding PromisedByUtc, StringFormat='Expected delivery: {0:d MMM, h:mm tt}'}"
+                                       IsVisible="{Binding PromisedByUtc, Converter={StaticResource IsNotNullConverter}}" />
                             </Grid>
                         </Frame>
                     </DataTemplate>

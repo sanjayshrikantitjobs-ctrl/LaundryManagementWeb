@@ -13,11 +13,13 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.FullName).HasMaxLength(200).IsRequired();
         builder.Property(c => c.PhoneNumber).HasMaxLength(20).IsRequired();
         builder.Property(c => c.Email).HasMaxLength(256);
+        builder.Property(c => c.WhatsAppNumber).HasMaxLength(20);
 
         builder.Property(c => c.WalletBalance).HasPrecision(18, 2);
         builder.Property(c => c.CreditLimit).HasPrecision(18, 2);
 
         builder.HasIndex(c => c.PhoneNumber).IsUnique();
+        builder.HasIndex(c => c.IdentityUserId).IsUnique().HasFilter("[IdentityUserId] IS NOT NULL");
 
         builder.HasMany(c => c.Addresses)
             .WithOne(a => a.Customer)

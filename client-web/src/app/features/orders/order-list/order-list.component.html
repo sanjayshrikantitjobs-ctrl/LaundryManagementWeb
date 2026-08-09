@@ -9,27 +9,55 @@
   } @else if (orders().length === 0) {
     <p>No orders yet.</p>
   } @else {
-    <table>
-      <thead>
-        <tr>
-          <th>Order #</th>
-          <th>Customer</th>
-          <th>Status</th>
-          <th>Payment</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (order of orders(); track order.id) {
+    <div class="tabs">
+      <button type="button" [class.active]="activeTab() === 'all'" (click)="activeTab.set('all')">
+        All <span class="count">{{ tabCounts().all }}</span>
+      </button>
+      <button type="button" [class.active]="activeTab() === 'new'" (click)="activeTab.set('new')">
+        New <span class="count">{{ tabCounts().new }}</span>
+      </button>
+      <button type="button" [class.active]="activeTab() === 'progress'" (click)="activeTab.set('progress')">
+        In Progress <span class="count">{{ tabCounts().progress }}</span>
+      </button>
+      <button type="button" [class.active]="activeTab() === 'completed'" (click)="activeTab.set('completed')">
+        Completed <span class="count">{{ tabCounts().completed }}</span>
+      </button>
+      <button type="button" [class.active]="activeTab() === 'cancelled'" (click)="activeTab.set('cancelled')">
+        Cancelled <span class="count">{{ tabCounts().cancelled }}</span>
+      </button>
+    </div>
+
+    @if (filteredOrders().length === 0) {
+      <p>No orders in this tab.</p>
+    } @else {
+      <table>
+        <thead>
           <tr>
-            <td>{{ order.orderNumber }}</td>
-            <td>{{ order.customerName }}</td>
-            <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
-            <td>{{ order.paymentStatus }}</td>
-            <td>{{ order.totalAmount | currency: 'INR' }}</td>
+            <th>Order #</th>
+            @if (!isCustomer) {
+              <th>Customer</th>
+            }
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Total</th>
+            <th>Expected Delivery</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (order of filteredOrders(); track order.id) {
+            <tr [routerLink]="[order.id]" class="clickable-row">
+              <td>{{ order.orderNumber }}</td>
+              @if (!isCustomer) {
+                <td>{{ order.customerName }}</td>
+              }
+              <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
+              <td>{{ paymentStatusLabel(order.paymentStatus) }}</td>
+              <td>{{ order.totalAmount | currency: 'INR' }}</td>
+              <td>{{ order.promisedByUtc ? (order.promisedByUtc | date: 'd MMM, h:mm a') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   }
 </section>

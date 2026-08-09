@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Services.Queries.GetServices;
 
 public record ServiceListItemDto(
-    Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority);
+    Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority, string? ImageUrl,
+    decimal ExpressSurcharge, int ExpressEtaHours);
 
 public record GetServicesQuery(
     string? Search = null,
@@ -32,7 +33,9 @@ public class GetServicesQueryHandler : IRequestHandler<GetServicesQuery, Paginat
             .OrderBy(s => s.Priority).ThenBy(s => s.Name)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(s => new ServiceListItemDto(s.Id, s.Name, s.BasePrice, s.EstimatedTimeHours, s.GstPercentage, s.Priority))
+            .Select(s => new ServiceListItemDto(
+                s.Id, s.Name, s.BasePrice, s.EstimatedTimeHours, s.GstPercentage, s.Priority, s.ImageUrl,
+                s.ExpressSurcharge, s.ExpressEtaHours))
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<ServiceListItemDto>(items, totalCount, request.PageNumber, request.PageSize);

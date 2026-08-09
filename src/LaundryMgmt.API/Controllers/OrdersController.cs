@@ -1,6 +1,9 @@
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Orders.Commands.AdvanceOrderStatus;
 using LaundryMgmt.Application.Orders.Commands.CreateOrder;
+using LaundryMgmt.Application.Orders.Queries.GetMyOrders;
+using LaundryMgmt.Application.Orders.Queries.GetOrderById;
+using LaundryMgmt.Application.Orders.Commands.UpdateOrder;
 using LaundryMgmt.Application.Orders.Queries.GetOrders;
 using LaundryMgmt.Domain.Enums;
 using MediatR;
@@ -16,16 +19,40 @@ public class OrdersController : ControllerBase
 {
     private readonly ISender _sender;
 
+    private const string ManagementRoles = "Admin,StoreManager,Staff";
+
     public OrdersController(ISender sender) => _sender = sender;
 
-    /// <summary>List orders with optional status filter and search, paginated.</summary>
+    /// <summary>List orders with optional status filter and search, paginated.
+    /// Staff/admin only — customers use /mine for their own history.</summary>
     [HttpGet]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(typeof(PaginatedList<OrderListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<OrderListItemDto>>> GetOrders(
         [FromQuery] OrderStatus? status, [FromQuery] string? search,
         [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
     {
         var result = await _sender.Send(new GetOrdersQuery(status, search, pageNumber, pageSize));
+        return Ok(result);
+    }
+
+    /// <summary>Order history for the logged-in customer only.</summary>
+    [HttpGet("mine")]
+    [ProducesResponseType(typeof(PaginatedList<OrderListItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedList<OrderListItemDto>>> GetMyOrders(
+        [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    {
+        var result = await _sender.Send(new GetMyOrdersQuery(pageNumber, pageSize));
+        return Ok(result);
+    }
+
+    /// <summary>Full detail for a single order (items, garments, services, pickup/delivery
+    /// timing). Customers may only fetch their own order; management roles may fetch any.</summary>
+    [HttpGet("{orderId:guid}")]
+    [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<OrderDetailDto>> GetOrderById(Guid orderId)
+    {
+        var result = await _sender.Send(new GetOrderByIdQuery(orderId));
         return Ok(result);
     }
 
@@ -40,10 +67,25 @@ public class OrdersController : ControllerBase
 
     /// <summary>Advance an order to the next step in the pipeline (or Cancelled).</summary>
     [HttpPatch("{orderId:guid}/status")]
+    [Authorize(Roles = ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> AdvanceStatus(Guid orderId, [FromBody] OrderStatus newStatus)
     {
         await _sender.Send(new AdvanceOrderStatusCommand(orderId, newStatus));
         return NoContent();
     }
+
+    /// <summary>Admin order management: set status to any target step, payment status,
+    /// amount paid, and/or expected delivery time. Notifies the customer of what changed.</summary>
+    [HttpPut("{orderId:guid}")]
+    [Authorize(Roles = ManagementRoles)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> UpdateOrder(Guid orderId, [FromBody] UpdateOrderBody body)
+    {
+        await _sender.Send(new UpdateOrderCommand(orderId, body.Status, body.PaymentStatus, body.AmountPaid, body.PromisedByUtc));
+        return NoContent();
+    }
 }
+
+public record UpdateOrderBody(
+    OrderStatus? Status, PaymentStatus? PaymentStatus, decimal? AmountPaid, DateTimeOffset? PromisedByUtc);

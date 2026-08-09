@@ -20,6 +20,16 @@ public partial class ModuleBreadcrumb : ContentView
     public ModuleBreadcrumb()
     {
         InitializeComponent();
+
+        // Customers/Garments/Services are staff-only (see AppShell.BuildTabsForRole and
+        // the matching API-side [Authorize(Roles=...)] restrictions) — a customer login
+        // would just hit a 403 tapping them, so hide them for that role. Reads the same
+        // Preferences key AuthService.Role does; no DI available for a plain XAML-declared
+        // ContentView, so this mirrors that lookup directly rather than injecting the service.
+        var isCustomer = Preferences.Default.Get<string?>("auth_role", null) == "Customer";
+        CustomersChip.IsVisible = !isCustomer;
+        GarmentsChip.IsVisible = !isCustomer;
+        ServicesChip.IsVisible = !isCustomer;
     }
 
     private void ApplyActiveState(string currentModule)

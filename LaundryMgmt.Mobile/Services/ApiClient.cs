@@ -34,6 +34,16 @@ public class ApiClient
         _http.PostAsJsonAsync("api/v1/auth/login", request)
             .ContinueWith(t => t.Result.EnsureSuccessStatusCode().Content.ReadFromJsonAsync<LoginResponse>()).Unwrap();
 
+    public Task<HttpResponseMessage> RegisterAsync(RegisterRequest request) =>
+        _http.PostAsJsonAsync("api/v1/auth/register", request);
+
+    public async Task<LoginResponse> VerifyOtpAsync(VerifyOtpRequest request)
+    {
+        var response = await _http.PostAsJsonAsync("api/v1/auth/verify-otp", request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<LoginResponse>())!;
+    }
+
     public Task<HttpResponseMessage> ConfirmDeliveryAsync(DeliveryOtpConfirmationRequest request) =>
         _http.PostAsJsonAsync("api/v1/pickup-delivery/confirm", request);
 
@@ -43,6 +53,10 @@ public class ApiClient
         _http.GetFromJsonAsync<PaginatedList<OrderListItem>>(
             $"api/v1/orders?{Query(("pageNumber", pageNumber), ("pageSize", pageSize))}");
 
+    public Task<PaginatedList<OrderListItem>?> GetMyOrdersAsync(int pageNumber = 1, int pageSize = 20) =>
+        _http.GetFromJsonAsync<PaginatedList<OrderListItem>>(
+            $"api/v1/orders/mine?{Query(("pageNumber", pageNumber), ("pageSize", pageSize))}");
+
     public Task<HttpResponseMessage> CreateOrderAsync(CreateOrderRequest request) =>
         _http.PostAsJsonAsync("api/v1/orders", request);
 
@@ -51,6 +65,9 @@ public class ApiClient
     public Task<PaginatedList<CustomerListItem>?> GetCustomersAsync(string? search = null, int pageNumber = 1, int pageSize = 50) =>
         _http.GetFromJsonAsync<PaginatedList<CustomerListItem>>(
             $"api/v1/customers?{Query(("search", search), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
+
+    public Task<CustomerListItem?> GetMyCustomerProfileAsync() =>
+        _http.GetFromJsonAsync<CustomerListItem>("api/v1/customers/me");
 
     public Task<HttpResponseMessage> CreateCustomerAsync(CreateCustomerRequest request) =>
         _http.PostAsJsonAsync("api/v1/customers", request);

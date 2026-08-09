@@ -49,4 +49,24 @@
       </button>
     </div>
   </form>
+
+  @if (isEditMode()) {
+    <div class="password-panel">
+      <h2>Reset Login Password</h2>
+      <p class="hint">Sets this customer's portal password directly — no old password needed.</p>
+      <div class="password-row">
+        <input
+          type="password"
+          placeholder="New password (min. 8 characters)"
+          [value]="newPassword()"
+          (input)="newPassword.set($any($event.target).value)"
+        />
+        <button type="button" [disabled]="isSavingPassword()" (click)="savePassword()">
+          {{ isSavingPassword() ? 'Saving…' : 'Set Password' }}
+        </button>
+      </div>
+      @if (passwordError()) { <p class="error">{{ passwordError() }}</p> }
+      @if (passwordSaved()) { <p class="success">Password updated.</p> }
+    </div>
+  }
 </section>

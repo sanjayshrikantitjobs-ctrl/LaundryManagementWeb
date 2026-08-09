@@ -43,13 +43,20 @@ public class AuthService
         var response = await _apiClient.LoginAsync(new LoginRequest(usernameOrEmail, password))
             ?? throw new InvalidOperationException("Login failed.");
 
+        await ApplySessionAsync(response);
+        return response;
+    }
+
+    /// <summary>Persists a session that already came back from the server — used after
+    /// OTP verification, which returns the same login payload shape as /login.</summary>
+    public async Task ApplySessionAsync(LoginResponse response)
+    {
         await _tokenStore.SaveTokenAsync(response.AccessToken);
         Preferences.Default.Set(FullNameKey, response.FullName);
         Preferences.Default.Set(RoleKey, response.Role);
         Preferences.Default.Set(UserIdKey, response.UserId);
 
         _apiClient.SetBearerToken(response.AccessToken);
-        return response;
     }
 
     public void Logout()

@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { GarmentsService } from '../garments.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { PricingMatrix, PricingType } from '../../../core/models/catalog.models';
 
 @Component({
@@ -12,10 +13,13 @@ import { PricingMatrix, PricingType } from '../../../core/models/catalog.models'
   styleUrl: './pricing-matrix.component.scss'
 })
 export class PricingMatrixComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
   readonly matrix = signal<PricingMatrix | null>(null);
   readonly isLoading = signal(true);
   readonly savingKey = signal<string | null>(null);
   readonly PricingType = PricingType;
+  readonly canEdit = this.authService.currentUser()?.role !== 'Customer';
 
   constructor(private garmentsService: GarmentsService) {}
 

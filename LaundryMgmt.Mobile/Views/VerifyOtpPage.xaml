@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.VerifyOtpPage"
+             x:DataType="vm:VerifyOtpViewModel"
+             Title="Verify phone">
+
+    <Grid BackgroundColor="{StaticResource PrimaryDark}">
+        <VerticalStackLayout Padding="32" Spacing="16" VerticalOptions="Center">
+            <Label Text="Verify your phone" FontSize="22" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" HorizontalTextAlignment="Center" />
+            <Label Text="{Binding PhoneNumber, StringFormat='We sent a 6-digit code over WhatsApp to {0}.'}"
+                   TextColor="{StaticResource White}" HorizontalTextAlignment="Center" Margin="0,0,0,8" />
+
+            <Frame BackgroundColor="{StaticResource White}" Padding="20">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="CODE" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding Code}" Keyboard="Numeric" MaxLength="6" Placeholder="123456"
+                           HorizontalTextAlignment="Center" FontSize="20" />
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+                    <Button Text="Verify &amp; sign in" Command="{Binding VerifyCommand}" Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

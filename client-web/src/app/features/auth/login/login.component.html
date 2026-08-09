@@ -16,8 +16,14 @@
       <p class="error">{{ errorMessage() }}</p>
     }
 
+    @if (hadFailedAttempt()) {
+      <p class="forgot"><a routerLink="/forgot-password">Forgot your password?</a></p>
+    }
+
     <button type="submit" [disabled]="form.invalid || isSubmitting()">
       {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
     </button>
   </form>
+
+  <p class="switch">New customer? <a routerLink="/register">Create an account</a></p>
 </section>
