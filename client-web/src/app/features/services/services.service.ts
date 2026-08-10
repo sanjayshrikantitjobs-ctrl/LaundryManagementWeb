@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateServiceRequest, ServiceDetail, ServiceListItem, UpdateServiceRequest } from '../../core/models/catalog.models';
-import { PaginatedList } from '../../core/models/order.models';
+import { PaginatedList, SortDirection } from '../../core/models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class ServicesService {
@@ -10,12 +10,20 @@ export class ServicesService {
 
   constructor(private http: HttpClient) {}
 
-  getServices(opts: { search?: string; pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<ServiceListItem>> {
+  getServices(opts: {
+    search?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
+  } = {}): Observable<PaginatedList<ServiceListItem>> {
     let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
     return this.http.get<PaginatedList<ServiceListItem>>(this.baseUrl, { params });
   }

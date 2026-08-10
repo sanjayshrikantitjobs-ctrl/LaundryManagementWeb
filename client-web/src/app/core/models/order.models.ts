@@ -39,13 +39,19 @@ export interface OrderListItem {
 export interface PaginatedList<T> {
   items: T[];
   pageNumber: number;
+  pageSize: number;
   totalPages: number;
   totalCount: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
+
+export type SortDirection = 'asc' | 'desc';
 
 export interface OrderItemDetail {
   id: string;
   garmentName: string;
+  serviceId: string;
   serviceName: string;
   quantity: number;
   weightKg?: number | null;

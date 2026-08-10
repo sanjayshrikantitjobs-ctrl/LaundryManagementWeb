@@ -1,0 +1,37 @@
+<section class="pickup-queue">
+  <header>
+    <h1>My Delivery Queue</h1>
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading assigned deliveries…</p>
+  } @else if (items().length === 0) {
+    <p>No deliveries assigned to you right now.</p>
+  } @else {
+    <div class="card-list">
+      @for (item of items(); track item.pickupDeliveryId) {
+        <a class="card" [routerLink]="['/orders', item.orderId]" [queryParams]="{ deliveryId: item.pickupDeliveryId }">
+          <div class="card-main">
+            <strong>{{ item.orderNumber }}</strong>
+            <span>{{ item.customerName }}</span>
+            @if (item.addressLine) { <span class="address">{{ item.addressLine }}</span> }
+          </div>
+          <div class="card-meta">
+            <span class="status-badge">{{ statusLabel(item.status) }}</span>
+            @if (item.scheduledAtUtc) {
+              <span class="scheduled">{{ item.scheduledAtUtc | date: 'medium' }}</span>
+            }
+          </div>
+        </a>
+      }
+    </div>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

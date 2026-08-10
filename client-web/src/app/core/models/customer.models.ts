@@ -4,6 +4,11 @@ export enum MembershipTier {
   Gold = 2
 }
 
+export enum CustomerStatus {
+  Active = 0,
+  Inactive = 1
+}
+
 export interface CustomerListItem {
   id: string;
   fullName: string;
@@ -13,6 +18,7 @@ export interface CustomerListItem {
   membershipTier: MembershipTier;
   walletBalance: number;
   loyaltyPoints: number;
+  status: CustomerStatus;
   createdAtUtc: string;
   lastOrderAtUtc?: string | null;
 }
@@ -43,6 +49,7 @@ export interface CustomerDetail {
   creditLimit: number;
   loyaltyPoints: number;
   membershipTier: MembershipTier;
+  status: CustomerStatus;
   notes?: string;
   addresses: CustomerAddress[];
 }

@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Services.Commands.CreateService;
 using LaundryMgmt.Application.Services.Commands.DeleteService;
@@ -17,17 +18,16 @@ public class ServicesController : ControllerBase
 {
     private readonly ISender _sender;
 
-    private const string ManagementRoles = "Admin,StoreManager,Staff";
-
     public ServicesController(ISender sender) => _sender = sender;
 
     /// <summary>List services with optional search, paginated.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedList<ServiceListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<ServiceListItemDto>>> GetServices(
-        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
-        var result = await _sender.Send(new GetServicesQuery(search, pageNumber, pageSize));
+        var result = await _sender.Send(new GetServicesQuery(search, pageNumber, pageSize, sortBy, sortDirection));
         return Ok(result);
     }
 
@@ -42,7 +42,7 @@ public class ServicesController : ControllerBase
 
     /// <summary>Add a new service (Washing, Dry Cleaning, Iron Only, ...).</summary>
     [HttpPost]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreateService(CreateServiceCommand command)
     {
@@ -52,7 +52,7 @@ public class ServicesController : ControllerBase
 
     /// <summary>Update a service's pricing/timing details.</summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateService(Guid id, [FromBody] UpdateServiceBody body)
     {
@@ -64,7 +64,7 @@ public class ServicesController : ControllerBase
 
     /// <summary>Remove a service from the catalog.</summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteService(Guid id)
     {

@@ -55,6 +55,100 @@
       }
     </div>
 
+    <h2>Garment Details</h2>
+    <div class="garment-images">
+      <div class="image-type-tabs">
+        <button type="button" [class.active]="imageTypeTab() === GarmentImageType.Pickup" (click)="setImageTypeTab(GarmentImageType.Pickup)">
+          Pickup Photos
+        </button>
+        <button type="button" [class.active]="imageTypeTab() === GarmentImageType.Delivery" (click)="setImageTypeTab(GarmentImageType.Delivery)">
+          Delivery Proof
+        </button>
+      </div>
+
+      @if (serviceTabs().length > 0) {
+        <div class="service-tabs">
+          <button type="button" [class.active]="serviceFilter() === null" (click)="setServiceFilter(null)">All</button>
+          @for (tab of serviceTabs(); track tab.serviceId) {
+            <button type="button" [class.active]="serviceFilter() === tab.serviceId" (click)="setServiceFilter(tab.serviceId)">
+              {{ tab.serviceName }}
+            </button>
+          }
+        </div>
+      }
+
+      @if (filteredImages().length === 0) {
+        <p class="hint">No {{ imageTypeTab() === GarmentImageType.Pickup ? 'pickup' : 'delivery' }} photos yet.</p>
+      } @else {
+        <div class="image-grid">
+          @for (image of filteredImages(); track image.id) {
+            <div class="image-card">
+              <img [src]="image.imageUrl" alt="Garment photo" />
+              <div class="image-meta">
+                <span>{{ image.uploadedByName }}</span>
+                <span>{{ image.uploadedAtUtc | date: 'short' }}</span>
+                @if (image.serviceName) { <span class="service-tag">{{ image.serviceName }}</span> }
+                @if (image.notes) { <span class="notes">{{ image.notes }}</span> }
+              </div>
+              @if (canUpload()) {
+                <button type="button" class="remove-btn" (click)="deleteImage(image)">✕</button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (canUpload()) {
+        <div class="upload-panel">
+          <input type="text" placeholder="Notes (optional)" [ngModel]="uploadNotes()" (ngModelChange)="uploadNotes.set($event)" />
+          <label class="file-label">
+            {{ isUploading() ? 'Uploading…' : 'Add Photo' }}
+            <input type="file" accept="image/*" capture="environment" [disabled]="isUploading()" (change)="onFileSelected($event)" hidden />
+          </label>
+          @if (uploadError()) { <p class="error">{{ uploadError() }}</p> }
+        </div>
+      }
+
+      @if (isPickupAgent && pickupId()) {
+        <div class="confirm-panel">
+          <button type="button" class="btn-confirm" [disabled]="isConfirming()" (click)="confirmPickup()">
+            {{ isConfirming() ? 'Confirming…' : 'Confirm Garments Received' }}
+          </button>
+          @if (confirmError()) { <p class="error">{{ confirmError() }}</p> }
+        </div>
+      }
+
+      @if (isDeliveryAgent && deliveryId()) {
+        <div class="confirm-panel">
+          <button type="button" class="btn-confirm" [disabled]="isConfirming()" (click)="confirmDelivery()">
+            {{ isConfirming() ? 'Confirming…' : 'Confirm Delivery' }}
+          </button>
+          @if (confirmError()) { <p class="error">{{ confirmError() }}</p> }
+        </div>
+      }
+    </div>
+
+    @if (canViewOperations && pickupDeliveries().length > 0) {
+      <h2>Pickup &amp; Delivery</h2>
+      <div class="pickup-delivery-panel">
+        @for (leg of pickupDeliveries(); track leg.id) {
+          <div class="leg-row">
+            <span class="leg-type">{{ leg.isPickup ? 'Pickup' : 'Delivery' }}</span>
+            <span class="leg-status">{{ leg.assignedEmployeeName || 'Unassigned' }}</span>
+            @if (isManagement) {
+              <select [ngModel]="selectedAgentByLeg()[leg.id] ?? ''" (ngModelChange)="onAgentSelect(leg.id, $event)">
+                <option value="" disabled>Select agent…</option>
+                @for (agent of agentsFor(leg); track agent.employeeId) {
+                  <option [value]="agent.employeeId">{{ agent.fullName }}</option>
+                }
+              </select>
+              <button type="button" (click)="assignAgent(leg)">Assign</button>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <div class="summary">
       <div class="row"><span>Subtotal</span><span>₹{{ order.subTotal }}</span></div>
       @if (order.discountAmount) {

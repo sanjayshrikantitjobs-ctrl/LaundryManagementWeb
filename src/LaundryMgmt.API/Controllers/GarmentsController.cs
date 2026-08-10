@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Garments.Commands.CreateGarment;
 using LaundryMgmt.Application.Garments.Commands.DeleteGarment;
@@ -20,17 +21,16 @@ public class GarmentsController : ControllerBase
 {
     private readonly ISender _sender;
 
-    private const string ManagementRoles = "Admin,StoreManager,Staff";
-
     public GarmentsController(ISender sender) => _sender = sender;
 
     /// <summary>List garments with optional search, paginated.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedList<GarmentListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<GarmentListItemDto>>> GetGarments(
-        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
-        var result = await _sender.Send(new GetGarmentsQuery(search, pageNumber, pageSize));
+        var result = await _sender.Send(new GetGarmentsQuery(search, pageNumber, pageSize, sortBy, sortDirection));
         return Ok(result);
     }
 
@@ -54,7 +54,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Add a new garment to the catalog.</summary>
     [HttpPost]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreateGarment(CreateGarmentCommand command)
     {
@@ -64,7 +64,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Update a garment's catalog details.</summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateGarment(Guid id, [FromBody] UpdateGarmentBody body)
     {
@@ -74,7 +74,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Remove a garment from the catalog.</summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteGarment(Guid id)
     {
@@ -84,7 +84,7 @@ public class GarmentsController : ControllerBase
 
     /// <summary>Set (create or update) the price for a garment + service combination.</summary>
     [HttpPut("{id:guid}/prices/{serviceId:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     public async Task<ActionResult<Guid>> SetPrice(Guid id, Guid serviceId, [FromBody] SetPriceBody body)
     {

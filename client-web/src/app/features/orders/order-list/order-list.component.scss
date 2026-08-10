@@ -44,6 +44,15 @@
     letter-spacing: 0.03em;
   }
 
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: var(--color-primary-dark);
+    }
+  }
+
   .tabs {
     display: flex;
     gap: 8px;

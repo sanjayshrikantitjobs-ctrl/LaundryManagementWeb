@@ -15,10 +15,24 @@ public record GetOrdersQuery(
     OrderStatus? Status = null,
     string? Search = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<OrderListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null,
+    List<OrderStatus>? Statuses = null) : IRequest<PaginatedList<OrderListItemDto>>;
 
 public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedList<OrderListItemDto>>
 {
+    internal static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.Order, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["orderNumber"] = o => o.OrderNumber,
+        ["customerName"] = o => o.Customer!.FullName,
+        ["status"] = o => o.Status,
+        ["totalAmount"] = o => o.TotalAmount,
+        ["paymentStatus"] = o => o.PaymentStatus,
+        ["createdAtUtc"] = o => o.CreatedAtUtc,
+        ["promisedByUtc"] = o => o.PromisedByUtc!
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetOrdersQueryHandler(IApplicationDbContext db) => _db = db;
@@ -30,6 +44,9 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
         if (request.Status.HasValue)
             query = query.Where(o => o.Status == request.Status.Value);
 
+        if (request.Statuses is { Count: > 0 })
+            query = query.Where(o => request.Statuses.Contains(o.Status));
+
         if (!string.IsNullOrWhiteSpace(request.Search))
             query = query.Where(o =>
                 o.OrderNumber.Contains(request.Search) ||
@@ -38,7 +55,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(o => o.CreatedAtUtc)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, o => o.CreatedAtUtc, defaultDescending: true)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(o => new OrderListItemDto(

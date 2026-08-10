@@ -58,6 +58,12 @@ public class Employee : AuditableEntity
     public decimal Salary { get; set; }
     public DateOnly JoinedOn { get; set; }
     public bool IsActive { get; set; } = true;
+
+    /// <summary>Links this staff record to the Identity login the employee signs in
+    /// with, mirroring <see cref="Customer.IdentityUserId"/>. Set for roles that need
+    /// to resolve "which employee is the currently logged-in user" (e.g. Pickup/Delivery
+    /// Agent assignment lookups). Null for employees with no portal login.</summary>
+    public Guid? IdentityUserId { get; set; }
 }
 
 public class Machine : AuditableEntity
@@ -119,4 +125,34 @@ public class PickupDelivery : AuditableEntity
     public DateTimeOffset? CompletedAtUtc { get; set; }
     public string? Otp { get; set; }
     public decimal Charge { get; set; }
+}
+
+/// <summary>A garment photo taken during pickup or delivery, for dispute-prevention
+/// and operational transparency (which garments, condition, count). Categorized by
+/// Service (the existing catalog category) rather than a hardcoded enum, per the
+/// existing Service/Garment structure. Metadata-only row — the actual file is written
+/// via the existing UploadsController/local disk storage, this just records who
+/// uploaded what, when, and for which order/service/item.</summary>
+public class OrderGarmentImage : AuditableEntity
+{
+    public Guid OrderId { get; set; }
+    public Order? Order { get; set; }
+
+    /// <summary>The Service category this photo belongs to (e.g. Dry Cleaning,
+    /// Ironing) — optional since a pickup/delivery-proof photo may cover the whole
+    /// order rather than one specific service line.</summary>
+    public Guid? ServiceId { get; set; }
+    public Service? Service { get; set; }
+
+    public Guid? OrderItemId { get; set; }
+    public OrderItem? OrderItem { get; set; }
+
+    public GarmentImageType ImageType { get; set; }
+    public string ImageUrl { get; set; } = string.Empty;
+
+    public Guid UploadedByUserId { get; set; }
+    public string UploadedByName { get; set; } = string.Empty;
+    public DateTimeOffset UploadedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    public string? Notes { get; set; }
 }

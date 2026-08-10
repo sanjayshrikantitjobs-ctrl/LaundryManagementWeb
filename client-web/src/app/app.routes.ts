@@ -79,6 +79,23 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/admin-promotions/admin-promotions.routes').then((m) => m.ADMIN_PROMOTIONS_ROUTES)
   },
+  {
+    path: 'users',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/users/users.routes').then((m) => m.USERS_ROUTES)
+  },
+  {
+    path: 'pickup-queue',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/pickup-delivery/pickup-queue/pickup-queue.component').then((m) => m.PickupQueueComponent)
+  },
+  {
+    path: 'delivery-queue',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/pickup-delivery/delivery-queue/delivery-queue.component').then((m) => m.DeliveryQueueComponent)
+  },
   { path: '', pathMatch: 'full', redirectTo: 'orders' },
   { path: '**', redirectTo: 'orders' }
 ];

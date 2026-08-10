@@ -23,6 +23,25 @@ export class AppComponent {
     return this.authService.currentUser()?.role === 'Customer';
   }
 
+  get homeLink(): string {
+    if (this.isCustomer) return '/shop';
+    if (this.isPickupAgent) return '/pickup-queue';
+    if (this.isDeliveryAgent) return '/delivery-queue';
+    return '/orders';
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'Admin';
+  }
+
+  get isPickupAgent(): boolean {
+    return this.authService.currentUser()?.role === 'PickupAgent';
+  }
+
+  get isDeliveryAgent(): boolean {
+    return this.authService.currentUser()?.role === 'DeliveryAgent';
+  }
+
   closeMenu(): void {
     this.isMenuOpen.set(false);
     this.isServicesMenuOpen.set(false);

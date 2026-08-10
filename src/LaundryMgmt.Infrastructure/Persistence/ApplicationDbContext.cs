@@ -34,6 +34,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Machine> Machines => Set<Machine>();
     public DbSet<Complaint> Complaints => Set<Complaint>();
     public DbSet<PickupDelivery> PickupDeliveries => Set<PickupDelivery>();
+    public DbSet<OrderGarmentImage> OrderGarmentImages => Set<OrderGarmentImage>();
     public DbSet<OtpChallenge> OtpChallenges => Set<OtpChallenge>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();

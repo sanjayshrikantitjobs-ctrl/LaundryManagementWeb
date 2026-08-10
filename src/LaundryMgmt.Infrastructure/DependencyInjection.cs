@@ -47,7 +47,7 @@ public static class DependencyInjection
                 : ActivatorUtilities.CreateInstance<LoggingWhatsAppSender>(sp));
         services.AddScoped<Application.Common.Interfaces.IOtpService, OtpService>();
 
-        // ASP.NET Core Identity — backs Admin/StoreManager/Staff/DeliveryBoy logins.
+        // ASP.NET Core Identity — backs Admin/StoreManager/Staff/DepartmentHead/PickupAgent/DeliveryAgent logins.
         services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.Password.RequiredLength = 8;
@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<Application.Common.Interfaces.IIdentityAuthService, IdentityAuthService>();
         services.AddScoped<Application.Common.Interfaces.ITokenService, TokenServiceAdapter>();
+        services.AddScoped<Application.Common.Interfaces.IUserManagementService, UserManagementService>();
 
         // JWT auth
         var jwtSection = configuration.GetSection("Jwt");

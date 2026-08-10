@@ -1,6 +1,6 @@
 @if (authService.isAuthenticated()) {
   <header class="app-header">
-    <span class="brand" (click)="closeMenu()" [routerLink]="isCustomer ? '/shop' : '/orders'">🧺 Laundry Mgmt</span>
+    <span class="brand" (click)="closeMenu()" [routerLink]="homeLink">🧺 Laundry Mgmt</span>
 
     <button type="button" class="menu-toggle" (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen()">
       <span></span><span></span><span></span>
@@ -30,6 +30,10 @@
         <a routerLink="/price-list" routerLinkActive="active" (click)="closeMenu()">Price List</a>
         <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
         <a routerLink="/contact-us" routerLinkActive="active" (click)="closeMenu()">Contact Us</a>
+      } @else if (isPickupAgent) {
+        <a routerLink="/pickup-queue" routerLinkActive="active" (click)="closeMenu()">My Pickup Queue</a>
+      } @else if (isDeliveryAgent) {
+        <a routerLink="/delivery-queue" routerLinkActive="active" (click)="closeMenu()">My Delivery Queue</a>
       } @else {
         <a routerLink="/orders" routerLinkActive="active" (click)="closeMenu()">Orders</a>
         <a routerLink="/customers" routerLinkActive="active" (click)="closeMenu()">Customers</a>
@@ -37,6 +41,9 @@
         <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Services</a>
         <a routerLink="/garments/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a>
         <a routerLink="/admin/promotions" routerLinkActive="active" (click)="closeMenu()">Promotions</a>
+        @if (isAdmin) {
+          <a routerLink="/users" routerLinkActive="active" (click)="closeMenu()">Users</a>
+        }
       }
 
       <div class="user-info mobile-only">

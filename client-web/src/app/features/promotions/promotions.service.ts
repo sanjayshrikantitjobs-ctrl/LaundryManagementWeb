@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ActivePromotion, PromotionListItem, SavePromotionRequest } from '../../core/models/promotion.models';
-import { PaginatedList } from '../../core/models/order.models';
+import { PaginatedList, SortDirection } from '../../core/models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class PromotionsService {
@@ -14,12 +14,20 @@ export class PromotionsService {
     return this.http.get<ActivePromotion[]>(`${this.baseUrl}/active`);
   }
 
-  getPromotions(opts: { search?: string; pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<PromotionListItem>> {
+  getPromotions(opts: {
+    search?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
+  } = {}): Observable<PaginatedList<PromotionListItem>> {
     let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
     return this.http.get<PaginatedList<PromotionListItem>>(this.baseUrl, { params });
   }

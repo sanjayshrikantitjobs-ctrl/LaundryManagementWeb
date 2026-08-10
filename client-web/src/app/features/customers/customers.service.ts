@@ -7,10 +7,11 @@ import {
   CreateCustomerAddressRequest,
   CustomerDetail,
   CustomerListItem,
+  CustomerStatus,
   UpdateCustomerRequest,
   UpdateMyProfileRequest
 } from '../../core/models/customer.models';
-import { PaginatedList } from '../../core/models/order.models';
+import { PaginatedList, SortDirection } from '../../core/models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class CustomersService {
@@ -18,12 +19,24 @@ export class CustomersService {
 
   constructor(private http: HttpClient) {}
 
-  getCustomers(opts: { search?: string; pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<CustomerListItem>> {
+  getCustomers(opts: {
+    search?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
+    hasOrders?: boolean;
+    status?: CustomerStatus;
+  } = {}): Observable<PaginatedList<CustomerListItem>> {
     let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
+    if (opts.hasOrders !== undefined) params = params.set('hasOrders', opts.hasOrders);
+    if (opts.status !== undefined) params = params.set('status', opts.status);
 
     return this.http.get<PaginatedList<CustomerListItem>>(this.baseUrl, { params });
   }
@@ -70,5 +83,9 @@ export class CustomersService {
 
   deleteCustomer(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  setStatus(id: string, status: CustomerStatus): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/status`, { status });
   }
 }

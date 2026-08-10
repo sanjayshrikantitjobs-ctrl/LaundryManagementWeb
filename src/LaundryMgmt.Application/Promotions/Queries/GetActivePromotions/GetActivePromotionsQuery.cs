@@ -29,8 +29,6 @@ public class GetActivePromotionsQueryHandler : IRequestHandler<GetActivePromotio
 
         return await _db.Promotions
             .Where(p => p.IsActive)
-            .Where(p => !p.ValidFrom.HasValue || p.ValidFrom <= now)
-            .Where(p => !p.ValidTo.HasValue || p.ValidTo >= now)
             .OrderByDescending(p => p.CreatedAtUtc)
             .Select(p => new ActivePromotionDto(
                 p.Id, p.Title, p.Description, p.ImageUrl, p.Code, p.DiscountPercent, p.DiscountAmount, p.ValidTo))

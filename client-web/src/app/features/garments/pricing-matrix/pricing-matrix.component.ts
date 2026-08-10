@@ -19,7 +19,7 @@ export class PricingMatrixComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly savingKey = signal<string | null>(null);
   readonly PricingType = PricingType;
-  readonly canEdit = this.authService.currentUser()?.role !== 'Customer';
+  readonly canEdit = !['Customer', 'DepartmentHead'].includes(this.authService.currentUser()?.role ?? '');
 
   constructor(private garmentsService: GarmentsService) {}
 

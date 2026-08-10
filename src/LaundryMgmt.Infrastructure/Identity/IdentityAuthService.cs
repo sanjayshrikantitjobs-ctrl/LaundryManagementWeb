@@ -1,6 +1,7 @@
 using LaundryMgmt.Application.Common.Interfaces;
 using LaundryMgmt.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Infrastructure.Identity;
 
@@ -8,11 +9,13 @@ public class IdentityAuthService : IIdentityAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IApplicationDbContext _db;
 
-    public IdentityAuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public IdentityAuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IApplicationDbContext db)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _db = db;
     }
 
     public async Task<AuthenticatedUserDto?> ValidateCredentialsAsync(
@@ -28,7 +31,17 @@ public class IdentityAuthService : IIdentityAuthService
         if (!passwordValid)
             return null;
 
-        return ToDto(user);
+        var isCustomerActive = true;
+        if (user.Role == UserRole.Customer)
+        {
+            var customer = await _db.Customers
+                .Where(c => c.IdentityUserId == user.Id)
+                .Select(c => (CustomerStatus?)c.Status)
+                .FirstOrDefaultAsync(cancellationToken);
+            isCustomerActive = customer != CustomerStatus.Inactive;
+        }
+
+        return ToDto(user, isCustomerActive);
     }
 
     public async Task<Guid> RegisterCustomerAsync(
@@ -85,9 +98,9 @@ public class IdentityAuthService : IIdentityAuthService
         return result.Succeeded;
     }
 
-    private static AuthenticatedUserDto ToDto(ApplicationUser user) => new(
+    private static AuthenticatedUserDto ToDto(ApplicationUser user, bool isCustomerActive = true) => new(
         user.Id, user.UserName ?? user.Email ?? string.Empty,
-        user.Email ?? string.Empty, user.FullName, user.Role, user.PhoneNumberConfirmed);
+        user.Email ?? string.Empty, user.FullName, user.Role, user.PhoneNumberConfirmed, isCustomerActive);
 }
 
 /// <summary>Adapts the concrete JwtTokenService (which speaks ApplicationUser)

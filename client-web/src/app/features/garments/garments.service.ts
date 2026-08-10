@@ -9,7 +9,7 @@ import {
   PricingType,
   UpdateGarmentRequest
 } from '../../core/models/catalog.models';
-import { PaginatedList } from '../../core/models/order.models';
+import { PaginatedList, SortDirection } from '../../core/models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class GarmentsService {
@@ -17,12 +17,20 @@ export class GarmentsService {
 
   constructor(private http: HttpClient) {}
 
-  getGarments(opts: { search?: string; pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<GarmentListItem>> {
+  getGarments(opts: {
+    search?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
+  } = {}): Observable<PaginatedList<GarmentListItem>> {
     let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
     return this.http.get<PaginatedList<GarmentListItem>>(this.baseUrl, { params });
   }

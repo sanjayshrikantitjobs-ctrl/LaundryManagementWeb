@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Orders.Queries.GetOrderById;
 
 public record OrderItemDetailDto(
-    Guid Id, string GarmentName, string ServiceName, int Quantity, decimal? WeightKg,
+    Guid Id, string GarmentName, Guid ServiceId, string ServiceName, int Quantity, decimal? WeightKg,
     decimal UnitPrice, decimal LineTotal, string? SpecialInstructions);
 
 public record OrderDetailDto(
@@ -59,7 +59,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             order.PaymentStatus, order.AmountPaid,
             order.CreatedAtUtc, order.PromisedByUtc, order.DeliveredAtUtc, pickupScheduledAtUtc,
             order.Items.Select(i => new OrderItemDetailDto(
-                i.Id, i.Garment!.Name, i.Service!.Name, i.Quantity, i.WeightKg,
+                i.Id, i.Garment!.Name, i.ServiceId, i.Service!.Name, i.Quantity, i.WeightKg,
                 i.UnitPrice, i.LineTotal, i.SpecialInstructions)).ToList());
     }
 }

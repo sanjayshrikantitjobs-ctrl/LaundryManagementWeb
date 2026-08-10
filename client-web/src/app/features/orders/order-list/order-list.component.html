@@ -4,60 +4,54 @@
     <a routerLink="new" class="btn-primary">+ New Order</a>
   </header>
 
+  <div class="tabs">
+    <button type="button" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All</button>
+    <button type="button" [class.active]="activeTab() === 'new'" (click)="setTab('new')">New</button>
+    <button type="button" [class.active]="activeTab() === 'progress'" (click)="setTab('progress')">In Progress</button>
+    <button type="button" [class.active]="activeTab() === 'completed'" (click)="setTab('completed')">Completed</button>
+    <button type="button" [class.active]="activeTab() === 'cancelled'" (click)="setTab('cancelled')">Cancelled</button>
+  </div>
+
   @if (isLoading()) {
     <p>Loading orders…</p>
   } @else if (orders().length === 0) {
-    <p>No orders yet.</p>
+    <p>No orders in this view.</p>
   } @else {
-    <div class="tabs">
-      <button type="button" [class.active]="activeTab() === 'all'" (click)="activeTab.set('all')">
-        All <span class="count">{{ tabCounts().all }}</span>
-      </button>
-      <button type="button" [class.active]="activeTab() === 'new'" (click)="activeTab.set('new')">
-        New <span class="count">{{ tabCounts().new }}</span>
-      </button>
-      <button type="button" [class.active]="activeTab() === 'progress'" (click)="activeTab.set('progress')">
-        In Progress <span class="count">{{ tabCounts().progress }}</span>
-      </button>
-      <button type="button" [class.active]="activeTab() === 'completed'" (click)="activeTab.set('completed')">
-        Completed <span class="count">{{ tabCounts().completed }}</span>
-      </button>
-      <button type="button" [class.active]="activeTab() === 'cancelled'" (click)="activeTab.set('cancelled')">
-        Cancelled <span class="count">{{ tabCounts().cancelled }}</span>
-      </button>
-    </div>
-
-    @if (filteredOrders().length === 0) {
-      <p>No orders in this tab.</p>
-    } @else {
-      <table>
-        <thead>
-          <tr>
-            <th>Order #</th>
-            @if (!isCustomer) {
-              <th>Customer</th>
-            }
-            <th>Status</th>
-            <th>Payment</th>
-            <th>Total</th>
-            <th>Expected Delivery</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (order of filteredOrders(); track order.id) {
-            <tr [routerLink]="[order.id]" class="clickable-row">
-              <td>{{ order.orderNumber }}</td>
-              @if (!isCustomer) {
-                <td>{{ order.customerName }}</td>
-              }
-              <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
-              <td>{{ paymentStatusLabel(order.paymentStatus) }}</td>
-              <td>{{ order.totalAmount | currency: 'INR' }}</td>
-              <td>{{ order.promisedByUtc ? (order.promisedByUtc | date: 'd MMM, h:mm a') : '—' }}</td>
-            </tr>
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" (click)="sortByColumn('orderNumber')">Order # {{ sortIndicator('orderNumber') }}</th>
+          @if (!isCustomer) {
+            <th class="sortable" (click)="sortByColumn('customerName')">Customer {{ sortIndicator('customerName') }}</th>
           }
-        </tbody>
-      </table>
-    }
+          <th class="sortable" (click)="sortByColumn('status')">Status {{ sortIndicator('status') }}</th>
+          <th class="sortable" (click)="sortByColumn('paymentStatus')">Payment {{ sortIndicator('paymentStatus') }}</th>
+          <th class="sortable" (click)="sortByColumn('totalAmount')">Total {{ sortIndicator('totalAmount') }}</th>
+          <th class="sortable" (click)="sortByColumn('promisedByUtc')">Expected Delivery {{ sortIndicator('promisedByUtc') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.id) {
+          <tr [routerLink]="[order.id]" class="clickable-row">
+            <td>{{ order.orderNumber }}</td>
+            @if (!isCustomer) {
+              <td>{{ order.customerName }}</td>
+            }
+            <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
+            <td>{{ paymentStatusLabel(order.paymentStatus) }}</td>
+            <td>{{ order.totalAmount | currency: 'INR' }}</td>
+            <td>{{ order.promisedByUtc ? (order.promisedByUtc | date: 'd MMM, h:mm a') : '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
   }
 </section>

@@ -24,6 +24,7 @@ public interface IApplicationDbContext
     DbSet<Machine> Machines { get; }
     DbSet<Complaint> Complaints { get; }
     DbSet<PickupDelivery> PickupDeliveries { get; }
+    DbSet<OrderGarmentImage> OrderGarmentImages { get; }
     DbSet<OtpChallenge> OtpChallenges { get; }
     DbSet<Promotion> Promotions { get; }
     DbSet<ContactMessage> ContactMessages { get; }

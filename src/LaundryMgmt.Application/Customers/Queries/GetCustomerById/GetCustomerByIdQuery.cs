@@ -11,7 +11,7 @@ public record CustomerAddressDto(
 public record CustomerDetailDto(
     Guid Id, string FullName, string PhoneNumber, string? Email,
     decimal WalletBalance, decimal CreditLimit, int LoyaltyPoints,
-    MembershipTier MembershipTier, string? Notes, List<CustomerAddressDto> Addresses);
+    MembershipTier MembershipTier, CustomerStatus Status, string? Notes, List<CustomerAddressDto> Addresses);
 
 public record GetCustomerByIdQuery(Guid CustomerId) : IRequest<CustomerDetailDto>;
 
@@ -31,7 +31,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
         return new CustomerDetailDto(
             customer.Id, customer.FullName, customer.PhoneNumber, customer.Email,
             customer.WalletBalance, customer.CreditLimit, customer.LoyaltyPoints,
-            customer.MembershipTier, customer.Notes,
+            customer.MembershipTier, customer.Status, customer.Notes,
             customer.Addresses.Select(a => new CustomerAddressDto(
                 a.Id, a.Label, a.Line1, a.Line2, a.City, a.State, a.PostalCode, a.IsDefault)).ToList());
     }

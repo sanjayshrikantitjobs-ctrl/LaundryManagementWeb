@@ -12,10 +12,20 @@ public record ServiceListItemDto(
 public record GetServicesQuery(
     string? Search = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<ServiceListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null) : IRequest<PaginatedList<ServiceListItemDto>>;
 
 public class GetServicesQueryHandler : IRequestHandler<GetServicesQuery, PaginatedList<ServiceListItemDto>>
 {
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.Service, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["name"] = s => s.Name,
+        ["basePrice"] = s => s.BasePrice,
+        ["estimatedTimeHours"] = s => s.EstimatedTimeHours,
+        ["priority"] = s => s.Priority
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetServicesQueryHandler(IApplicationDbContext db) => _db = db;
@@ -30,7 +40,8 @@ public class GetServicesQueryHandler : IRequestHandler<GetServicesQuery, Paginat
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(s => s.Priority).ThenBy(s => s.Name)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, s => s.Priority)
+            .ThenBy(s => s.Name)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(s => new ServiceListItemDto(

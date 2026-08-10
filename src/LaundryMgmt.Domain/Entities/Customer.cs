@@ -19,6 +19,7 @@ public class Customer : AuditableEntity
     public decimal CreditLimit { get; set; }
     public int LoyaltyPoints { get; set; }
     public MembershipTier MembershipTier { get; set; } = MembershipTier.None;
+    public CustomerStatus Status { get; set; } = CustomerStatus.Active;
     public string? Notes { get; set; }
 
     public ICollection<CustomerAddress> Addresses { get; set; } = new List<CustomerAddress>();

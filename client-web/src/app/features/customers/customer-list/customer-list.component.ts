@@ -1,10 +1,12 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CustomersService } from '../customers.service';
-import { CustomerListItem, MembershipTier } from '../../../core/models/customer.models';
+import { CustomerListItem, CustomerStatus, MembershipTier } from '../../../core/models/customer.models';
+import { SortDirection } from '../../../core/models/order.models';
+import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
-type CustomerTab = 'all' | 'new';
+type CustomerTab = 'all' | 'new' | 'inactive';
 type ActivityTier = 'new' | 'active' | 'yellow' | 'orange' | 'red';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -12,7 +14,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.scss'
 })
@@ -20,21 +22,15 @@ export class CustomerListComponent implements OnInit {
   readonly customers = signal<CustomerListItem[]>([]);
   readonly isLoading = signal(true);
   readonly search = signal('');
+  readonly totalCount = signal(0);
   readonly MembershipTier = MembershipTier;
+  readonly CustomerStatus = CustomerStatus;
   readonly activeTab = signal<CustomerTab>('all');
 
-  readonly tabCounts = computed(() => {
-    const list = this.customers();
-    return {
-      all: list.length,
-      new: list.filter((c) => !c.lastOrderAtUtc).length
-    };
-  });
-
-  readonly filteredCustomers = computed(() => {
-    const list = this.customers();
-    return this.activeTab() === 'new' ? list.filter((c) => !c.lastOrderAtUtc) : list;
-  });
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(20);
+  readonly sortBy = signal<string | null>(null);
+  readonly sortDirection = signal<SortDirection>('asc');
 
   constructor(private customersService: CustomersService) {}
 
@@ -44,13 +40,57 @@ export class CustomerListComponent implements OnInit {
 
   onSearch(term: string): void {
     this.search.set(term);
+    this.pageNumber.set(1);
     this.loadCustomers();
+  }
+
+  setTab(tab: CustomerTab): void {
+    this.activeTab.set(tab);
+    this.pageNumber.set(1);
+    this.loadCustomers();
+  }
+
+  onPageChange(page: number): void {
+    this.pageNumber.set(page);
+    this.loadCustomers();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.pageNumber.set(1);
+    this.loadCustomers();
+  }
+
+  sortByColumn(column: string): void {
+    if (this.sortBy() === column) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortBy.set(column);
+      this.sortDirection.set('asc');
+    }
+    this.pageNumber.set(1);
+    this.loadCustomers();
+  }
+
+  sortIndicator(column: string): string {
+    if (this.sortBy() !== column) return '';
+    return this.sortDirection() === 'asc' ? '▲' : '▼';
   }
 
   deleteCustomer(customer: CustomerListItem): void {
     if (!confirm(`Delete customer "${customer.fullName}"?`)) return;
 
     this.customersService.deleteCustomer(customer.id).subscribe({
+      next: () => this.loadCustomers()
+    });
+  }
+
+  toggleStatus(customer: CustomerListItem): void {
+    const nextStatus = customer.status === CustomerStatus.Active ? CustomerStatus.Inactive : CustomerStatus.Active;
+    const action = nextStatus === CustomerStatus.Inactive ? 'Deactivate' : 'Activate';
+    if (!confirm(`${action} customer "${customer.fullName}"? Their orders and history will not be affected.`)) return;
+
+    this.customersService.setStatus(customer.id, nextStatus).subscribe({
       next: () => this.loadCustomers()
     });
   }
@@ -87,12 +127,24 @@ export class CustomerListComponent implements OnInit {
 
   private loadCustomers(): void {
     this.isLoading.set(true);
-    this.customersService.getCustomers({ search: this.search() || undefined, pageSize: 200 }).subscribe({
-      next: (result) => {
-        this.customers.set(result.items);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false)
-    });
+    const tab = this.activeTab();
+    this.customersService
+      .getCustomers({
+        search: this.search() || undefined,
+        pageNumber: this.pageNumber(),
+        pageSize: this.pageSize(),
+        sortBy: this.sortBy() ?? undefined,
+        sortDirection: this.sortDirection(),
+        hasOrders: tab === 'new' ? false : undefined,
+        status: tab === 'inactive' ? CustomerStatus.Inactive : undefined
+      })
+      .subscribe({
+        next: (result) => {
+          this.customers.set(result.items);
+          this.totalCount.set(result.totalCount);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false)
+      });
   }
 }

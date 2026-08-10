@@ -14,10 +14,20 @@ public record ContactMessageListItemDto(
 public record GetContactMessagesQuery(
     ContactMessageStatus? Status = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<ContactMessageListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null) : IRequest<PaginatedList<ContactMessageListItemDto>>;
 
 public class GetContactMessagesQueryHandler : IRequestHandler<GetContactMessagesQuery, PaginatedList<ContactMessageListItemDto>>
 {
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.ContactMessage, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["customerName"] = m => m.Customer!.FullName,
+        ["type"] = m => m.Type,
+        ["status"] = m => m.Status,
+        ["createdAtUtc"] = m => m.CreatedAtUtc
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetContactMessagesQueryHandler(IApplicationDbContext db) => _db = db;
@@ -32,7 +42,7 @@ public class GetContactMessagesQueryHandler : IRequestHandler<GetContactMessages
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(m => m.CreatedAtUtc)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, m => m.CreatedAtUtc, defaultDescending: true)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(m => new ContactMessageListItemDto(

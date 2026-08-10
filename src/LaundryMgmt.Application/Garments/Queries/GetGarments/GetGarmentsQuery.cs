@@ -10,10 +10,19 @@ public record GarmentListItemDto(Guid Id, string Name, string Category, string? 
 public record GetGarmentsQuery(
     string? Search = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<GarmentListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null) : IRequest<PaginatedList<GarmentListItemDto>>;
 
 public class GetGarmentsQueryHandler : IRequestHandler<GetGarmentsQuery, PaginatedList<GarmentListItemDto>>
 {
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.Garment, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["name"] = g => g.Name,
+        ["category"] = g => g.Category,
+        ["barcode"] = g => g.Barcode!
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetGarmentsQueryHandler(IApplicationDbContext db) => _db = db;
@@ -28,7 +37,8 @@ public class GetGarmentsQueryHandler : IRequestHandler<GetGarmentsQuery, Paginat
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(g => g.Category).ThenBy(g => g.Name)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, g => g.Category)
+            .ThenBy(g => g.Name)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(g => new GarmentListItemDto(g.Id, g.Name, g.Category, g.Barcode, g.ImageUrl))

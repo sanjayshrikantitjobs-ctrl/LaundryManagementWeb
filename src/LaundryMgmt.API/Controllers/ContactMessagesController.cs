@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.ContactMessages.Commands.CreateContactMessage;
 using LaundryMgmt.Application.ContactMessages.Commands.RespondToContactMessage;
@@ -16,8 +17,6 @@ namespace LaundryMgmt.API.Controllers;
 public class ContactMessagesController : ControllerBase
 {
     private readonly ISender _sender;
-
-    private const string ManagementRoles = "Admin,StoreManager,Staff";
 
     public ContactMessagesController(ISender sender) => _sender = sender;
 
@@ -42,18 +41,19 @@ public class ContactMessagesController : ControllerBase
 
     /// <summary>Admin/staff inbox for all customer-submitted messages.</summary>
     [HttpGet]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(PaginatedList<ContactMessageListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<ContactMessageListItemDto>>> GetAll(
-        [FromQuery] ContactMessageStatus? status, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        [FromQuery] ContactMessageStatus? status, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
-        var result = await _sender.Send(new GetContactMessagesQuery(status, pageNumber, pageSize));
+        var result = await _sender.Send(new GetContactMessagesQuery(status, pageNumber, pageSize, sortBy, sortDirection));
         return Ok(result);
     }
 
     /// <summary>Reply to a customer's message and mark it resolved.</summary>
     [HttpPut("{id:guid}/respond")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Respond(Guid id, [FromBody] RespondBody body)
     {

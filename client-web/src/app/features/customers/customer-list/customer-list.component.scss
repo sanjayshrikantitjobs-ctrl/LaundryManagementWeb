@@ -105,6 +105,15 @@
     letter-spacing: 0.03em;
   }
 
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: var(--color-primary-dark);
+    }
+  }
+
   .badge {
     background: var(--color-primary-light);
     color: var(--color-primary-dark);
@@ -112,6 +121,20 @@
     border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 600;
+  }
+
+  .status-badge {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+
+    &.inactive {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
   }
 
   .actions {

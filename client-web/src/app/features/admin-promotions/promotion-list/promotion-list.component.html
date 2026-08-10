@@ -1,24 +1,32 @@
 <section class="promotion-list">
   <header>
     <h1>Promotions</h1>
-    <a routerLink="new" class="btn-primary">+ New Promotion</a>
+    @if (canEdit) {
+      <a routerLink="new" class="btn-primary">+ New Promotion</a>
+    }
   </header>
+
+  <input
+    type="search"
+    placeholder="Search by title…"
+    (input)="onSearch($any($event.target).value)"
+  />
 
   @if (isLoading()) {
     <p>Loading promotions…</p>
   } @else if (promotions().length === 0) {
-    <p>No promotions yet.</p>
+    <p>No promotions found.</p>
   } @else {
     <table>
       <thead>
         <tr>
           <th></th>
-          <th>Title</th>
-          <th>Code</th>
+          <th class="sortable" (click)="sortByColumn('title')">Title {{ sortIndicator('title') }}</th>
+          <th class="sortable" (click)="sortByColumn('code')">Code {{ sortIndicator('code') }}</th>
           <th>Discount</th>
-          <th>Valid Until</th>
-          <th>Status</th>
-          <th></th>
+          <th class="sortable" (click)="sortByColumn('validTo')">Valid Until {{ sortIndicator('validTo') }}</th>
+          <th class="sortable" (click)="sortByColumn('isActive')">Status {{ sortIndicator('isActive') }}</th>
+          @if (canEdit) { <th></th> }
         </tr>
       </thead>
       <tbody>
@@ -42,13 +50,23 @@
             <td>
               <span class="status-badge" [class.inactive]="!promo.isActive">{{ promo.isActive ? 'Active' : 'Inactive' }}</span>
             </td>
-            <td class="actions">
-              <a [routerLink]="[promo.id, 'edit']">Edit</a>
-              <button type="button" (click)="deletePromotion(promo)">Delete</button>
-            </td>
+            @if (canEdit) {
+              <td class="actions">
+                <a [routerLink]="[promo.id, 'edit']">Edit</a>
+                <button type="button" (click)="deletePromotion(promo)">Delete</button>
+              </td>
+            }
           </tr>
         }
       </tbody>
     </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
   }
 </section>

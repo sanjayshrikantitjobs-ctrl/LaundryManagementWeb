@@ -77,7 +77,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Complaints", (string)null);
+                    b.ToTable("Complaints");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.ContactMessage", b =>
@@ -133,7 +133,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("ContactMessages", (string)null);
+                    b.ToTable("ContactMessages");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Customer", b =>
@@ -193,6 +193,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("WalletBalance")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -210,7 +213,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.CustomerAddress", b =>
@@ -279,7 +282,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("CustomerAddresses", (string)null);
+                    b.ToTable("CustomerAddresses");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Employee", b =>
@@ -302,7 +305,11 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("IdentityUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -323,14 +330,20 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Salary")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Shift")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employees", (string)null);
+                    b.HasIndex("IdentityUserId")
+                        .IsUnique()
+                        .HasFilter("[IdentityUserId] IS NOT NULL");
+
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Garment", b =>
@@ -387,7 +400,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[Barcode] IS NOT NULL");
 
-                    b.ToTable("Garments", (string)null);
+                    b.ToTable("Garments");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.GarmentServicePrice", b =>
@@ -416,7 +429,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.HasIndex("GarmentId", "ServiceId")
                         .IsUnique();
 
-                    b.ToTable("GarmentServicePrices", (string)null);
+                    b.ToTable("GarmentServicePrices");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.InventoryItem", b =>
@@ -465,7 +478,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InventoryItems", (string)null);
+                    b.ToTable("InventoryItems");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Invoice", b =>
@@ -521,7 +534,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Machine", b =>
@@ -573,7 +586,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Machines", (string)null);
+                    b.ToTable("Machines");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Notification", b =>
@@ -636,7 +649,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("RecipientUserId", "IsRead");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Order", b =>
@@ -727,7 +740,77 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.HasIndex("OrderNumber")
                         .IsUnique();
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderGarmentImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ImageType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UploadedByName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderItemId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("OrderId", "ImageType");
+
+                    b.ToTable("OrderGarmentImages");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderItem", b =>
@@ -774,7 +857,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderStatusHistory", b =>
@@ -842,7 +925,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("PhoneNumber", "Purpose", "IsUsed");
 
-                    b.ToTable("OtpChallenges", (string)null);
+                    b.ToTable("OtpChallenges");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Payment", b =>
@@ -894,7 +977,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.PickupDelivery", b =>
@@ -928,9 +1011,6 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<Guid?>("DeliveryBoyEmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DeliveryBoyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -960,11 +1040,11 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasIndex("AddressId");
 
-                    b.HasIndex("DeliveryBoyId");
+                    b.HasIndex("DeliveryBoyEmployeeId");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("PickupDeliveries", (string)null);
+                    b.ToTable("PickupDeliveries");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Promotion", b =>
@@ -1034,7 +1114,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[Code] IS NOT NULL");
 
-                    b.ToTable("Promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Service", b =>
@@ -1096,7 +1176,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Infrastructure.Identity.ApplicationUser", b =>
@@ -1394,6 +1474,31 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderGarmentImage", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LaundryMgmt.Domain.Entities.OrderItem", "OrderItem")
+                        .WithMany()
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("LaundryMgmt.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Order");
+
+                    b.Navigation("OrderItem");
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderItem", b =>
                 {
                     b.HasOne("LaundryMgmt.Domain.Entities.Garment", "Garment")
@@ -1450,7 +1555,8 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasOne("LaundryMgmt.Domain.Entities.Employee", "DeliveryBoy")
                         .WithMany()
-                        .HasForeignKey("DeliveryBoyId");
+                        .HasForeignKey("DeliveryBoyEmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("LaundryMgmt.Domain.Entities.Order", "Order")
                         .WithMany()

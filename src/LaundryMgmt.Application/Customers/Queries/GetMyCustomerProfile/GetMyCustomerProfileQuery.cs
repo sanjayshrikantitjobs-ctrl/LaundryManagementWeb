@@ -30,7 +30,7 @@ public class GetMyCustomerProfileQueryHandler : IRequestHandler<GetMyCustomerPro
             .Where(c => c.IdentityUserId == userId)
             .Select(c => new CustomerListItemDto(
                 c.Id, c.FullName, c.PhoneNumber, c.Email, c.WhatsAppNumber, c.MembershipTier, c.WalletBalance, c.LoyaltyPoints,
-                c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
+                c.Status, c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new InvalidOperationException("No customer profile is linked to this login.");
     }

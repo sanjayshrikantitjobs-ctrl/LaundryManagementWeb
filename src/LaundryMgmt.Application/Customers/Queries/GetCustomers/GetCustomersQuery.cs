@@ -9,15 +9,28 @@ namespace LaundryMgmt.Application.Customers.Queries.GetCustomers;
 public record CustomerListItemDto(
     Guid Id, string FullName, string PhoneNumber, string? Email, string? WhatsAppNumber,
     MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints,
-    DateTimeOffset CreatedAtUtc, DateTimeOffset? LastOrderAtUtc);
+    CustomerStatus Status, DateTimeOffset CreatedAtUtc, DateTimeOffset? LastOrderAtUtc);
 
 public record GetCustomersQuery(
     string? Search = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<CustomerListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null,
+    bool? HasOrders = null,
+    CustomerStatus? Status = null) : IRequest<PaginatedList<CustomerListItemDto>>;
 
 public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, PaginatedList<CustomerListItemDto>>
 {
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.Customer, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["fullName"] = c => c.FullName,
+        ["phoneNumber"] = c => c.PhoneNumber,
+        ["membershipTier"] = c => c.MembershipTier,
+        ["walletBalance"] = c => c.WalletBalance,
+        ["createdAtUtc"] = c => c.CreatedAtUtc
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetCustomersQueryHandler(IApplicationDbContext db) => _db = db;
@@ -32,15 +45,21 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, Pagin
                 c.PhoneNumber.Contains(request.Search) ||
                 (c.Email != null && c.Email.Contains(request.Search)));
 
+        if (request.HasOrders.HasValue)
+            query = request.HasOrders.Value ? query.Where(c => c.Orders.Any()) : query.Where(c => !c.Orders.Any());
+
+        if (request.Status.HasValue)
+            query = query.Where(c => c.Status == request.Status.Value);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(c => c.FullName)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, c => c.FullName)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new CustomerListItemDto(
                 c.Id, c.FullName, c.PhoneNumber, c.Email, c.WhatsAppNumber, c.MembershipTier, c.WalletBalance, c.LoyaltyPoints,
-                c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
+                c.Status, c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<CustomerListItemDto>(items, totalCount, request.PageNumber, request.PageSize);

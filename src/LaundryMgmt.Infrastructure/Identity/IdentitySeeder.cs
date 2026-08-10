@@ -32,6 +32,17 @@ public static class IdentitySeeder
         var configuration = provider.GetRequiredService<IConfiguration>();
         var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(IdentitySeeder));
 
+        // One-time data fix: UserRole.DeliveryBoy was renamed to DeliveryAgent. Rename
+        // the existing AspNetRoles row in place (rather than creating a new orphaned
+        // "DeliveryAgent" role) so any already-assigned users keep their role membership.
+        var legacyDeliveryBoyRole = await roleManager.FindByNameAsync("DeliveryBoy");
+        if (legacyDeliveryBoyRole is not null)
+        {
+            legacyDeliveryBoyRole.Name = nameof(UserRole.DeliveryAgent);
+            await roleManager.UpdateAsync(legacyDeliveryBoyRole);
+            logger.LogInformation("Renamed Identity role DeliveryBoy -> DeliveryAgent.");
+        }
+
         foreach (var role in Enum.GetNames<UserRole>())
         {
             if (!await roleManager.RoleExistsAsync(role))

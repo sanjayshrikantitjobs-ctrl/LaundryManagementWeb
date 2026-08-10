@@ -29,7 +29,7 @@ public partial class AppShell : Shell
         var tabBar = new TabBar();
 
         var isManagement = role is "Admin" or "StoreManager" or "Staff";
-        var isDeliveryBoy = role == "DeliveryBoy";
+        var isDeliveryBoy = role == "DeliveryAgent";
         var isCustomer = role == "Customer";
 
         if (isManagement || isCustomer)

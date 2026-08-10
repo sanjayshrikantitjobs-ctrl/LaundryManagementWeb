@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Promotions.Commands.CreatePromotion;
 using LaundryMgmt.Application.Promotions.Commands.DeletePromotion;
@@ -17,18 +18,17 @@ public class PromotionsController : ControllerBase
 {
     private readonly ISender _sender;
 
-    private const string ManagementRoles = "Admin,StoreManager,Staff";
-
     public PromotionsController(ISender sender) => _sender = sender;
 
     /// <summary>Admin listing of all promotions (active, expired, and disabled), paginated.</summary>
     [HttpGet]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.OperationalViewRoles)]
     [ProducesResponseType(typeof(PaginatedList<PromotionListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<PromotionListItemDto>>> GetPromotions(
-        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
-        var result = await _sender.Send(new GetPromotionsQuery(search, pageNumber, pageSize));
+        var result = await _sender.Send(new GetPromotionsQuery(search, pageNumber, pageSize, sortBy, sortDirection));
         return Ok(result);
     }
 
@@ -43,7 +43,7 @@ public class PromotionsController : ControllerBase
 
     /// <summary>Create a promotion/offer (title, image, optional promo code + discount + validity window).</summary>
     [HttpPost]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreatePromotion(CreatePromotionCommand command)
     {
@@ -53,7 +53,7 @@ public class PromotionsController : ControllerBase
 
     /// <summary>Update a promotion.</summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdatePromotion(Guid id, [FromBody] UpdatePromotionBody body)
     {
@@ -65,7 +65,7 @@ public class PromotionsController : ControllerBase
 
     /// <summary>Remove a promotion.</summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeletePromotion(Guid id)
     {

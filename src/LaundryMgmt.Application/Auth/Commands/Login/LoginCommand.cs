@@ -39,6 +39,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResultDto>
         if (user.Role == UserRole.Customer && !user.PhoneNumberConfirmed)
             throw new UnauthorizedAccessException("Verify your phone number with the code we sent you before logging in.");
 
+        if (user.Role == UserRole.Customer && !user.IsCustomerActive)
+            throw new UnauthorizedAccessException("This account has been deactivated. Please contact support.");
+
         var (accessToken, expiresAtUtc) = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
 

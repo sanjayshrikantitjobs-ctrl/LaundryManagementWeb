@@ -1,6 +1,7 @@
 using LaundryMgmt.Application.Common.Interfaces;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Orders.Queries.GetOrders;
+using LaundryMgmt.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,13 @@ namespace LaundryMgmt.Application.Orders.Queries.GetMyOrders;
 /// linked Customer catalog row via Customer.IdentityUserId, then scopes to it.
 /// Reuses OrderListItemDto so the mobile/web clients share one shape with the
 /// admin-wide GetOrdersQuery.</summary>
-public record GetMyOrdersQuery(int PageNumber = 1, int PageSize = 20) : IRequest<PaginatedList<OrderListItemDto>>;
+public record GetMyOrdersQuery(
+    int PageNumber = 1,
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null,
+    OrderStatus? Status = null,
+    List<OrderStatus>? Statuses = null) : IRequest<PaginatedList<OrderListItemDto>>;
 
 public class GetMyOrdersQueryHandler : IRequestHandler<GetMyOrdersQuery, PaginatedList<OrderListItemDto>>
 {
@@ -36,10 +43,16 @@ public class GetMyOrdersQueryHandler : IRequestHandler<GetMyOrdersQuery, Paginat
 
         var query = _db.Orders.Include(o => o.Customer).Where(o => o.CustomerId == customerId);
 
+        if (request.Status.HasValue)
+            query = query.Where(o => o.Status == request.Status.Value);
+
+        if (request.Statuses is { Count: > 0 })
+            query = query.Where(o => request.Statuses.Contains(o.Status));
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(o => o.CreatedAtUtc)
+            .ApplySort(request.SortBy, request.SortDirection, GetOrdersQueryHandler.SortableColumns, o => o.CreatedAtUtc, defaultDescending: true)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(o => new OrderListItemDto(

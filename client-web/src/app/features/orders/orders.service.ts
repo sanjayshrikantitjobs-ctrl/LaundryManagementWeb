@@ -7,6 +7,7 @@ import {
   OrderListItem,
   OrderStatus,
   PaginatedList,
+  SortDirection,
   UpdateOrderRequest
 } from '../../core/models/order.models';
 
@@ -18,24 +19,42 @@ export class OrdersService {
 
   getOrders(opts: {
     status?: OrderStatus;
+    statuses?: string;
     search?: string;
     pageNumber?: number;
     pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
   } = {}): Observable<PaginatedList<OrderListItem>> {
     let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.status !== undefined) params = params.set('status', opts.status);
+    if (opts.statuses) params = params.set('statuses', opts.statuses);
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
     return this.http.get<PaginatedList<OrderListItem>>(this.baseUrl, { params });
   }
 
-  getMyOrders(opts: { pageNumber?: number; pageSize?: number } = {}): Observable<PaginatedList<OrderListItem>> {
-    const params = new HttpParams()
+  getMyOrders(opts: {
+    status?: OrderStatus;
+    statuses?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: SortDirection;
+  } = {}): Observable<PaginatedList<OrderListItem>> {
+    let params = new HttpParams()
       .set('pageNumber', opts.pageNumber ?? 1)
       .set('pageSize', opts.pageSize ?? 20);
+
+    if (opts.status !== undefined) params = params.set('status', opts.status);
+    if (opts.statuses) params = params.set('statuses', opts.statuses);
+    if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
     return this.http.get<PaginatedList<OrderListItem>>(`${this.baseUrl}/mine`, { params });
   }

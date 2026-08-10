@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,7 @@ namespace LaundryMgmt.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "Admin,StoreManager,Staff")]
+[Authorize(Roles = AppRoles.ImageUploadRoles)]
 public class UploadsController : ControllerBase
 {
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };

@@ -1,3 +1,4 @@
+using LaundryMgmt.Application.Common.Constants;
 using LaundryMgmt.Application.Common.Models;
 using LaundryMgmt.Application.Customers.Commands.AddCustomerAddress;
 using LaundryMgmt.Application.Customers.Commands.AddMyAddress;
@@ -11,7 +12,9 @@ using LaundryMgmt.Application.Customers.Queries.GetCustomerById;
 using LaundryMgmt.Application.Customers.Queries.GetCustomers;
 using LaundryMgmt.Application.Customers.Queries.GetMyAddresses;
 using LaundryMgmt.Application.Customers.Commands.UpdateMyProfile;
+using LaundryMgmt.Application.Customers.Commands.SetCustomerStatus;
 using LaundryMgmt.Application.Customers.Queries.GetMyCustomerProfile;
+using LaundryMgmt.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,23 +30,23 @@ public class CustomersController : ControllerBase
 
     public CustomersController(ISender sender) => _sender = sender;
 
-    private const string ManagementRoles = "Admin,StoreManager,Staff";
-
-    /// <summary>List customers with optional search, paginated. Staff/admin only —
-    /// customers have no legitimate reason to browse other customers' records.</summary>
+    /// <summary>List customers with optional search, paginated. Staff/admin/department-head
+    /// only — customers have no legitimate reason to browse other customers' records.</summary>
     [HttpGet]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.OperationalViewRoles)]
     [ProducesResponseType(typeof(PaginatedList<CustomerListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<CustomerListItemDto>>> GetCustomers(
-        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null,
+        [FromQuery] bool? hasOrders = null, [FromQuery] CustomerStatus? status = null)
     {
-        var result = await _sender.Send(new GetCustomersQuery(search, pageNumber, pageSize));
+        var result = await _sender.Send(new GetCustomersQuery(search, pageNumber, pageSize, sortBy, sortDirection, hasOrders, status));
         return Ok(result);
     }
 
     /// <summary>Get a single customer with their addresses.</summary>
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.OperationalViewRoles)]
     [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<CustomerDetailDto>> GetCustomerById(Guid id)
     {
@@ -72,7 +75,7 @@ public class CustomersController : ControllerBase
 
     /// <summary>Register a new customer, optionally with initial addresses.</summary>
     [HttpPost]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CreateCustomer(CreateCustomerCommand command)
     {
@@ -82,7 +85,7 @@ public class CustomersController : ControllerBase
 
     /// <summary>Update a customer's profile.</summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerBody body)
     {
@@ -93,7 +96,7 @@ public class CustomersController : ControllerBase
 
     /// <summary>Soft-delete a customer.</summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteCustomer(Guid id)
     {
@@ -101,10 +104,22 @@ public class CustomersController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>Activate or deactivate a customer's account. Deactivating never
+    /// deletes or hides their historical orders, addresses or invoices — it only
+    /// blocks their portal login and flags the account for staff.</summary>
+    [HttpPut("{id:guid}/status")]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> SetStatus(Guid id, [FromBody] SetCustomerStatusBody body)
+    {
+        await _sender.Send(new SetCustomerStatusCommand(id, body.Status));
+        return NoContent();
+    }
+
     /// <summary>Set a customer's portal login password (admin/staff only) — for
     /// resetting a customer's access without needing their old password.</summary>
     [HttpPut("{id:guid}/password")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> SetPassword(Guid id, [FromBody] SetPasswordBody body)
     {
@@ -114,7 +129,7 @@ public class CustomersController : ControllerBase
 
     /// <summary>Add an address to an existing customer.</summary>
     [HttpPost("{id:guid}/addresses")]
-    [Authorize(Roles = ManagementRoles)]
+    [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> AddAddress(Guid id, [FromBody] AddAddressBody body)
     {
@@ -170,3 +185,5 @@ public record AddAddressBody(
     string Label, string Line1, string? Line2, string City, string State, string PostalCode, bool IsDefault);
 
 public record SetPasswordBody(string NewPassword);
+
+public record SetCustomerStatusBody(CustomerStatus Status);

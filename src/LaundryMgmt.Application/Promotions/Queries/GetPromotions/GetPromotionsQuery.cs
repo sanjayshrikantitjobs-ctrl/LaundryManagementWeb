@@ -14,10 +14,21 @@ public record PromotionListItemDto(
 public record GetPromotionsQuery(
     string? Search = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<PaginatedList<PromotionListItemDto>>;
+    int PageSize = 20,
+    string? SortBy = null,
+    string? SortDirection = null) : IRequest<PaginatedList<PromotionListItemDto>>;
 
 public class GetPromotionsQueryHandler : IRequestHandler<GetPromotionsQuery, PaginatedList<PromotionListItemDto>>
 {
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Domain.Entities.Promotion, object>>> SortableColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["title"] = p => p.Title,
+        ["code"] = p => p.Code!,
+        ["validTo"] = p => p.ValidTo!,
+        ["isActive"] = p => p.IsActive,
+        ["createdAtUtc"] = p => p.CreatedAtUtc
+    };
+
     private readonly IApplicationDbContext _db;
 
     public GetPromotionsQueryHandler(IApplicationDbContext db) => _db = db;
@@ -32,7 +43,7 @@ public class GetPromotionsQueryHandler : IRequestHandler<GetPromotionsQuery, Pag
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(p => p.CreatedAtUtc)
+            .ApplySort(request.SortBy, request.SortDirection, SortableColumns, p => p.CreatedAtUtc, defaultDescending: true)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(p => new PromotionListItemDto(

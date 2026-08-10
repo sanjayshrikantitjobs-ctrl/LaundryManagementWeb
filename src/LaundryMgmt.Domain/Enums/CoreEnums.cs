@@ -5,8 +5,10 @@ public enum UserRole
     Admin = 0,
     StoreManager = 1,
     Staff = 2,
-    DeliveryBoy = 3,
-    Customer = 4
+    DeliveryAgent = 3,
+    Customer = 4,
+    DepartmentHead = 5,
+    PickupAgent = 6
 }
 
 public enum OrderChannel
@@ -44,6 +46,22 @@ public enum MembershipTier
     None = 0,
     Silver = 1,
     Gold = 2
+}
+
+public enum CustomerStatus
+{
+    Active = 0,
+    Inactive = 1
+}
+
+/// <summary>Which stage of the order lifecycle a garment photo was taken at.
+/// Kept to just these two (no separate "Processing" type) since this system has
+/// no distinct processing-station workflow yet — processing-stage photos, if ever
+/// needed, would be photos attached at pickup time showing garment condition.</summary>
+public enum GarmentImageType
+{
+    Pickup = 0,
+    Delivery = 1
 }
 
 public enum DeliveryStatus
