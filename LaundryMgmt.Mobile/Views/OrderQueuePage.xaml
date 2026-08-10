@@ -2,12 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              x:Class="LaundryMgmt.Mobile.Views.OrderQueuePage"
              x:DataType="vm:OrderQueueViewModel"
              Title="My Queue">
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-        <CollectionView ItemsSource="{Binding AssignedOrders}">
+        <CollectionView ItemsSource="{Binding AssignedOrders}"
+                        RemainingItemsThreshold="3"
+                        RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
             <CollectionView.EmptyView>
                 <VerticalStackLayout Padding="24" VerticalOptions="Center">
                     <Label Text="No pickups or deliveries assigned right now." HorizontalTextAlignment="Center" />
@@ -15,14 +18,20 @@
             </CollectionView.EmptyView>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:AssignedOrderSummary">
+                <DataTemplate x:DataType="models:MyPickupDeliveryDto">
                     <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                CommandParameter="{Binding .}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenOrderCommand}" />
+                        </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0">
                             <Label Text="{Binding OrderNumber}" FontAttributes="Bold" />
                             <Label Text="{Binding CustomerName}" FontSize="14" />
-                            <Label Text="{Binding Address}" FontSize="12" TextColor="{StaticResource Gray300}" />
+                            <Label Text="{Binding AddressLine}" FontSize="12" TextColor="{StaticResource Gray300}"
+                                   IsVisible="{Binding AddressLine, Converter={StaticResource IsNotNullConverter}}" />
                         </VerticalStackLayout>
-                        <Label Grid.Column="1" Text="{Binding Status}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding Status}" VerticalOptions="Center" Style="{StaticResource Badge}" />
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

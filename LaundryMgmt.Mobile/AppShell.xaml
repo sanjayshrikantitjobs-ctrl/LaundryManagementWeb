@@ -6,7 +6,8 @@
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="16,0">
-            <Label Grid.Column="0" Text="Laundry wala" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
+            <Label x:Name="GreetingLabel" Grid.Column="0" Text="Laundry wala" TextColor="White" FontAttributes="Bold"
+                   VerticalOptions="Center" LineBreakMode="TailTruncation" />
             <Button Grid.Column="1" Text="Logout" Clicked="OnLogoutClicked" />
         </Grid>
     </Shell.TitleView>

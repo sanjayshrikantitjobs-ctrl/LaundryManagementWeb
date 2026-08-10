@@ -13,6 +13,10 @@
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:GarmentIconConverter x:Key="GarmentIconConverter" />
             <converters:ServiceIconConverter x:Key="ServiceIconConverter" />
+            <converters:CustomerStatusColorConverter x:Key="CustomerStatusColorConverter" />
+            <converters:CustomerStatusToggleLabelConverter x:Key="CustomerStatusToggleLabelConverter" />
+            <converters:ActiveToggleLabelConverter x:Key="ActiveToggleLabelConverter" />
+            <converters:ResolvedImageUrlConverter x:Key="ResolvedImageUrlConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

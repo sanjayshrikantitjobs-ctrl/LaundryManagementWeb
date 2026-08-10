@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AuthService } from './core/services/auth.service';
 import { NotificationBellComponent } from './shared/notification-bell/notification-bell.component';
 import { SERVICE_INFO_CATEGORIES } from './features/service-info/service-info.data';
+import { homeRouteForRole } from './core/utils/role-home.util';
 
 @Component({
   selector: 'app-root',
@@ -24,10 +25,7 @@ export class AppComponent {
   }
 
   get homeLink(): string {
-    if (this.isCustomer) return '/shop';
-    if (this.isPickupAgent) return '/pickup-queue';
-    if (this.isDeliveryAgent) return '/delivery-queue';
-    return '/orders';
+    return homeRouteForRole(this.authService.currentUser()?.role);
   }
 
   get isAdmin(): boolean {

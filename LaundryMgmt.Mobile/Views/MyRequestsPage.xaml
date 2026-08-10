@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.MyRequestsPage"
+             x:DataType="vm:MyRequestsViewModel"
+             Title="My Requests">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:CustomerNavBar Grid.Row="0" CurrentPage="myrequests" />
+
+        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Requests}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="📋" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No active requests right now." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:OrderListItem">
+                        <Frame Style="{StaticResource ListCard}">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenOrderCommand}" />
+                            </Frame.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding OrderNumber}" FontAttributes="Bold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Badge}" />
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource SubtleLabel}"
+                                       Text="{Binding CreatedAtUtc, StringFormat='Placed: {0:d MMM, h:mm tt}'}" />
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource SubtleLabel}"
+                                       Text="{Binding PromisedByUtc, StringFormat='Expected: {0:d MMM, h:mm tt}'}"
+                                       IsVisible="{Binding PromisedByUtc, Converter={StaticResource IsNotNullConverter}}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

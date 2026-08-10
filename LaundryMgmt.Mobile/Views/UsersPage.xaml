@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.UsersPage"
+             x:DataType="vm:UsersViewModel"
+             Title="Users">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ New" Command="{Binding NewUserCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="users" />
+
+        <SearchBar Grid.Row="1"
+                   Placeholder="Search by name, username or email…"
+                   Text="{Binding SearchText}"
+                   SearchCommand="{Binding RefreshCommand}" />
+
+        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Users}"
+                            RemainingItemsThreshold="3"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="🧑‍💼" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No users found." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:UserSummaryDto">
+                        <Frame Style="{StaticResource ListCard}">
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
+                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
+                                    <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding UserName}" Style="{StaticResource SubtleLabel}" />
+                                    <Label Text="{Binding Role}" Style="{StaticResource Badge}" />
+                                    <Label Text="Inactive" TextColor="{StaticResource Danger}" FontAttributes="Bold" FontSize="12"
+                                           IsVisible="{Binding IsActive, Converter={StaticResource InvertedBoolConverter}}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Row="0" Grid.Column="1" Text="Edit"
+                                        CommandParameter="{Binding .}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditUserCommand}" />
+                                <Button Grid.Row="0" Grid.Column="2" Text="{Binding IsActive, Converter={StaticResource ActiveToggleLabelConverter}}"
+                                        Style="{StaticResource DangerButton}"
+                                        CommandParameter="{Binding .}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleActiveCommand}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

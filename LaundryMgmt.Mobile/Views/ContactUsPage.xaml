@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
+             x:Class="LaundryMgmt.Mobile.Views.ContactUsPage"
+             x:DataType="vm:ContactUsViewModel"
+             Title="Contact Us">
+
+    <Grid RowDefinitions="Auto,*">
+        <views:CustomerNavBar Grid.Row="0" CurrentPage="contactus" />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <Frame>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="TYPE" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding MessageTypes}" SelectedItem="{Binding SelectedType}" />
+
+                        <Label Text="MESSAGE" Style="{StaticResource SectionLabel}" />
+                        <Editor Text="{Binding Message}" AutoSize="TextChanges" MinimumHeightRequest="100" Placeholder="Tell us what's on your mind..." />
+
+                        <Label Text="PHOTO (OPTIONAL)" Style="{StaticResource SectionLabel}" />
+                        <Image behaviors:TrustedImage.Url="{Binding PhotoUrl, Converter={StaticResource ResolvedImageUrlConverter}}" HeightRequest="120" Aspect="AspectFit"
+                               IsVisible="{Binding PhotoUrl, Converter={StaticResource IsNotNullConverter}}" />
+                        <HorizontalStackLayout Spacing="8">
+                            <Button Text="📷 Take Photo" Style="{StaticResource OutlineButton}" Command="{Binding TakePhotoCommand}" />
+                            <Button Text="🖼️ Choose Photo" Style="{StaticResource OutlineButton}" Command="{Binding PickPhotoCommand}" />
+                            <Button Text="Remove" Style="{StaticResource DangerButton}" Command="{Binding RemovePhotoCommand}"
+                                    IsVisible="{Binding PhotoUrl, Converter={StaticResource IsNotNullConverter}}" />
+                        </HorizontalStackLayout>
+                        <ActivityIndicator IsRunning="{Binding IsUploadingPhoto}" IsVisible="{Binding IsUploadingPhoto}" Color="{StaticResource Primary}" />
+
+                        <Label Text="{Binding StatusMessage}" TextColor="{StaticResource Success}"
+                               IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNullConverter}}" />
+                        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}" />
+
+                        <Button Text="Send Message" Command="{Binding SubmitCommand}"
+                                IsEnabled="{Binding IsSubmitting, Converter={StaticResource InvertedBoolConverter}}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="YOUR PREVIOUS MESSAGES" Style="{StaticResource SectionLabel}" />
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" Color="{StaticResource Primary}" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Messages}" Spacing="10"
+                                      IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:MyContactMessageDto">
+                            <Frame Style="{StaticResource ListCard}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Type}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Badge}" />
+                                    </Grid>
+                                    <Label Text="{Binding CreatedAtUtc, StringFormat='{0:d MMM yyyy, h:mm tt}'}" Style="{StaticResource SubtleLabel}" FontSize="12" />
+                                    <Label Text="{Binding Message}" />
+                                    <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}" HeightRequest="100" Aspect="AspectFit" HorizontalOptions="Start"
+                                           IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}" />
+
+                                    <Frame IsVisible="{Binding Response, Converter={StaticResource IsNotNullConverter}}"
+                                           BackgroundColor="{StaticResource PrimaryLight}" Padding="10">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="Our reply:" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource Primary}" />
+                                            <Label Text="{Binding Response}" FontSize="13" />
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

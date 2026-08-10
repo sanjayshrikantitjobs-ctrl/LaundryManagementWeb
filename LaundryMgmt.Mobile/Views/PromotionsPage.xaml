@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
+             x:Class="LaundryMgmt.Mobile.Views.PromotionsPage"
+             x:DataType="vm:PromotionsViewModel"
+             Title="Promotions">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:CustomerNavBar Grid.Row="0" CurrentPage="promotions" />
+
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            Color="{StaticResource Primary}" VerticalOptions="Center" />
+
+        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Promotions}"
+                         IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                    <Label Text="🎁" FontSize="40" HorizontalTextAlignment="Center" />
+                    <Label Text="No active promotions right now." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:PromotionRow">
+                    <Frame Style="{StaticResource ListCard}" Padding="0">
+                        <VerticalStackLayout Spacing="0">
+                            <Image behaviors:TrustedImage.Url="{Binding Promotion.ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                   IsVisible="{Binding Promotion.ImageUrl, Converter={StaticResource IsNotNullConverter}}"
+                                   HeightRequest="120" Aspect="AspectFill" />
+
+                            <VerticalStackLayout Spacing="6" Padding="14,12">
+                                <Label Text="{Binding Promotion.Title}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="{Binding Promotion.Description}" Style="{StaticResource SubtleLabel}"
+                                       IsVisible="{Binding Promotion.Description, Converter={StaticResource IsNotNullConverter}}" />
+                                <Label Text="{Binding Promotion.ValidTo, StringFormat='Valid till {0:d MMM yyyy}'}"
+                                       Style="{StaticResource SubtleLabel}" FontSize="12"
+                                       IsVisible="{Binding Promotion.ValidTo, Converter={StaticResource IsNotNullConverter}}" />
+
+                                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Promotion.Code, Converter={StaticResource IsNotNullConverter}}">
+                                    <Label Grid.Column="0" Text="{Binding Promotion.Code}" FontAttributes="Bold"
+                                           TextColor="{StaticResource Primary}" VerticalOptions="Center" />
+                                    <Button Grid.Column="1" Text="{Binding ButtonLabel}" FontSize="12" Padding="10,4"
+                                            CommandParameter="{Binding .}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.UseCodeCommand}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+
+</ContentPage>

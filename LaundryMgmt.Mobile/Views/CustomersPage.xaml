@@ -9,10 +9,10 @@
              Title="Customers">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewCustomerCommand}" />
+        <ToolbarItem Text="+ New" Command="{Binding NewCustomerCommand}" IsEnabled="{Binding CanEditMasterData}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="customers" />
 
         <SearchBar Grid.Row="1"
@@ -20,12 +20,22 @@
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding RefreshCommand}" />
 
-        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <ScrollView Grid.Row="2" Orientation="Horizontal" Padding="12,0,12,8">
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="All" CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" />
+                <Button Text="Active" CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" />
+                <Button Text="Inactive" CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" />
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Customers}">
+        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Customers}"
+                            RemainingItemsThreshold="3"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
                         <Label Text="👤" FontSize="40" HorizontalTextAlignment="Center" />
@@ -36,13 +46,24 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:CustomerListItem">
                         <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
+                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
                                     <Label Text="{Binding FullName}" FontAttributes="Bold" />
                                     <Label Text="{Binding PhoneNumber}" Style="{StaticResource SubtleLabel}" />
+                                    <Label Text="{Binding Status}" TextColor="{Binding Status, Converter={StaticResource CustomerStatusColorConverter}}"
+                                           FontAttributes="Bold" FontSize="12" />
                                 </VerticalStackLayout>
-                                <Button Grid.Column="1" Text="Delete" Style="{StaticResource DangerButton}"
+                                <Button Grid.Row="0" Grid.Column="1" Text="Edit"
                                         CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCustomerCommand}" />
+                                <Button Grid.Row="0" Grid.Column="2" Text="{Binding Status, Converter={StaticResource CustomerStatusToggleLabelConverter}}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleStatusCommand}" />
+                                <Button Grid.Row="0" Grid.Column="3" Text="Delete" Style="{StaticResource DangerButton}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCustomerCommand}" />
                             </Grid>
                         </Frame>

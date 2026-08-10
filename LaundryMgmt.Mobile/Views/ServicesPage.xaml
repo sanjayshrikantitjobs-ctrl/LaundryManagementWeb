@@ -9,7 +9,7 @@
              Title="Services">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewServiceCommand}" />
+        <ToolbarItem Text="+ New" Command="{Binding NewServiceCommand}" IsEnabled="{Binding CanEditMasterData}" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,Auto,*">
@@ -20,7 +20,9 @@
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
         <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Services}">
+            <CollectionView ItemsSource="{Binding Services}"
+                            RemainingItemsThreshold="3"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
                         <Label Text="🧼" FontSize="40" HorizontalTextAlignment="Center" />
@@ -40,6 +42,7 @@
                                 </VerticalStackLayout>
                                 <Button Grid.Column="2" Text="Delete" Style="{StaticResource DangerButton}"
                                         CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteServiceCommand}" />
                             </Grid>
                         </Frame>

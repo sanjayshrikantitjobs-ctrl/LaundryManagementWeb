@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
+             x:Class="LaundryMgmt.Mobile.Views.CartPage"
+             x:DataType="vm:CartViewModel"
+             Title="Your Cart">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <VerticalStackLayout IsVisible="{Binding HasItems, Converter={StaticResource InvertedBoolConverter}}"
+                                      Padding="24" Spacing="8" VerticalOptions="Center">
+                    <Label Text="🛒" FontSize="40" HorizontalTextAlignment="Center" />
+                    <Label Text="Your cart is empty." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:CartItem">
+                            <Frame Style="{StaticResource ListCard}">
+                                <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="10">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="Transparent"
+                                            BackgroundColor="{StaticResource Gray50}" WidthRequest="56" HeightRequest="56" Padding="0">
+                                        <Image behaviors:TrustedImage.Url="{Binding GarmentImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                               Aspect="AspectFill" IsVisible="{Binding GarmentImageUrl, Converter={StaticResource IsNotNullConverter}}" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding GarmentName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding ServiceName}" Style="{StaticResource SubtleLabel}" />
+                                        <Label Text="{Binding LineTotal, StringFormat='₹{0:0.00}'}" TextColor="{StaticResource Primary}" FontAttributes="Bold" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="End">
+                                        <Label Text="{Binding WeightKg, StringFormat='{0} kg'}"
+                                               IsVisible="{Binding IsWeightBased}"
+                                               HorizontalTextAlignment="End" />
+
+                                        <HorizontalStackLayout Spacing="6"
+                                                                IsVisible="{Binding IsWeightBased, Converter={StaticResource InvertedBoolConverter}}">
+                                            <Button Text="−" FontSize="12" Padding="8,2"
+                                                    CommandParameter="{Binding .}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DecrementQuantityCommand}" />
+                                            <Label Text="{Binding Quantity}" VerticalOptions="Center" />
+                                            <Button Text="+" FontSize="12" Padding="8,2"
+                                                    CommandParameter="{Binding .}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IncrementQuantityCommand}" />
+                                        </HorizontalStackLayout>
+
+                                        <Button Text="Remove" FontSize="11" Style="{StaticResource DangerButton}" Padding="8,4"
+                                                CommandParameter="{Binding .}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveItemCommand}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Frame IsVisible="{Binding HasItems}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Express Service" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding IsExpress}" />
+                    </Grid>
+                </Frame>
+
+                <Frame IsVisible="{Binding HasItems}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="PICKUP ADDRESS" Style="{StaticResource SectionLabel}" />
+                        <Picker ItemsSource="{Binding Addresses}" SelectedItem="{Binding SelectedAddress}">
+                            <Picker.ItemDisplayBinding>
+                                <Binding Path="Label" />
+                            </Picker.ItemDisplayBinding>
+                        </Picker>
+
+                        <Button Text="+ Add New Address" Style="{StaticResource OutlineButton}"
+                                Command="{Binding ToggleAddAddressFormCommand}" />
+
+                        <VerticalStackLayout IsVisible="{Binding ShowAddAddressForm}" Spacing="8">
+                            <Entry Placeholder="Label (e.g. Home)" Text="{Binding NewAddressLabel}" />
+                            <Entry Placeholder="Address Line 1" Text="{Binding NewAddressLine1}" />
+                            <Entry Placeholder="Address Line 2 (optional)" Text="{Binding NewAddressLine2}" />
+                            <Entry Placeholder="City" Text="{Binding NewAddressCity}" />
+                            <Entry Placeholder="State" Text="{Binding NewAddressState}" />
+                            <Entry Placeholder="Postal Code" Text="{Binding NewAddressPostalCode}" />
+                            <Button Text="Save Address" Command="{Binding AddAddressCommand}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame IsVisible="{Binding HasItems}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="PICKUP SCHEDULE" Style="{StaticResource SectionLabel}" />
+                        <DatePicker Date="{Binding PickupDate}" />
+                        <TimePicker Time="{Binding PickupTime}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame IsVisible="{Binding HasItems}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="PROMO CODE" Style="{StaticResource SectionLabel}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry Grid.Column="0" Placeholder="Enter code" Text="{Binding PromoCodeText}" />
+                            <Button Grid.Column="1" Text="Apply" Command="{Binding ApplyPromoCommand}" />
+                        </Grid>
+                        <Label Text="{Binding PromoMessage}" Style="{StaticResource SubtleLabel}"
+                               IsVisible="{Binding PromoMessage, Converter={StaticResource IsNotNullConverter}}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Frame Grid.Row="1" IsVisible="{Binding HasItems}" Margin="0" CornerRadius="0">
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="Subtotal" />
+                    <Label Grid.Column="1" Text="{Binding Subtotal, StringFormat='₹{0:0.00}'}" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExpress}">
+                    <Label Grid.Column="0" Text="Express surcharge" />
+                    <Label Grid.Column="1" Text="{Binding ExpressSurchargeTotal, StringFormat='₹{0:0.00}'}" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding AppliedPromo, Converter={StaticResource IsNotNullConverter}}">
+                    <Label Grid.Column="0" Text="Discount" TextColor="{StaticResource Success}" />
+                    <Label Grid.Column="1" Text="{Binding DiscountAmount, StringFormat='-₹{0:0.00}'}" TextColor="{StaticResource Success}" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="Total" FontAttributes="Bold" FontSize="16" />
+                    <Label Grid.Column="1" Text="{Binding GrandTotal, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" />
+                </Grid>
+                <Button Text="Place Order" Command="{Binding PlaceOrderCommand}"
+                        IsEnabled="{Binding IsPlacingOrder, Converter={StaticResource InvertedBoolConverter}}" />
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+
+</ContentPage>

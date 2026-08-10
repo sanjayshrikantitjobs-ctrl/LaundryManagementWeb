@@ -121,8 +121,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             var promotion = await _db.Promotions.FirstOrDefaultAsync(p =>
                 p.Code != null && p.Code == normalizedCode &&
                 p.IsActive &&
-                (!p.ValidFrom.HasValue || p.ValidFrom <= now) &&
-                (!p.ValidTo.HasValue || p.ValidTo >= now),
+                (p.ValidFrom.HasValue) &&
+                (p.ValidTo.HasValue && p.ValidTo >= now),
                 cancellationToken)
                 ?? throw new InvalidOperationException($"Promo code '{request.PromoCode}' is invalid or has expired.");
 
@@ -132,6 +132,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
 
             order.DiscountAmount = Math.Round(Math.Min(discount, order.SubTotal), 2);
             order.PromoCode = normalizedCode;
+        }
+        else
+        {
+            order.DiscountAmount = 0m;
+            order.PromoCode = null;
         }
 
         order.GstAmount = Math.Round(order.SubTotal * 0.05m, 2); // placeholder flat 5% GST, wire to Service.GstPercentage

@@ -13,27 +13,53 @@ public enum MembershipTier
     Gold = 2
 }
 
-public record PaginatedList<T>(List<T> Items, int PageNumber, int TotalPages, int TotalCount);
+public record PaginatedList<T>(
+    List<T> Items, int PageNumber, int PageSize, int TotalPages, int TotalCount, bool HasNextPage, bool HasPreviousPage);
+
+public enum CustomerStatus
+{
+    Active = 0,
+    Inactive = 1
+}
 
 public record CustomerListItem(
-    Guid Id, string FullName, string PhoneNumber, string? Email,
-    MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints);
+    Guid Id, string FullName, string PhoneNumber, string? Email, string? WhatsAppNumber,
+    MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints, CustomerStatus Status);
 
 public record CreateCustomerRequest(string FullName, string PhoneNumber, string? Email, decimal CreditLimit, string? Notes);
 
-public record GarmentListItem(Guid Id, string Name, string Category, string? Barcode);
+public record UpdateCustomerRequest(
+    string FullName, string PhoneNumber, string? Email, decimal CreditLimit, MembershipTier MembershipTier, string? Notes);
+
+public record UpdateMyProfileRequest(string FullName, string? Email, string? WhatsAppNumber);
+
+public record CustomerAddressDto(
+    Guid Id, string Label, string Line1, string? Line2, string City, string State, string PostalCode, bool IsDefault);
+
+public record CreateCustomerAddressRequest(
+    string Label, string Line1, string? Line2, string City, string State, string PostalCode, bool IsDefault);
+
+public record CustomerDetailDto(
+    Guid Id, string FullName, string PhoneNumber, string? Email,
+    decimal WalletBalance, decimal CreditLimit, int LoyaltyPoints,
+    MembershipTier MembershipTier, CustomerStatus Status, string? Notes, List<CustomerAddressDto> Addresses);
+
+public record GarmentListItem(Guid Id, string Name, string Category, string? Barcode, string? ImageUrl);
 
 public record CreateGarmentRequest(string Name, string Category, string? Barcode, string? SpecialInstructions);
 
+public record UpdateGarmentRequest(string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl);
+
 public record ServiceListItem(
-    Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority);
+    Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    string? ImageUrl, decimal ExpressSurcharge, int ExpressEtaHours);
 
 public record CreateServiceRequest(string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority);
 
 public record GarmentServicePriceDto(Guid ServiceId, string ServiceName, PricingType PricingType, decimal Price);
 
 public record GarmentDetailDto(
-    Guid Id, string Name, string Category, string? Barcode, string? SpecialInstructions,
+    Guid Id, string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl,
     List<GarmentServicePriceDto> ServicePrices);
 
 public record PricingMatrixServiceDto(Guid Id, string Name);

@@ -21,6 +21,12 @@
 
                     <Label Text="CREDIT LIMIT" Style="{StaticResource SectionLabel}" />
                     <Entry Text="{Binding CreditLimitText}" Keyboard="Numeric" />
+
+                    <Label Text="MEMBERSHIP TIER" Style="{StaticResource SectionLabel}" IsVisible="{Binding IsEditMode}" />
+                    <Picker ItemsSource="{Binding MembershipTiers}" SelectedItem="{Binding MembershipTier}" IsVisible="{Binding IsEditMode}" />
+
+                    <Label Text="NOTES" Style="{StaticResource SectionLabel}" />
+                    <Editor Text="{Binding Notes}" HeightRequest="80" />
                 </VerticalStackLayout>
             </Frame>
 

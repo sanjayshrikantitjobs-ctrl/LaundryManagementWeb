@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LaundryMgmt.Mobile.Views.CustomerNavBar">
+
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" BackgroundColor="{StaticResource White}">
+        <HorizontalStackLayout Spacing="10" Padding="12,10">
+
+            <Border x:Name="ShopChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnShopTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="🏠" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="ShopLabel" Text="Home" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="ServiceInfoChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnServiceInfoTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="🧺" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="ServiceInfoLabel" Text="Services" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="PromotionsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPromotionsTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="🎁" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="PromotionsLabel" Text="Promotions" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="MyRequestsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMyRequestsTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="📋" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="MyRequestsLabel" Text="Requests" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="OrdersChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOrdersTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="📦" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="OrdersLabel" Text="My Orders" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="PriceListChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPriceListTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="🏷️" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="PriceListLabel" Text="Price List" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="SettingsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSettingsTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="⚙️" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="SettingsLabel" Text="Settings" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="ContactUsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnContactUsTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="💬" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="ContactUsLabel" Text="Contact" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+        </HorizontalStackLayout>
+    </ScrollView>
+
+</ContentView>

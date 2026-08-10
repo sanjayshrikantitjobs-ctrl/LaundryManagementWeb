@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Settings">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:CustomerNavBar Grid.Row="0" CurrentPage="settings" />
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="8" Padding="16,8">
+            <Button Text="General" CommandParameter="{x:Static vm:SettingsTab.General}" Command="{Binding SetTabCommand}" />
+            <Button Text="Address" CommandParameter="{x:Static vm:SettingsTab.Address}" Command="{Binding SetTabCommand}" />
+        </HorizontalStackLayout>
+
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            Color="{StaticResource Primary}" VerticalOptions="Center" />
+
+        <ScrollView Grid.Row="2" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <VerticalStackLayout IsVisible="{Binding IsGeneralTab}" Spacing="10">
+                    <Frame>
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="FULL NAME" Style="{StaticResource SectionLabel}" />
+                            <Entry Text="{Binding FullName}" />
+
+                            <Label Text="EMAIL" Style="{StaticResource SectionLabel}" />
+                            <Entry Text="{Binding Email}" Keyboard="Email" />
+
+                            <Label Text="WHATSAPP NUMBER" Style="{StaticResource SectionLabel}" />
+                            <Entry Text="{Binding WhatsAppNumber}" Keyboard="Telephone" />
+
+                            <Label Text="{Binding StatusMessage}" TextColor="{StaticResource Success}"
+                                   IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNullConverter}}" />
+                            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                                   IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}" />
+
+                            <Button Text="Save Changes" Command="{Binding SaveProfileCommand}"
+                                    IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding IsAddressTab}" Spacing="10">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Addresses}" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:CustomerAddressDto">
+                                <Frame Style="{StaticResource ListCard}">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Label}" FontAttributes="Bold" />
+                                        <Label Grid.Row="0" Grid.Column="1" Text="Primary" Style="{StaticResource Badge}" IsVisible="{Binding IsDefault}" />
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource SubtleLabel}"
+                                               Text="{Binding Line1}" />
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource SubtleLabel}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding City}" />
+                                                    <Span Text=", " />
+                                                    <Span Text="{Binding State}" />
+                                                    <Span Text=" - " />
+                                                    <Span Text="{Binding PostalCode}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+
+                                        <HorizontalStackLayout Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Spacing="6" VerticalOptions="End">
+                                            <Button Text="Set Primary" FontSize="11" Padding="8,4" Style="{StaticResource OutlineButton}"
+                                                    IsVisible="{Binding IsDefault, Converter={StaticResource InvertedBoolConverter}}"
+                                                    CommandParameter="{Binding .}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SetPrimaryCommand}" />
+                                            <Button Text="Delete" FontSize="11" Padding="8,4" Style="{StaticResource DangerButton}"
+                                                    CommandParameter="{Binding .}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteAddressCommand}" />
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="+ Add New Address" Style="{StaticResource OutlineButton}"
+                            Command="{Binding ToggleAddAddressFormCommand}" />
+
+                    <Frame IsVisible="{Binding ShowAddAddressForm}">
+                        <VerticalStackLayout Spacing="8">
+                            <Entry Placeholder="Label (e.g. Home)" Text="{Binding NewAddressLabel}" />
+                            <Entry Placeholder="Address Line 1" Text="{Binding NewAddressLine1}" />
+                            <Entry Placeholder="Address Line 2 (optional)" Text="{Binding NewAddressLine2}" />
+                            <Entry Placeholder="City" Text="{Binding NewAddressCity}" />
+                            <Entry Placeholder="State" Text="{Binding NewAddressState}" />
+                            <Entry Placeholder="Postal Code" Text="{Binding NewAddressPostalCode}" />
+                            <Button Text="Save Address" Command="{Binding AddAddressCommand}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                           IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

@@ -34,9 +34,19 @@ public partial class LoginViewModel : ObservableObject
             await _authService.LoginAsync(UsernameOrEmail, Password);
             LoggedIn?.Invoke();
         }
-        catch (Exception)
+        catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
         {
+            // A real response came back with a bad status (401 for wrong credentials,
+            // etc.) — the server was reachable, the login itself failed.
             ErrorMessage = "Invalid username or password.";
+        }
+        catch (Exception ex)
+        {
+            // No HTTP status at all means the request never got a response —
+            // DNS failure, connection refused, TLS handshake failure, timeout. This is
+            // a connectivity problem, not a login problem; showing "Invalid username or
+            // password" here would be actively misleading, so show what actually broke.
+            ErrorMessage = $"Couldn't reach the server: {ex.Message}";
         }
         finally
         {

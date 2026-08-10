@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.ServiceInfoPage"
+             x:DataType="vm:ServiceInfoViewModel"
+             Title="Services">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:CustomerNavBar Grid.Row="0" CurrentPage="serviceinfo" />
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}" SelectionMode="Single"
+                         SelectedItem="{Binding SelectedCategory}" HeightRequest="56">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ServiceInfoCategory">
+                    <Border StrokeShape="RoundRectangle 16" Stroke="Transparent" Padding="14,8" Margin="4,8">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Label TextColor="{StaticResource Primary}" FontSize="13">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding Icon}" />
+                                    <Span Text=" " />
+                                    <Span Text="{Binding Name}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="16" Spacing="16" BindingContext="{Binding SelectedCategory}" x:DataType="models:ServiceInfoCategory">
+                <Label Text="{Binding Headline}" FontAttributes="Bold" FontSize="20" />
+                <Label Text="{Binding Description}" Style="{StaticResource SubtleLabel}" />
+
+                <Label Text="HOW WE COMPARE" Style="{StaticResource SectionLabel}" />
+                <Frame Padding="0">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto,Auto" Padding="12,8" BackgroundColor="{StaticResource Gray50}">
+                            <Label Grid.Column="0" Text="Feature" FontAttributes="Bold" FontSize="12" />
+                            <Label Grid.Column="1" Text="Us" FontAttributes="Bold" FontSize="12" WidthRequest="40" HorizontalTextAlignment="Center" />
+                            <Label Grid.Column="2" Text="Others" FontAttributes="Bold" FontSize="12" WidthRequest="50" HorizontalTextAlignment="Center" />
+                        </Grid>
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Comparison}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ServiceComparisonRow">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" Padding="12,8">
+                                        <Label Grid.Column="0" Text="{Binding Feature}" FontSize="13" />
+                                        <Label Grid.Column="1" Text="{Binding OursIcon}" WidthRequest="40" HorizontalTextAlignment="Center" />
+                                        <Label Grid.Column="2" Text="{Binding OthersIcon}" WidthRequest="50" HorizontalTextAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="WHY IT MATTERS" Style="{StaticResource SectionLabel}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Benefits}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="✓" TextColor="{StaticResource Success}" FontAttributes="Bold" />
+                                <Label Text="{Binding .}" Style="{StaticResource SubtleLabel}" />
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Margin="0,10,0,0">
+                    <Button Text="💬 Chat on WhatsApp" Style="{StaticResource OutlineButton}"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ChatOnWhatsAppCommand}" />
+                    <Button Text="Schedule Pickup"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SchedulePickupCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

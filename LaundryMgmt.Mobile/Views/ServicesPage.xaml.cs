@@ -11,6 +11,7 @@ public partial class ServicesPage : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+        Shell.SetTabBarIsVisible(this, false);
     }
 
     protected override void OnAppearing()

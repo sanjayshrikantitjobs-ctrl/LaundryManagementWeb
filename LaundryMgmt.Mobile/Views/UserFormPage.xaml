@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.UserFormPage"
+             x:DataType="vm:UserFormViewModel"
+             Title="User">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Frame>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="FULL NAME" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding FullName}" />
+
+                    <Label Text="USERNAME" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding UserName}" IsEnabled="{Binding IsEditMode, Converter={StaticResource InvertedBoolConverter}}" />
+
+                    <Label Text="EMAIL" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding Email}" Keyboard="Email" />
+
+                    <Label Text="PHONE NUMBER" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding PhoneNumber}" Keyboard="Telephone" />
+
+                    <Label Text="PASSWORD" Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding IsEditMode, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Entry Text="{Binding Password}" IsPassword="True"
+                           IsVisible="{Binding IsEditMode, Converter={StaticResource InvertedBoolConverter}}" />
+
+                    <Label Text="ROLE" Style="{StaticResource SectionLabel}" />
+                    <Picker ItemsSource="{Binding Roles}" SelectedItem="{Binding Role}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             x:Class="LaundryMgmt.Mobile.Views.PricingMatrixPage"
+             x:DataType="vm:PricingMatrixViewModel"
+             Title="Pricing">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="pricing" />
+
+        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+               Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
+
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            Color="{StaticResource Primary}" VerticalOptions="Center" />
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsLoading}" Command="{Binding InitializeCommand}"
+                     IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <CollectionView ItemsSource="{Binding Rows}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="🏷️" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No garments in the catalog yet." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PricingMatrixRow">
+                        <Frame Style="{StaticResource ListCard}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding GarmentName}" FontAttributes="Bold" />
+                                <Label Text="{Binding Category}" Style="{StaticResource SubtleLabel}" />
+
+                                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                                    <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cells}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PricingMatrixCell">
+                                                <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}" Padding="10,6">
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            CommandParameter="{Binding .}"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCellCommand}" />
+                                                    </Border.GestureRecognizers>
+                                                    <VerticalStackLayout Spacing="1">
+                                                        <Label Text="{Binding ServiceName}" FontSize="11" Style="{StaticResource SubtleLabel}" />
+                                                        <Label Text="{Binding DisplayText}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                                    </VerticalStackLayout>
+                                                </Border>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </HorizontalStackLayout>
+                                </ScrollView>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

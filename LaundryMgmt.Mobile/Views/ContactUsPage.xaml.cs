@@ -2,15 +2,16 @@ using LaundryMgmt.Mobile.ViewModels;
 
 namespace LaundryMgmt.Mobile.Views;
 
-public partial class PricingPage : ContentPage
+public partial class ContactUsPage : ContentPage
 {
-    private readonly PricingViewModel _viewModel;
+    private readonly ContactUsViewModel _viewModel;
 
-    public PricingPage(PricingViewModel viewModel)
+    public ContactUsPage(ContactUsViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+        Shell.SetTabBarIsVisible(this, false);
     }
 
     protected override async void OnAppearing()

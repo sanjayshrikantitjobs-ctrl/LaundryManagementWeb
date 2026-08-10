@@ -1,43 +1,28 @@
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LaundryMgmt.Mobile.Models;
 using LaundryMgmt.Mobile.Services;
+using LaundryMgmt.Mobile.ViewModels.Paging;
 
 namespace LaundryMgmt.Mobile.ViewModels;
 
-public partial class ServicesViewModel : ObservableObject
+public partial class ServicesViewModel : PagedListViewModel<ServiceListItem>
 {
     private readonly ApiClient _apiClient;
+    private readonly AuthService _authService;
 
-    public ObservableCollection<ServiceListItem> Services { get; } = new();
+    public ObservableCollection<ServiceListItem> Services => Items;
 
-    [ObservableProperty] private bool isRefreshing;
-    [ObservableProperty] private string? errorMessage;
+    public bool CanEditMasterData => _authService.Role is not ("Customer" or "DepartmentHead");
 
-    public ServicesViewModel(ApiClient apiClient) => _apiClient = apiClient;
-
-    [RelayCommand]
-    public async Task RefreshAsync()
+    public ServicesViewModel(ApiClient apiClient, AuthService authService)
     {
-        IsRefreshing = true;
-        ErrorMessage = null;
-        try
-        {
-            var result = await _apiClient.GetServicesAsync();
-            Services.Clear();
-            foreach (var service in result?.Items ?? new List<ServiceListItem>())
-                Services.Add(service);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Couldn't load services: {ex.Message}";
-        }
-        finally
-        {
-            IsRefreshing = false;
-        }
+        _apiClient = apiClient;
+        _authService = authService;
     }
+
+    protected override Task<PaginatedList<ServiceListItem>?> FetchPageAsync(int pageNumber, int pageSize) =>
+        _apiClient.GetServicesAsync(pageNumber: pageNumber, pageSize: pageSize);
 
     [RelayCommand]
     private async Task NewServiceAsync() => await Shell.Current.GoToAsync(nameof(Views.ServiceFormPage));

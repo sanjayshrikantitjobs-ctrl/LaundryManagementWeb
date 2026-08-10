@@ -26,10 +26,12 @@ public partial class ModuleBreadcrumb : ContentView
         // would just hit a 403 tapping them, so hide them for that role. Reads the same
         // Preferences key AuthService.Role does; no DI available for a plain XAML-declared
         // ContentView, so this mirrors that lookup directly rather than injecting the service.
-        var isCustomer = Preferences.Default.Get<string?>("auth_role", null) == "Customer";
+        var role = Preferences.Default.Get<string?>("auth_role", null);
+        var isCustomer = role == "Customer";
         CustomersChip.IsVisible = !isCustomer;
         GarmentsChip.IsVisible = !isCustomer;
         ServicesChip.IsVisible = !isCustomer;
+        UsersChip.IsVisible = role == "Admin";
     }
 
     private void ApplyActiveState(string currentModule)
@@ -39,6 +41,7 @@ public partial class ModuleBreadcrumb : ContentView
         SetChipState(GarmentsChip, GarmentsLabel, currentModule == "garments");
         SetChipState(ServicesChip, ServicesLabel, currentModule == "services");
         SetChipState(PricingChip, PricingLabel, currentModule == "pricing");
+        SetChipState(UsersChip, UsersLabel, currentModule == "users");
     }
 
     private static void SetChipState(Border chip, Label label, bool isActive)
@@ -57,6 +60,7 @@ public partial class ModuleBreadcrumb : ContentView
     private async void OnGarmentsTapped(object? sender, EventArgs e) => await NavigateAsync("garments");
     private async void OnServicesTapped(object? sender, EventArgs e) => await NavigateAsync("services");
     private async void OnPricingTapped(object? sender, EventArgs e) => await NavigateAsync("pricing");
+    private async void OnUsersTapped(object? sender, EventArgs e) => await NavigateAsync("users");
 
     private static async Task NavigateAsync(string route)
     {

@@ -15,22 +15,53 @@ public partial class AppShell : Shell
         _serviceProvider = serviceProvider;
         _authService = authService;
 
-        Routing.RegisterRoute(nameof(DeliveryConfirmationPage), typeof(DeliveryConfirmationPage));
         Routing.RegisterRoute(nameof(OrderFormPage), typeof(OrderFormPage));
+        Routing.RegisterRoute(nameof(OrderDetailPage), typeof(OrderDetailPage));
         Routing.RegisterRoute(nameof(CustomerFormPage), typeof(CustomerFormPage));
         Routing.RegisterRoute(nameof(GarmentFormPage), typeof(GarmentFormPage));
         Routing.RegisterRoute(nameof(ServiceFormPage), typeof(ServiceFormPage));
+        Routing.RegisterRoute(nameof(UserFormPage), typeof(UserFormPage));
+        Routing.RegisterRoute(nameof(CartPage), typeof(CartPage));
 
+        GreetingLabel.Text = BuildGreeting(authService.FullName);
         BuildTabsForRole(authService.Role);
+    }
+
+    private static string BuildGreeting(string? fullName)
+    {
+        var timeOfDay = DateTime.Now.Hour switch
+        {
+            < 12 => "Good morning",
+            < 17 => "Good afternoon",
+            _ => "Good evening"
+        };
+
+        return string.IsNullOrWhiteSpace(fullName) ? timeOfDay : $"{timeOfDay}, {fullName}";
     }
 
     private void BuildTabsForRole(string? role)
     {
         var tabBar = new TabBar();
 
-        var isManagement = role is "Admin" or "StoreManager" or "Staff";
-        var isDeliveryBoy = role == "DeliveryAgent";
+        // DepartmentHead gets the same tab set as Admin/StoreManager/Staff — view
+        // access to Orders/Customers/Garments/Services/Pricing, same as the web app's
+        // nav. Write actions (Add/Edit/Delete, price changes) are gated per-page by
+        // CanEditMasterData/CanEditPrice, not by hiding the tab — matches
+        // AppRoles.OperationalViewRoles on the API (Management + DepartmentHead can
+        // all read this data; only AppRoles.ManagementRoles, which excludes
+        // DepartmentHead, can write it).
+        var isManagement = role is "Admin" or "StoreManager" or "Staff" or "DepartmentHead";
+        var isPickupAgent = role == "PickupAgent";
+        var isDeliveryAgent = role == "DeliveryAgent";
         var isCustomer = role == "Customer";
+
+        if (isCustomer)
+        {
+            tabBar.Items.Add(CreateTab("Home", "ShopPage", typeof(ShopPage)));
+            tabBar.Items.Add(CreateTab("Services Info", "ServiceInfoPage", typeof(ServiceInfoPage)));
+            tabBar.Items.Add(CreateTab("Promotions", "PromotionsPage", typeof(PromotionsPage)));
+            tabBar.Items.Add(CreateTab("My Requests", "MyRequestsPage", typeof(MyRequestsPage)));
+        }
 
         if (isManagement || isCustomer)
             tabBar.Items.Add(CreateTab(isCustomer ? "My Orders" : "Orders", "orders", typeof(OrdersPage)));
@@ -40,13 +71,26 @@ public partial class AppShell : Shell
             tabBar.Items.Add(CreateTab("Customers", "customers", typeof(CustomersPage)));
             tabBar.Items.Add(CreateTab("Garments", "garments", typeof(GarmentsPage)));
             tabBar.Items.Add(CreateTab("Services", "services", typeof(ServicesPage)));
+            tabBar.Items.Add(CreateTab("Pricing", "pricing", typeof(PricingMatrixPage)));
         }
 
-        if (isManagement || isCustomer)
-            tabBar.Items.Add(CreateTab("Pricing", "pricing", typeof(PricingPage)));
+        if (isCustomer)
+        {
+            tabBar.Items.Add(CreateTab("Price List", "PriceListPage", typeof(PriceListPage)));
+            tabBar.Items.Add(CreateTab("Settings", "SettingsPage", typeof(SettingsPage)));
+            tabBar.Items.Add(CreateTab("Contact Us", "ContactUsPage", typeof(ContactUsPage)));
+        }
 
-        if (isManagement || isDeliveryBoy)
-            tabBar.Items.Add(CreateTab("My Queue", "queue", typeof(OrderQueuePage)));
+        // PickupDeliveryController.GetMine is Authorize(Roles = "PickupAgent,DeliveryAgent")
+        // only — management roles never had assignments to see here (the original
+        // "isManagement || isDeliveryBoy" condition on this tab was harmless only
+        // because OrderQueueViewModel used to be a stub; now that it calls the real
+        // endpoint, showing this tab to management would just produce a 403).
+        if (isPickupAgent || isDeliveryAgent)
+            tabBar.Items.Add(CreateTab(isPickupAgent ? "My Pickup Queue" : "My Delivery Queue", "queue", typeof(OrderQueuePage)));
+
+        if (role == "Admin")
+            tabBar.Items.Add(CreateTab("Users", "users", typeof(UsersPage)));
 
         Items.Add(tabBar);
     }

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
+             x:Class="LaundryMgmt.Mobile.Views.OrderDetailPage"
+             x:DataType="vm:OrderDetailViewModel"
+             Title="Order">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}" />
+
+            <!-- Order summary -->
+            <Frame IsVisible="{Binding Order, Converter={StaticResource IsNotNullConverter}}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Order.OrderNumber}" FontAttributes="Bold" FontSize="18" />
+                    <Label Text="{Binding Order.Status}" Style="{StaticResource Badge}" />
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                        <Label Grid.Column="0" Text="Subtotal" />
+                        <Label Grid.Column="1" Text="{Binding Order.SubTotal, StringFormat='₹{0:0.00}'}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" TextColor="{StaticResource Success}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Discount" />
+                                    <Span Text="{Binding Order.PromoCode, StringFormat=' ({0})'}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Grid.Column="1" Text="{Binding Order.DiscountAmount, StringFormat='-₹{0:0.00}'}" TextColor="{StaticResource Success}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="GST" />
+                        <Label Grid.Column="1" Text="{Binding Order.GstAmount, StringFormat='₹{0:0.00}'}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Delivery charge" />
+                        <Label Grid.Column="1" Text="{Binding Order.DeliveryCharge, StringFormat='₹{0:0.00}'}" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray300}" Margin="0,4" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Total" FontAttributes="Bold" FontSize="16" />
+                        <Label Grid.Column="1" Text="{Binding Order.TotalAmount, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Payment Status" Style="{StaticResource SubtleLabel}" />
+                        <Label Grid.Column="1" Text="{Binding Order.PaymentStatus}" Style="{StaticResource SubtleLabel}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Amount Paid" Style="{StaticResource SubtleLabel}" />
+                        <Label Grid.Column="1" Text="{Binding Order.AmountPaid, StringFormat='₹{0:0.00}'}" Style="{StaticResource SubtleLabel}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Manage Order (management roles only) -->
+            <Frame IsVisible="{Binding IsAssignManagement}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Manage Order" FontAttributes="Bold" FontSize="16" />
+
+                    <Label Text="STATUS" Style="{StaticResource SectionLabel}" />
+                    <Picker ItemsSource="{Binding OrderStatuses}" SelectedItem="{Binding EditStatus}" />
+
+                    <Label Text="PAYMENT STATUS" Style="{StaticResource SectionLabel}" />
+                    <Picker ItemsSource="{Binding PaymentStatuses}" SelectedItem="{Binding EditPaymentStatus}" />
+
+                    <Label Text="AMOUNT PAID (₹)" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding EditAmountPaidText}" Keyboard="Numeric" />
+
+                    <Label Text="EXPECTED DELIVERY" Style="{StaticResource SectionLabel}" />
+                    <DatePicker Date="{Binding EditPromisedDate}" />
+                    <TimePicker Time="{Binding EditPromisedTime}" />
+
+                    <Label Text="{Binding SaveOrderStatus}" TextColor="{StaticResource Success}"
+                           IsVisible="{Binding SaveOrderStatus, Converter={StaticResource IsNotNullConverter}}" />
+                    <Label Text="{Binding SaveOrderError}" TextColor="{StaticResource Danger}"
+                           IsVisible="{Binding SaveOrderError, Converter={StaticResource IsNotNullConverter}}" />
+
+                    <Button Text="Save Changes" Command="{Binding SaveOrderCommand}"
+                            IsEnabled="{Binding IsSavingOrder, Converter={StaticResource InvertedBoolConverter}}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Items -->
+            <Label Text="Items" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding Order.Items}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:OrderItemDetailDto">
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                            <VerticalStackLayout Grid.Column="0">
+                                <Label Text="{Binding GarmentName}" FontAttributes="Bold" />
+                                <Label Text="{Binding ServiceName}" Style="{StaticResource SubtleLabel}" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="{Binding LineTotal, StringFormat='₹{0:0.00}'}" VerticalOptions="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Garment Details -->
+            <Label Text="Garment Details" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0" />
+
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="Pickup Photos"
+                        Command="{Binding SetImageTypeTabCommand}" CommandParameter="{x:Static models:GarmentImageType.Pickup}" />
+                <Button Text="Delivery Proof"
+                        Command="{Binding SetImageTypeTabCommand}" CommandParameter="{x:Static models:GarmentImageType.Delivery}" />
+            </HorizontalStackLayout>
+
+            <CollectionView ItemsSource="{Binding ServiceTabs}" IsVisible="{Binding ServiceTabs.Count, Converter={StaticResource IsNotNullConverter}}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ServiceTabItem">
+                        <Button Text="{Binding ServiceName}" FontSize="12" Padding="10,4"
+                                CommandParameter="{Binding ServiceId}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SetServiceFilterCommand}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <CollectionView ItemsSource="{Binding FilteredImages}" HeightRequest="220">
+                <CollectionView.EmptyView>
+                    <Label Text="No photos yet." Style="{StaticResource SubtleLabel}" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:OrderGarmentImageDto">
+                        <Grid>
+                            <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}" Aspect="AspectFill" HeightRequest="100" />
+                            <Button Text="✕" FontSize="10" Padding="4" HorizontalOptions="End" VerticalOptions="Start"
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteImageCommand}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding CanUpload}">
+                <Entry Placeholder="Notes (optional)" Text="{Binding UploadNotes}" />
+                <HorizontalStackLayout Spacing="8">
+                    <Button Text="Take Photo" Command="{Binding TakePhotoCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Button Text="Choose Photo" Command="{Binding PickPhotoCommand}" IsEnabled="{Binding IsUploading, Converter={StaticResource InvertedBoolConverter}}" />
+                </HorizontalStackLayout>
+                <ActivityIndicator IsRunning="{Binding IsUploading}" IsVisible="{Binding IsUploading}" />
+                <Label Text="{Binding UploadError}" TextColor="{StaticResource Danger}"
+                       IsVisible="{Binding UploadError, Converter={StaticResource IsNotNullConverter}}" />
+            </VerticalStackLayout>
+
+            <!-- Confirm actions -->
+            <Button Text="Confirm Garments Received" Command="{Binding ConfirmPickupCommand}"
+                    IsVisible="{Binding PickupId, Converter={StaticResource IsNotNullConverter}}"
+                    IsEnabled="{Binding IsConfirming, Converter={StaticResource InvertedBoolConverter}}" />
+            <Button Text="Confirm Delivery" Command="{Binding ConfirmDeliveryCommand}"
+                    IsVisible="{Binding DeliveryId, Converter={StaticResource IsNotNullConverter}}"
+                    IsEnabled="{Binding IsConfirming, Converter={StaticResource InvertedBoolConverter}}" />
+            <Label Text="{Binding ConfirmError}" TextColor="{StaticResource Danger}"
+                   IsVisible="{Binding ConfirmError, Converter={StaticResource IsNotNullConverter}}" />
+
+            <!-- Pickup & Delivery (management view) -->
+            <Label Text="Pickup &amp; Delivery" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0"
+                   IsVisible="{Binding CanViewOperations}" />
+            <CollectionView ItemsSource="{Binding PickupDeliveries}" IsVisible="{Binding CanViewOperations}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AssignableLeg">
+                        <Frame Style="{StaticResource ListCard}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="6">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Leg.IsPickup, StringFormat='{0}'}" FontAttributes="Bold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Leg.AssignedEmployeeName}" Style="{StaticResource SubtleLabel}" />
+                                <Picker Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" WidthRequest="150"
+                                        ItemsSource="{Binding Agents}" ItemDisplayBinding="{Binding FullName}"
+                                        SelectedItem="{Binding SelectedAgent}" />
+                                <Button Grid.Row="1" Grid.Column="1" Text="Assign" HorizontalOptions="Start"
+                                        CommandParameter="{Binding .}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AssignAgentCommand}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

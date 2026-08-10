@@ -16,11 +16,13 @@ public class AuthService
 
     private readonly ApiClient _apiClient;
     private readonly AuthTokenStore _tokenStore;
+    private readonly CartService _cartService;
 
-    public AuthService(ApiClient apiClient, AuthTokenStore tokenStore)
+    public AuthService(ApiClient apiClient, AuthTokenStore tokenStore, CartService cartService)
     {
         _apiClient = apiClient;
         _tokenStore = tokenStore;
+        _cartService = cartService;
     }
 
     public string? FullName => Preferences.Default.Get<string?>(FullNameKey, null);
@@ -35,6 +37,7 @@ public class AuthService
             return false;
 
         _apiClient.SetBearerToken(token);
+        _cartService.SetCurrentUser(UserId);
         return true;
     }
 
@@ -57,6 +60,7 @@ public class AuthService
         Preferences.Default.Set(UserIdKey, response.UserId);
 
         _apiClient.SetBearerToken(response.AccessToken);
+        _cartService.SetCurrentUser(response.UserId);
     }
 
     public void Logout()
@@ -66,5 +70,6 @@ public class AuthService
         Preferences.Default.Remove(RoleKey);
         Preferences.Default.Remove(UserIdKey);
         _apiClient.SetBearerToken(null);
+        _cartService.SetCurrentUser(null);
     }
 }

@@ -9,7 +9,7 @@
              Title="Garments">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewGarmentCommand}" />
+        <ToolbarItem Text="+ New" Command="{Binding NewGarmentCommand}" IsEnabled="{Binding CanEditMasterData}" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,Auto,*">
@@ -20,7 +20,9 @@
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
         <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Garments}">
+            <CollectionView ItemsSource="{Binding Garments}"
+                            RemainingItemsThreshold="3"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
                         <Label Text="🧺" FontSize="40" HorizontalTextAlignment="Center" />
@@ -31,15 +33,20 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:GarmentListItem">
                         <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                 <Label Grid.Column="0" Text="{Binding Name, Converter={StaticResource GarmentIconConverter}}"
                                        FontSize="28" VerticalOptions="Center" Margin="0,0,12,0" />
-                                <VerticalStackLayout Grid.Column="1">
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                     <Label Text="{Binding Name}" FontAttributes="Bold" />
                                     <Label Text="{Binding Category}" Style="{StaticResource SubtleLabel}" />
                                 </VerticalStackLayout>
-                                <Button Grid.Column="2" Text="Delete" Style="{StaticResource DangerButton}"
+                                <Button Grid.Column="2" Text="Edit" Style="{StaticResource OutlineButton}"
                                         CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditGarmentCommand}" />
+                                <Button Grid.Column="3" Text="Delete" Style="{StaticResource DangerButton}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteGarmentCommand}" />
                             </Grid>
                         </Frame>
