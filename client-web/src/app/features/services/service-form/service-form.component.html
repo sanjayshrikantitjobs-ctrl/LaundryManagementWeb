@@ -1,0 +1,72 @@
+<section class="service-form">
+  <h1>{{ isEditMode() ? 'Edit Service' : 'New Service' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Name
+      <input type="text" formControlName="name" placeholder="Washing, Dry Cleaning, Iron Only…" />
+    </label>
+
+    <label>
+      Category
+      <select formControlName="categoryId">
+        <option value="" disabled>Select a category…</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Base Price
+      <input type="number" formControlName="basePrice" min="0" />
+    </label>
+
+    <label>
+      Estimated Time (hours)
+      <input type="number" formControlName="estimatedTimeHours" min="1" />
+    </label>
+
+    <label>
+      GST %
+      <input type="number" formControlName="gstPercentage" min="0" max="100" />
+    </label>
+
+    <label>
+      Priority
+      <input type="number" formControlName="priority" min="0" />
+    </label>
+
+    <label>
+      Express Surcharge (₹, added per item when Channel = Express)
+      <input type="number" formControlName="expressSurcharge" min="0" />
+    </label>
+
+    <label>
+      Express ETA (hours)
+      <input type="number" formControlName="expressEtaHours" min="1" />
+    </label>
+
+    <label>
+      Image
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (isUploading()) {
+      <p>Uploading…</p>
+    } @else if (imageUrl()) {
+      <img [src]="imageUrl()" alt="Service preview" class="image-preview" />
+    }
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

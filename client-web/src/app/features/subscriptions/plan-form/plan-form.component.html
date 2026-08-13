@@ -1,0 +1,69 @@
+<section class="plan-form">
+  <h1>{{ isEditMode() ? 'Edit Plan' : 'New Plan' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Name
+      <input type="text" formControlName="name" placeholder="Basic, Standard, Premium, Family…" />
+    </label>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="2"></textarea>
+    </label>
+
+    <label>
+      Billing Cycle
+      <select formControlName="billingCycle">
+        <option [ngValue]="BillingCycle.Monthly">Monthly</option>
+        <option [ngValue]="BillingCycle.Quarterly">Quarterly</option>
+        <option [ngValue]="BillingCycle.HalfYearly">Half Yearly</option>
+        <option [ngValue]="BillingCycle.Yearly">Yearly</option>
+      </select>
+    </label>
+
+    <label>
+      Garments per Cycle
+      <input type="number" formControlName="garmentsPerCycle" min="0" />
+    </label>
+
+    <label>
+      Price (₹)
+      <input type="number" formControlName="price" min="0" step="0.01" />
+    </label>
+
+    <label>
+      Display Order
+      <input type="number" formControlName="displayOrder" min="0" />
+    </label>
+
+    @if (isEditMode()) {
+      <label class="checkbox">
+        <input type="checkbox" formControlName="isActive" />
+        Active (visible to customers)
+      </label>
+    }
+
+    <div class="features" formArrayName="features">
+      <label>Features</label>
+      @for (feature of features.controls; track feature) {
+        <div class="feature-row">
+          <input type="text" [formControlName]="$index" placeholder="Standard washing, Free pickup/delivery…" />
+          <button type="button" (click)="removeFeature($index)" [disabled]="features.length === 1">Remove</button>
+        </div>
+      }
+      <button type="button" class="link" (click)="addFeature()">+ Add feature</button>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

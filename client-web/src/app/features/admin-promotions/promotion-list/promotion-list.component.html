@@ -1,0 +1,74 @@
+<section class="promotion-list">
+  <header>
+    <h1>Promotions</h1>
+    @if (canEdit) {
+      <a routerLink="new" class="btn-primary">+ New Promotion</a>
+    }
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by title…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading promotions…</p>
+  } @else if (promotions().length === 0) {
+    <p>No promotions found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="sortable" (click)="sortByColumn('title')">Title {{ sortIndicator('title') }}</th>
+          <th class="sortable" (click)="sortByColumn('code')">Code {{ sortIndicator('code') }}</th>
+          <th>Discount</th>
+          <th class="sortable" (click)="sortByColumn('validTo')">Valid Until {{ sortIndicator('validTo') }}</th>
+          <th class="sortable" (click)="sortByColumn('isActive')">Status {{ sortIndicator('isActive') }}</th>
+          @if (canEdit) { <th></th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (promo of promotions(); track promo.id) {
+          <tr>
+            <td class="thumb">
+              @if (promo.imageUrl) {
+                <img [src]="promo.imageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🎁</span>
+              }
+            </td>
+            <td>{{ promo.title }}</td>
+            <td>{{ promo.code || '—' }}</td>
+            <td>
+              @if (promo.discountPercent) { {{ promo.discountPercent }}% }
+              @else if (promo.discountAmount) { ₹{{ promo.discountAmount }} }
+              @else { — }
+            </td>
+            <td>{{ promo.validTo ? (promo.validTo | date: 'mediumDate') : '—' }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="!promo.isActive">{{ promo.isActive ? 'Active' : 'Inactive' }}</span>
+            </td>
+            @if (canEdit) {
+              <td class="actions">
+                <div class="actions-inner">
+                  <a [routerLink]="[promo.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deletePromotion(promo)">🗑️</button>
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

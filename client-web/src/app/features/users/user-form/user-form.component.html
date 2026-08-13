@@ -1,0 +1,52 @@
+<section class="user-form">
+  <h1>{{ isEditMode() ? 'Edit User' : 'New User' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Full Name
+      <input type="text" formControlName="fullName" />
+    </label>
+
+    <label>
+      Username
+      <input type="text" formControlName="userName" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+
+    <label>
+      Phone Number
+      <input type="tel" formControlName="phoneNumber" />
+    </label>
+
+    @if (!isEditMode()) {
+      <label>
+        Password
+        <input type="password" formControlName="password" />
+      </label>
+    }
+
+    <label>
+      Role
+      <select formControlName="role">
+        @for (role of staffRoles; track role) {
+          <option [ngValue]="role">{{ roleLabel(role) }}</option>
+        }
+      </select>
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

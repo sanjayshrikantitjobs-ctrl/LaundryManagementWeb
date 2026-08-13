@@ -1,0 +1,77 @@
+<section class="user-list">
+  <header>
+    <h1>Users</h1>
+    <a routerLink="new" class="btn-primary">+ New User</a>
+  </header>
+
+  <div class="filters">
+    <input
+      type="search"
+      placeholder="Search by name, username or email…"
+      (input)="onSearch($any($event.target).value)"
+    />
+
+    <select (change)="onRoleFilterChange($any($event.target).value)">
+      <option value="">All Roles</option>
+      @for (role of staffRoles; track role) {
+        <option [value]="role">{{ roleLabel(role) }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="tabs">
+    <button type="button" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All</button>
+    <button type="button" [class.active]="activeTab() === 'active'" (click)="setTab('active')">Active</button>
+    <button type="button" [class.active]="activeTab() === 'inactive'" (click)="setTab('inactive')">Inactive</button>
+  </div>
+
+  @if (isLoading()) {
+    <p>Loading users…</p>
+  } @else if (users().length === 0) {
+    <p>No users found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="sortable" (click)="sortByColumn('fullName')">Name {{ sortIndicator('fullName') }}</th>
+          <th class="sortable" (click)="sortByColumn('userName')">Username {{ sortIndicator('userName') }}</th>
+          <th>Email</th>
+          <th class="sortable" (click)="sortByColumn('role')">Role {{ sortIndicator('role') }}</th>
+          <th class="sortable" (click)="sortByColumn('isActive')">Status {{ sortIndicator('isActive') }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td class="avatar"><span class="avatar-icon">👤</span></td>
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.userName }}</td>
+            <td>{{ user.email || '—' }}</td>
+            <td><span class="badge">{{ roleLabel(user.role) }}</span></td>
+            <td>
+              <span class="status-badge" [class.inactive]="!user.isActive">{{ user.isActive ? 'Active' : 'Inactive' }}</span>
+            </td>
+            <td class="actions">
+              <div class="actions-inner">
+                <a [routerLink]="[user.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button type="button" class="icon-btn" [title]="user.isActive ? 'Deactivate' : 'Activate'" (click)="toggleActive(user)">
+                  {{ user.isActive ? '⏸️' : '▶️' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

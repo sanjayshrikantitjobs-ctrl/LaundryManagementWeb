@@ -1,0 +1,40 @@
+<section class="promotions-page">
+  <header>
+    <h1>Promotions &amp; Offers</h1>
+    <p>Save more on your next laundry order with these active offers.</p>
+  </header>
+
+  @if (isLoading()) {
+    <p class="hint">Loading offers…</p>
+  } @else if (promotions().length === 0) {
+    <p class="hint">No active promotions right now — check back soon!</p>
+  } @else {
+    <div class="promo-grid">
+      @for (promo of promotions(); track promo.id) {
+        <article class="promo-card">
+          <div class="promo-image">
+            @if (promo.imageUrl) {
+              <img [src]="promo.imageUrl" alt="" />
+            } @else {
+              <span>🎉</span>
+            }
+          </div>
+          <div class="promo-body">
+            <h3>{{ promo.title }}</h3>
+            @if (promo.description) { <p>{{ promo.description }}</p> }
+            <div class="tags">
+              @if (promo.discountPercent) { <span class="discount">{{ promo.discountPercent }}% OFF</span> }
+              @if (promo.discountAmount) { <span class="discount">₹{{ promo.discountAmount }} OFF</span> }
+              @if (promo.validTo) { <span class="valid">Valid till {{ promo.validTo | date: 'mediumDate' }}</span> }
+            </div>
+            @if (promo.code) {
+              <button type="button" class="code-btn" (click)="copyCode(promo.code!)">
+                {{ copiedCode() === promo.code ? 'Copied!' : 'Use code ' + promo.code }}
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

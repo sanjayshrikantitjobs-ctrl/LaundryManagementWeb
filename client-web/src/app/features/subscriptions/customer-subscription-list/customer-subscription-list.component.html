@@ -1,0 +1,62 @@
+<section class="customer-subscription-list">
+  <header>
+    <h1>Customer Subscriptions</h1>
+    <div class="header-actions">
+      <a routerLink="/subscriptions" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="link">Plans</a>
+      <a routerLink="new" class="btn-primary">+ Assign Plan</a>
+    </div>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by customer name…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading subscriptions…</p>
+  } @else if (subscriptions().length === 0) {
+    <p>No customer subscriptions found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Plan</th>
+          <th>Recurring Value</th>
+          <th>Start Date</th>
+          <th>Next Billing</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (subscription of subscriptions(); track subscription.id) {
+          <tr>
+            <td>{{ subscription.customerName }}</td>
+            <td>{{ subscription.planName }}</td>
+            <td>₹{{ subscription.recurringValue }}</td>
+            <td>{{ subscription.startDate }}</td>
+            <td>{{ subscription.nextBillingDate || '—' }}</td>
+            <td>
+              <span class="status" [class]="'status-' + statusLabel(subscription.status).toLowerCase()">
+                {{ statusLabel(subscription.status) }}
+              </span>
+            </td>
+            <td class="actions">
+              <a [routerLink]="[subscription.id, 'edit']">Edit</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

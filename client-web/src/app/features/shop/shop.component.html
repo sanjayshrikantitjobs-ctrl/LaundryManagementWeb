@@ -1,0 +1,262 @@
+<section class="shop">
+  <div class="hero">
+    <div class="hero-copy">
+      <h1>Fresh, folded, and delivered to your door</h1>
+      <p>Pick a service, choose your garments, and we'll take care of the rest.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">🧺✨👔</div>
+  </div>
+
+  @if (promotions().length) {
+    <div class="promo-strip">
+      @for (promo of promotions(); track promo.id) {
+        <article class="promo-card">
+          @if (promo.imageUrl) {
+            <img [src]="promo.imageUrl" alt="" />
+          } @else {
+            <div class="promo-fallback">🎁</div>
+          }
+          <div class="promo-body">
+            <h3>{{ promo.title }}</h3>
+            @if (promo.description) { <p>{{ promo.description }}</p> }
+            <div class="promo-tags">
+              @if (promo.code) { <span class="code">{{ promo.code }}</span> }
+              @if (promo.discountPercent) { <span class="discount">{{ promo.discountPercent }}% OFF</span> }
+              @if (promo.discountAmount) { <span class="discount">₹{{ promo.discountAmount }} OFF</span> }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  <div class="category-tabs">
+    @for (category of categories(); track category.id) {
+      <button
+        type="button"
+        class="category-tab"
+        [class.active]="selectedCategory()?.id === category.id"
+        (click)="selectCategory(category)"
+      >
+        {{ category.name }}
+      </button>
+    }
+  </div>
+
+  <div class="service-tabs">
+    @for (service of servicesForSelectedCategory(); track service.id) {
+      <button
+        type="button"
+        class="service-tab"
+        [class.active]="selectedService()?.id === service.id"
+        (click)="selectService(service)"
+      >
+        @if (service.imageUrl) {
+          <img [src]="service.imageUrl" alt="" />
+        } @else {
+          <span class="service-icon">🧼</span>
+        }
+        <span class="service-name">{{ service.name }}</span>
+        <span class="service-eta">{{ service.estimatedTimeHours }}h ETA</span>
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <p class="loading">Loading catalog…</p>
+  } @else {
+    <div class="garment-grid">
+      @for (garment of garmentsForSelectedService(); track garment.id) {
+        <article class="garment-card">
+          <div class="garment-image">
+            @if (garment.imageUrl) {
+              <img [src]="garment.imageUrl" alt="" />
+            } @else {
+              <app-garment-icon [category]="selectedCategory()?.name ?? ''" />
+            }
+          </div>
+          <h4>{{ garment.name }}</h4>
+          @if (priceFor(garment.id); as price) {
+            <p class="price">
+              ₹{{ price.price }}
+              <span class="unit">/ {{ price.pricingType === PricingType.WeightBased ? 'kg' : 'piece' }}</span>
+            </p>
+            <div class="qty-row">
+              <button
+                type="button"
+                [disabled]="quantityFor(garment.id) === 0"
+                (click)="setQuantity(garment.id, quantityFor(garment.id) - 1)"
+              >−</button>
+              <input
+                type="number"
+                min="0"
+                [value]="quantityFor(garment.id)"
+                (change)="setQuantity(garment.id, +$any($event.target).value)"
+              />
+              <button type="button" (click)="setQuantity(garment.id, quantityFor(garment.id) + 1)">+</button>
+            </div>
+            @if (canAddToCart(garment.id) && addOns().length) {
+              <div class="add-ons-row">
+                @for (addOn of addOns(); track addOn.id) {
+                  <label class="add-on-check">
+                    <input
+                      type="checkbox"
+                      [checked]="isAddOnSelected(garment.id, addOn.id)"
+                      (change)="toggleAddOn(garment.id, addOn.id)"
+                    />
+                    {{ addOn.name }} (+₹{{ addOn.price }})
+                  </label>
+                }
+              </div>
+            }
+            <button type="button" class="btn-add" [disabled]="!canAddToCart(garment.id)" (click)="addToCart(garment)">
+              Add to Cart
+            </button>
+          }
+        </article>
+      }
+    </div>
+  }
+
+  <button type="button" class="cart-fab" (click)="isCartOpen.set(true)">
+    🛒
+    @if (cart.itemCount() > 0) { <span class="badge">{{ cart.itemCount() }}</span> }
+  </button>
+
+  @if (isCartOpen()) {
+    <div class="cart-overlay" (click)="isCartOpen.set(false)"></div>
+    <aside class="cart-drawer">
+      <header>
+        <h2>Your Cart</h2>
+        <button type="button" class="close" (click)="isCartOpen.set(false)">✕</button>
+      </header>
+
+      @if (cart.items().length === 0) {
+        <p class="empty">Your cart is empty. Add some garments to get started.</p>
+      } @else {
+        <div class="cart-items">
+          @for (item of cart.items(); track item.garmentId + item.serviceId + (item.selectedAddOns ?? []).length) {
+            <div class="cart-item">
+              @if (item.garmentImageUrl) {
+                <img [src]="item.garmentImageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder"><app-garment-icon [category]="item.categoryName" /></span>
+              }
+              <div class="cart-item-info">
+                <strong>{{ item.garmentName }}</strong>
+                <span>{{ item.serviceName }}</span>
+                @if (item.selectedAddOns?.length) {
+                  <span class="add-ons">+ {{ addOnsSummary(item) }}</span>
+                }
+                @if (item.pricingType === PricingType.WeightBased) {
+                  <span class="qty">{{ item.weightKg }} kg</span>
+                } @else {
+                  <div class="qty-row">
+                    <button type="button" (click)="cart.updateQuantity(item, item.quantity - 1)">−</button>
+                    <span>{{ item.quantity }}</span>
+                    <button type="button" (click)="cart.updateQuantity(item, item.quantity + 1)">+</button>
+                  </div>
+                }
+              </div>
+              <div class="cart-item-total">
+                ₹{{ lineTotal(item) }}
+                <button type="button" class="remove" (click)="cart.remove(item)">Remove</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="checkout">
+          <label class="express-toggle">
+            <input type="checkbox" [ngModel]="isExpress()" (ngModelChange)="isExpress.set($event)" />
+            Express service (faster turnaround, small surcharge)
+          </label>
+
+          <label class="express-toggle">
+            <input type="checkbox" [ngModel]="isSameDay()" (ngModelChange)="isSameDay.set($event)" />
+            Same-day service
+          </label>
+
+          <div class="field">
+            <label>Pickup address</label>
+            @if (addresses().length) {
+              <select [ngModel]="selectedAddressId()" (ngModelChange)="selectedAddressId.set($event)">
+                @for (addr of addresses(); track addr.id) {
+                  <option [value]="addr.id">{{ addr.label }} — {{ addr.line1 }}, {{ addr.city }}</option>
+                }
+              </select>
+            } @else {
+              <p class="hint">No saved addresses yet.</p>
+            }
+            <button type="button" class="link-btn" (click)="toggleAddressForm()">
+              {{ showNewAddressForm() ? 'Cancel' : '+ Add new address' }}
+            </button>
+          </div>
+
+          @if (showNewAddressForm()) {
+            <div class="new-address-form">
+              <input placeholder="Label (Home, Work…)" [ngModel]="newAddress().label" (ngModelChange)="newAddress.set({ ...newAddress(), label: $event })" />
+              <input placeholder="Address line 1" [ngModel]="newAddress().line1" (ngModelChange)="newAddress.set({ ...newAddress(), line1: $event })" />
+              <input placeholder="Address line 2 (optional)" [ngModel]="newAddress().line2" (ngModelChange)="newAddress.set({ ...newAddress(), line2: $event })" />
+              <div class="row">
+                <input placeholder="City" [ngModel]="newAddress().city" (ngModelChange)="newAddress.set({ ...newAddress(), city: $event })" />
+                <input placeholder="State" [ngModel]="newAddress().state" (ngModelChange)="newAddress.set({ ...newAddress(), state: $event })" />
+                <input placeholder="PIN code" [ngModel]="newAddress().postalCode" (ngModelChange)="newAddress.set({ ...newAddress(), postalCode: $event })" />
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" [ngModel]="newAddress().isDefault" (ngModelChange)="newAddress.set({ ...newAddress(), isDefault: $event })" />
+                Set as primary address for delivery/pickup
+              </label>
+              <button type="button" class="btn-add" (click)="saveNewAddress()">Save Address</button>
+            </div>
+          }
+
+          <div class="field">
+            <label>Pickup date &amp; time</label>
+            <input type="datetime-local" [ngModel]="pickupAt()" (ngModelChange)="pickupAt.set($event)" />
+          </div>
+
+          <div class="field">
+            <label>Promo code</label>
+            @if (appliedPromo(); as promo) {
+              <div class="promo-applied">
+                <span>"{{ promo.code }}" applied</span>
+                <button type="button" class="link-btn" (click)="removePromoCode()">Remove</button>
+              </div>
+            } @else {
+              <div class="promo-input-row">
+                <input
+                  type="text"
+                  placeholder="Enter promo code"
+                  [ngModel]="promoCodeInput()"
+                  (ngModelChange)="promoCodeInput.set($event)"
+                />
+                <button type="button" (click)="applyPromoCode()">Apply</button>
+              </div>
+              @if (promoError()) { <p class="error">{{ promoError() }}</p> }
+            }
+          </div>
+
+          <div class="totals">
+            <div class="row"><span>Subtotal</span><span>₹{{ cart.subtotal() }}</span></div>
+            @if (isExpress()) {
+              <div class="row"><span>Express surcharge</span><span>₹{{ expressExtra() }}</span></div>
+            }
+            @if (discountAmount() > 0) {
+              <div class="row discount"><span>Discount ({{ appliedPromo()?.code }})</span><span>−₹{{ discountAmount() }}</span></div>
+            }
+            <div class="row total"><span>Total</span><span>₹{{ grandTotal() }}</span></div>
+          </div>
+
+          @if (errorMessage()) {
+            <p class="error">{{ errorMessage() }}</p>
+          }
+
+          <button type="button" class="btn-place-order" [disabled]="isPlacingOrder()" (click)="placeOrder()">
+            {{ isPlacingOrder() ? 'Placing order…' : 'Place Order' }}
+          </button>
+        </div>
+      }
+    </aside>
+  }
+</section>

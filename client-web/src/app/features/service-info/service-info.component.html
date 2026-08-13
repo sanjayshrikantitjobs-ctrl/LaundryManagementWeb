@@ -1,0 +1,51 @@
+<section class="service-info-page">
+  <nav class="category-tabs">
+    @for (cat of categories; track cat.slug) {
+      <a [routerLink]="['/services-info', cat.slug]" [class.active]="cat.slug === category().slug">
+        <span class="icon">{{ cat.icon }}</span> {{ cat.name }}
+      </a>
+    }
+  </nav>
+
+  <div class="detail-card">
+    <h1>{{ category().headline }}</h1>
+
+    <div class="compare-block">
+      <div class="visual">
+        <span class="big-icon">{{ category().icon }}</span>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="ours">Our {{ category().name }}</th>
+            <th>Others</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of category().comparison; track row.feature) {
+            <tr>
+              <td>{{ row.feature }}</td>
+              <td class="ours">{{ row.ours ? '✅' : '❌' }}</td>
+              <td>{{ row.others ? '✅' : '❌' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="description">{{ category().description }}</p>
+
+    <ul class="benefits">
+      @for (b of category().benefits; track b) {
+        <li>{{ b }}</li>
+      }
+    </ul>
+
+    <div class="cta-row">
+      <a [href]="whatsAppLink" target="_blank" rel="noopener" class="btn-whatsapp">💬 Chat on WhatsApp</a>
+      <button type="button" class="btn-pickup" (click)="goToShop()">Schedule Pickup</button>
+    </div>
+  </div>
+</section>

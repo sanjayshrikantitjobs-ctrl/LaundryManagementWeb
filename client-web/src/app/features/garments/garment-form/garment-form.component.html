@@ -1,0 +1,47 @@
+<section class="garment-form">
+  <h1>{{ isEditMode() ? 'Edit Garment' : 'New Garment' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Name
+      <input type="text" formControlName="name" placeholder="Shirt, Saree, Blanket…" />
+    </label>
+
+    <label>
+      Category
+      <select formControlName="categoryId">
+        <option value="" disabled>Select a category…</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Special Instructions
+      <textarea formControlName="specialInstructions" rows="3"></textarea>
+    </label>
+
+    <label>
+      Image
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (isUploading()) {
+      <p>Uploading…</p>
+    } @else if (imageUrl()) {
+      <img [src]="imageUrl()" alt="Garment preview" class="image-preview" />
+    }
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

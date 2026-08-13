@@ -1,0 +1,61 @@
+<section class="contact-page">
+  <header>
+    <h1>Contact Us</h1>
+    <p>Have feedback, a complaint, or a question? We're listening.</p>
+  </header>
+
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label>Type</label>
+      <select formControlName="type">
+        <option [ngValue]="ContactMessageType.Feedback">Feedback</option>
+        <option [ngValue]="ContactMessageType.Complaint">Complaint</option>
+        <option [ngValue]="ContactMessageType.Query">Query</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Message</label>
+      <textarea rows="5" formControlName="message" placeholder="Tell us more…"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Attach an image (optional)</label>
+      <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+      @if (isUploading()) { <span class="hint">Uploading…</span> }
+      @if (imageUrl()) { <img [src]="imageUrl()" alt="" class="preview" /> }
+    </div>
+
+    @if (submitError()) { <p class="error">{{ submitError() }}</p> }
+    @if (submitted()) { <p class="success">Thanks — we've received your message.</p> }
+
+    <button type="submit" class="btn-primary" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Sending…' : 'Send Message' }}
+    </button>
+  </form>
+
+  @if (!isLoadingMessages() && myMessages().length > 0) {
+    <div class="history">
+      <h2>Your Previous Messages</h2>
+      @for (msg of myMessages(); track msg.id) {
+        <div class="message-card">
+          <div class="message-head">
+            <span class="type-badge">{{ typeLabel(msg.type) }}</span>
+            <span class="status" [class.resolved]="msg.status === ContactMessageStatus.Resolved">
+              {{ msg.status === ContactMessageStatus.Resolved ? 'Resolved' : 'Open' }}
+            </span>
+            <span class="date">{{ msg.createdAtUtc | date: 'mediumDate' }}</span>
+          </div>
+          <p class="message-text">{{ msg.message }}</p>
+          @if (msg.imageUrl) { <img [src]="msg.imageUrl" alt="" class="thumb" /> }
+          @if (msg.response) {
+            <div class="response">
+              <strong>Our reply:</strong>
+              <p>{{ msg.response }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

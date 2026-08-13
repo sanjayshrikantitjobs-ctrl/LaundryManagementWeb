@@ -1,0 +1,104 @@
+/* Global styles for the Laundry Management System.
+   Palette/typography modeled on the Freshen laundry-service theme
+   (https://themewagon.github.io/Freshen/home.html): light sky-blue surfaces,
+   deep-blue text, a warm orange accent for primary actions, Inter typeface. */
+
+:root {
+  --color-bg: #f0f9ff;
+  --color-surface: #ffffff;
+  --color-text: #0c4a6e;
+  --color-text-muted: #0369a1;
+  --color-subtle: #64748b;
+  --color-primary: #0369a1;
+  --color-primary-dark: #0c4a6e;
+  --color-primary-light: #e0f2fe;
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+  --color-accent-light: #ffedd5;
+  --color-border: #bae6fd;
+  --color-danger: #b91c1c;
+  --color-danger-light: #fee2e2;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 2px 8px rgba(3, 105, 161, 0.08);
+  --shadow-md: 0 8px 20px rgba(3, 105, 161, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4 {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+/* Shared icon-action-button styling for admin list grids (Edit/Delete/Deactivate
+   across Customers/Garments/Services/Categories/Add-ons/Promotions/Plans/Users).
+   Global (not component-scoped) so every grid gets the same normalized sizing and
+   vertical alignment from one place, instead of near-duplicate per-component CSS. */
+td.actions {
+  vertical-align: middle;
+}
+
+.actions-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Generic avatar placeholder for Customers/Users grids — no upload, just a visual
+   marker distinguishing rows at a glance. */
+td.avatar {
+  width: 40px;
+}
+
+.avatar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  font-size: 1rem;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-light);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+
+  &.danger {
+    background: var(--color-danger-light);
+  }
+}

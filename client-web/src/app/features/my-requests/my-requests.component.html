@@ -1,0 +1,34 @@
+<section class="requests-page">
+  <header>
+    <h1>My Requests</h1>
+    <p>Your newly placed and in-progress laundry requests.</p>
+  </header>
+
+  @if (isLoading()) {
+    <p class="hint">Loading your requests…</p>
+  } @else if (activeRequests().length === 0) {
+    <div class="empty">
+      <span>🧺</span>
+      <p>No active requests right now.</p>
+      <a routerLink="/shop" class="btn-primary">Place a New Order</a>
+    </div>
+  } @else {
+    <div class="request-list">
+      @for (order of activeRequests(); track order.id) {
+        <a class="request-card" [routerLink]="['/orders', order.id]">
+          <div class="request-main">
+            <strong>{{ order.orderNumber }}</strong>
+            <span class="status-badge" [attr.data-status]="order.status">{{ orderStatusLabel(order.status) }}</span>
+          </div>
+          <div class="request-meta">
+            <span>Placed {{ order.createdAtUtc | date: 'medium' }}</span>
+            @if (order.promisedByUtc) {
+              <span>Expected by {{ order.promisedByUtc | date: 'medium' }}</span>
+            }
+          </div>
+          <div class="request-amount">₹{{ order.totalAmount }}</div>
+        </a>
+      }
+    </div>
+  }
+</section>

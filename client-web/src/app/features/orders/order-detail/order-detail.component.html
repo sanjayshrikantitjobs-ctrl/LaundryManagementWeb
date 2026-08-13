@@ -1,0 +1,214 @@
+<section class="order-detail-page">
+  <a routerLink="/orders" class="back-link">← Back to Orders</a>
+
+  @if (isLoading()) {
+    <p class="hint">Loading order…</p>
+  } @else if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  } @else if (order(); as order) {
+    <header class="order-header">
+      <div>
+        <h1>{{ order.orderNumber }}</h1>
+        <span class="status-badge">{{ orderStatusLabel(order.status) }}</span>
+      </div>
+      <div class="total">₹{{ order.totalAmount }}</div>
+    </header>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="label">Order Placed</span>
+        <span class="value">{{ order.createdAtUtc | date: 'medium' }}</span>
+      </div>
+      @if (order.pickupScheduledAtUtc) {
+        <div class="timeline-item">
+          <span class="label">Pickup Scheduled</span>
+          <span class="value">{{ order.pickupScheduledAtUtc | date: 'medium' }}</span>
+        </div>
+      }
+      @if (order.promisedByUtc) {
+        <div class="timeline-item">
+          <span class="label">Expected By</span>
+          <span class="value">{{ order.promisedByUtc | date: 'medium' }}</span>
+        </div>
+      }
+      @if (order.deliveredAtUtc) {
+        <div class="timeline-item">
+          <span class="label">Delivered</span>
+          <span class="value">{{ order.deliveredAtUtc | date: 'medium' }}</span>
+        </div>
+      }
+    </div>
+
+    <h2>Items</h2>
+    <div class="item-list">
+      @for (item of order.items; track item.id) {
+        <div class="item-row">
+          <div class="item-info">
+            <strong>{{ item.garmentName }}</strong>
+            <span>{{ item.serviceName }}</span>
+            @if (item.addOns.length) {
+              <span class="add-ons">+ {{ addOnNames(item) }}</span>
+            }
+          </div>
+          <div class="item-qty">
+            {{ item.weightKg ? item.weightKg + ' kg' : item.quantity + ' pcs' }}
+          </div>
+          <div class="item-total">₹{{ item.lineTotal }}</div>
+        </div>
+      }
+    </div>
+
+    <h2>Garment Details</h2>
+    <div class="garment-images">
+      <div class="image-type-tabs">
+        <button type="button" [class.active]="imageTypeTab() === GarmentImageType.Pickup" (click)="setImageTypeTab(GarmentImageType.Pickup)">
+          Pickup Photos
+        </button>
+        <button type="button" [class.active]="imageTypeTab() === GarmentImageType.Delivery" (click)="setImageTypeTab(GarmentImageType.Delivery)">
+          Delivery Proof
+        </button>
+      </div>
+
+      @if (serviceTabs().length > 0) {
+        <div class="service-tabs">
+          <button type="button" [class.active]="serviceFilter() === null" (click)="setServiceFilter(null)">All</button>
+          @for (tab of serviceTabs(); track tab.serviceId) {
+            <button type="button" [class.active]="serviceFilter() === tab.serviceId" (click)="setServiceFilter(tab.serviceId)">
+              {{ tab.serviceName }}
+            </button>
+          }
+        </div>
+      }
+
+      @if (filteredImages().length === 0) {
+        <p class="hint">No {{ imageTypeTab() === GarmentImageType.Pickup ? 'pickup' : 'delivery' }} photos yet.</p>
+      } @else {
+        <div class="image-grid">
+          @for (image of filteredImages(); track image.id) {
+            <div class="image-card">
+              <img [src]="image.imageUrl" alt="Garment photo" />
+              <div class="image-meta">
+                <span>{{ image.uploadedByName }}</span>
+                <span>{{ image.uploadedAtUtc | date: 'short' }}</span>
+                @if (image.serviceName) { <span class="service-tag">{{ image.serviceName }}</span> }
+                @if (image.notes) { <span class="notes">{{ image.notes }}</span> }
+              </div>
+              @if (canUpload()) {
+                <button type="button" class="remove-btn" (click)="deleteImage(image)">✕</button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (canUpload()) {
+        <div class="upload-panel">
+          <input type="text" placeholder="Notes (optional)" [ngModel]="uploadNotes()" (ngModelChange)="uploadNotes.set($event)" />
+          <label class="file-label">
+            {{ isUploading() ? 'Uploading…' : 'Add Photo' }}
+            <input type="file" accept="image/*" capture="environment" [disabled]="isUploading()" (change)="onFileSelected($event)" hidden />
+          </label>
+          @if (uploadError()) { <p class="error">{{ uploadError() }}</p> }
+        </div>
+      }
+
+      @if (isPickupAgent && pickupId()) {
+        <div class="confirm-panel">
+          <button type="button" class="btn-confirm" [disabled]="isConfirming()" (click)="confirmPickup()">
+            {{ isConfirming() ? 'Confirming…' : 'Confirm Garments Received' }}
+          </button>
+          @if (confirmError()) { <p class="error">{{ confirmError() }}</p> }
+        </div>
+      }
+
+      @if (isDeliveryAgent && deliveryId()) {
+        <div class="confirm-panel">
+          <button type="button" class="btn-confirm" [disabled]="isConfirming()" (click)="confirmDelivery()">
+            {{ isConfirming() ? 'Confirming…' : 'Confirm Delivery' }}
+          </button>
+          @if (confirmError()) { <p class="error">{{ confirmError() }}</p> }
+        </div>
+      }
+    </div>
+
+    @if (canViewOperations && pickupDeliveries().length > 0) {
+      <h2>Pickup &amp; Delivery</h2>
+      <div class="pickup-delivery-panel">
+        @for (leg of pickupDeliveries(); track leg.id) {
+          <div class="leg-row">
+            <span class="leg-type">{{ leg.isPickup ? 'Pickup' : 'Delivery' }}</span>
+            <span class="leg-status">{{ leg.assignedEmployeeName || 'Unassigned' }}</span>
+            @if (isManagement) {
+              <select [ngModel]="selectedAgentByLeg()[leg.id] ?? ''" (ngModelChange)="onAgentSelect(leg.id, $event)">
+                <option value="" disabled>Select agent…</option>
+                @for (agent of agentsFor(leg); track agent.employeeId) {
+                  <option [value]="agent.employeeId">{{ agent.fullName }}</option>
+                }
+              </select>
+              <button type="button" (click)="assignAgent(leg)">Assign</button>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <div class="summary">
+      <div class="row"><span>Subtotal</span><span>₹{{ order.subTotal }}</span></div>
+      @if (order.discountAmount) {
+        <div class="row discount">
+          <span>Discount{{ order.promoCode ? ' (' + order.promoCode + ')' : '' }}</span>
+          <span>−₹{{ order.discountAmount }}</span>
+        </div>
+      }
+      <div class="row"><span>GST</span><span>₹{{ order.gstAmount }}</span></div>
+      @if (order.deliveryCharge) { <div class="row"><span>Delivery</span><span>₹{{ order.deliveryCharge }}</span></div> }
+      <div class="row total"><span>Total</span><span>₹{{ order.totalAmount }}</span></div>
+      <div class="row payment"><span>Payment Status</span><span>{{ paymentStatusLabel(order.paymentStatus) }}</span></div>
+    </div>
+
+    @if (isManagement) {
+      <div class="admin-panel">
+        <h2>Manage Order</h2>
+
+        <div class="field-row">
+          <label>
+            Status
+            <select [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
+              @for (opt of statusOptions; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Payment Status
+            <select [ngModel]="editPaymentStatus()" (ngModelChange)="editPaymentStatus.set($event)">
+              @for (opt of paymentStatusOptions; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label>
+            Amount Paid (₹)
+            <input type="number" min="0" [ngModel]="editAmountPaid()" (ngModelChange)="editAmountPaid.set($event)" />
+          </label>
+
+          <label>
+            Expected Delivery
+            <input type="datetime-local" [ngModel]="editPromisedAt()" (ngModelChange)="editPromisedAt.set($event)" />
+          </label>
+        </div>
+
+        @if (saveError()) { <p class="error">{{ saveError() }}</p> }
+        @if (saved()) { <p class="success">Order updated — customer notified.</p> }
+
+        <button type="button" class="btn-save" [disabled]="isSaving()" (click)="saveChanges()">
+          {{ isSaving() ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </div>
+    }
+  }
+</section>

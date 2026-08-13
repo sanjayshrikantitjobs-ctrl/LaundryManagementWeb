@@ -1,0 +1,73 @@
+<section class="service-list">
+  <header>
+    <h1>Services</h1>
+    <div class="header-actions">
+      <a routerLink="/garments" class="link">Garments</a>
+      <a routerLink="/services" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="link">Services</a>
+      <a routerLink="/services/categories" routerLinkActive="active" class="link">Categories</a>
+      @if (canEdit) {
+        <a routerLink="new" class="btn-primary">+ New Service</a>
+      }
+    </div>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by name…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  @if (isLoading()) {
+    <p>Loading services…</p>
+  } @else if (services().length === 0) {
+    <p>No services found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="sortable" (click)="sortByColumn('name')">Name {{ sortIndicator('name') }}</th>
+          <th class="sortable" (click)="sortByColumn('basePrice')">Base Price {{ sortIndicator('basePrice') }}</th>
+          <th>GST %</th>
+          <th class="sortable" (click)="sortByColumn('estimatedTimeHours')">Est. Time (hrs) {{ sortIndicator('estimatedTimeHours') }}</th>
+          <th class="sortable" (click)="sortByColumn('priority')">Priority {{ sortIndicator('priority') }}</th>
+          @if (canEdit) { <th></th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (service of services(); track service.id) {
+          <tr>
+            <td class="thumb">
+              @if (service.imageUrl) {
+                <img [src]="service.imageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🧼</span>
+              }
+            </td>
+            <td>{{ service.name }}</td>
+            <td>{{ service.basePrice | currency: 'INR' }}</td>
+            <td>{{ service.gstPercentage }}%</td>
+            <td>{{ service.estimatedTimeHours }}</td>
+            <td>{{ service.priority }}</td>
+            @if (canEdit) {
+              <td class="actions">
+                <div class="actions-inner">
+                  <a [routerLink]="[service.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deleteService(service)">🗑️</button>
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

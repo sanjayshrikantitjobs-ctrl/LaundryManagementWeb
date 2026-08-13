@@ -1,0 +1,116 @@
+<section class="pricing-matrix">
+  <header>
+    <h1>Pricing Matrix</h1>
+    @if (canEdit) {
+      <a routerLink="/garments" class="link">&larr; Back to Garments</a>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading pricing matrix…</p>
+  } @else if (!matrix() || matrix()!.garments.length === 0) {
+    <p>Add garments and services first to configure pricing.</p>
+  } @else {
+    <div class="category-select">
+      <label for="pmCategory">Category</label>
+      <select id="pmCategory" [ngModel]="selectedCategoryId()" (ngModelChange)="selectCategory($event)">
+        @for (group of groupedServices(); track group.categoryId) {
+          <option [ngValue]="group.categoryId">{{ group.categoryName }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="grid-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Garment</th>
+            @for (service of visibleGroup()?.services ?? []; track service.id) {
+              <th>{{ service.name }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visibleRows(); track row.garmentId) {
+            <tr>
+              <td class="garment-name">{{ row.garmentName }}</td>
+              @for (service of visibleGroup()?.services ?? []; track service.id) {
+                @if (cellFor(row, service.id); as cell) {
+                  <td class="price-cell" [class.inactive]="!cell.isActive">
+                    <div class="price-cell-inner">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [value]="cell.price ?? ''"
+                        placeholder="—"
+                        [disabled]="!canEdit || savingKey() === cellKey(row.garmentId, cell.serviceId)"
+                        (change)="onPriceChange(row.garmentId, cell, $any($event.target).value)"
+                      />
+                      @if (canEdit) {
+                        <button type="button" class="edit-cell"
+                                (click)="openEditor(row.garmentId, row.garmentName, serviceName(cell.serviceId), cell)"
+                                title="Edit overrides">⚙</button>
+                      }
+                    </div>
+                  </td>
+                }
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (editingCell(); as ctx) {
+    <div class="modal-backdrop" (click)="closeEditor()">
+      <div class="modal" (click)="$event.stopPropagation()" [formGroup]="editForm">
+        <h2>{{ ctx.garmentName }} — {{ ctx.serviceName }}</h2>
+
+        <label>
+          Pricing Type
+          <select formControlName="pricingType">
+            <option [ngValue]="PricingType.PerItem">Per Item</option>
+            <option [ngValue]="PricingType.WeightBased">Weight Based (per kg)</option>
+          </select>
+        </label>
+
+        <label>
+          Price (₹)
+          <input type="number" formControlName="price" min="0" step="0.01" />
+        </label>
+
+        <label>
+          Express Price (₹) — blank uses Service's surcharge default
+          <input type="number" formControlName="expressPrice" min="0" step="0.01" />
+        </label>
+
+        <label>
+          GST % — blank uses Service default
+          <input type="number" formControlName="gstPercentage" min="0" max="100" step="0.01" />
+        </label>
+
+        <label>
+          Estimated Time (hours) — blank uses Service default
+          <input type="number" formControlName="estimatedTimeHours" min="1" />
+        </label>
+
+        <label>
+          Express ETA (hours) — blank uses Service default
+          <input type="number" formControlName="expressEtaHours" min="1" />
+        </label>
+
+        <label class="checkbox">
+          <input type="checkbox" formControlName="isActive" />
+          Active (visible to customers)
+        </label>
+
+        <div class="actions">
+          <button type="button" (click)="closeEditor()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="saveEditor()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

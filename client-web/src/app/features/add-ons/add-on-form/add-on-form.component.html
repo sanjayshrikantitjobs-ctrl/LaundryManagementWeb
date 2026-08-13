@@ -1,0 +1,38 @@
+<section class="category-form">
+  <h1>{{ isEditMode() ? 'Edit Add-on' : 'New Add-on' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Name
+      <input type="text" formControlName="name" placeholder="Stain Removal, Premium Packaging…" />
+    </label>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="2"></textarea>
+    </label>
+
+    <label>
+      Price (₹)
+      <input type="number" formControlName="price" min="0" />
+    </label>
+
+    @if (isEditMode()) {
+      <label class="checkbox">
+        <input type="checkbox" formControlName="isActive" />
+        Active (selectable by customers)
+      </label>
+    }
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

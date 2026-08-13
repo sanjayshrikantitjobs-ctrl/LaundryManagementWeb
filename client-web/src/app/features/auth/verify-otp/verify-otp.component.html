@@ -1,0 +1,26 @@
+<section class="verify-otp">
+  <h1>Verify your phone</h1>
+  <p>We sent a 6-digit code over WhatsApp to {{ phoneNumber() }}.</p>
+
+  @if (devOtpCode()) {
+    <p class="dev-note">
+      Dev mode: no WhatsApp provider is configured yet, so here's your code directly —
+      <strong>{{ devOtpCode() }}</strong> (already filled in below).
+    </p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Code
+      <input type="text" inputmode="numeric" maxlength="6" formControlName="code" autocomplete="one-time-code" />
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="form.invalid || isSubmitting()">
+      {{ isSubmitting() ? 'Verifying…' : 'Verify & sign in' }}
+    </button>
+  </form>
+</section>

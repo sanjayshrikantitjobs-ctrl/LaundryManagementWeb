@@ -1,0 +1,110 @@
+<section class="settings-page">
+  <header>
+    <h1>Settings</h1>
+  </header>
+
+  <div class="tabs">
+    <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
+    <button type="button" [class.active]="activeTab() === 'address'" (click)="activeTab.set('address')">Address</button>
+  </div>
+
+  @if (activeTab() === 'general') {
+    @if (profileError()) { <p class="error">{{ profileError() }}</p> }
+    <form class="panel" [formGroup]="generalForm" (ngSubmit)="saveGeneral()">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" formControlName="fullName" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>WhatsApp Number</label>
+        <input type="tel" formControlName="whatsAppNumber" placeholder="+91XXXXXXXXXX" />
+      </div>
+
+      @if (generalError()) { <p class="error">{{ generalError() }}</p> }
+      @if (generalSaved()) { <p class="success">Profile updated.</p> }
+
+      <button type="submit" class="btn-primary" [disabled]="isSavingGeneral()">
+        {{ isSavingGeneral() ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </form>
+  }
+
+  @if (activeTab() === 'address') {
+    <div class="panel">
+      @if (addressesError()) {
+        <p class="error">{{ addressesError() }}</p>
+      } @else if (isLoadingAddresses()) {
+        <p class="hint">Loading addresses…</p>
+      } @else if (addresses().length === 0 && !showAddressForm()) {
+        <p class="hint">No saved addresses yet.</p>
+      } @else if (addresses().length > 0) {
+        <div class="table-wrap">
+          <table class="address-grid">
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>PIN</th>
+                <th>Primary</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (addr of addresses(); track addr.id) {
+                <tr>
+                  <td>{{ addr.label }}</td>
+                  <td>{{ addr.line1 }}@if (addr.line2) {, {{ addr.line2 }}}</td>
+                  <td>{{ addr.city }}</td>
+                  <td>{{ addr.state }}</td>
+                  <td>{{ addr.postalCode }}</td>
+                  <td>
+                    @if (addr.isDefault) {
+                      <span class="primary-badge">Primary</span>
+                    } @else {
+                      <button type="button" class="link-btn" (click)="setPrimary(addr.id)">Set as Primary</button>
+                    }
+                  </td>
+                  <td>
+                    <button type="button" class="danger" (click)="deleteAddress(addr.id)">Delete</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (showAddressForm()) {
+        <form class="address-form" [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+          <div class="row">
+            <input placeholder="Label (Home, Work…)" formControlName="label" />
+            <input placeholder="PIN code" formControlName="postalCode" />
+          </div>
+          <input placeholder="Address line 1" formControlName="line1" />
+          <input placeholder="Address line 2 (optional)" formControlName="line2" />
+          <div class="row">
+            <input placeholder="City" formControlName="city" />
+            <input placeholder="State" formControlName="state" />
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" formControlName="isDefault" />
+            Set as primary address for delivery/pickup
+          </label>
+          <button type="submit" class="btn-primary" [disabled]="isSavingAddress()">
+            {{ isSavingAddress() ? 'Saving…' : 'Save Address' }}
+          </button>
+        </form>
+      }
+
+      <button type="button" class="link-btn" (click)="toggleAddressForm()">
+        {{ showAddressForm() ? 'Cancel' : '+ Add New Address' }}
+      </button>
+    </div>
+  }
+</section>

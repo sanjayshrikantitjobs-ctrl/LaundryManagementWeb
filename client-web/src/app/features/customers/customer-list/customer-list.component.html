@@ -1,0 +1,128 @@
+<section class="customer-list">
+  <header>
+    <h1>Customers</h1>
+    <a routerLink="new" class="btn-primary">+ New Customer</a>
+  </header>
+
+  <input
+    type="search"
+    placeholder="Search by name, phone or email…"
+    (input)="onSearch($any($event.target).value)"
+  />
+
+  <div class="tabs">
+    <button type="button" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All</button>
+    <button type="button" [class.active]="activeTab() === 'new'" (click)="setTab('new')">New Customers</button>
+    <button type="button" [class.active]="activeTab() === 'inactive'" (click)="setTab('inactive')">Inactive Customers</button>
+    <button type="button" [class.active]="activeTab() === 'subscribed'" (click)="setTab('subscribed')">Subscribed Customers</button>
+  </div>
+
+  @if (activeTab() !== 'subscribed') {
+    <p class="legend">
+      <span class="dot yellow"></span> 1+ week without an order
+      <span class="dot orange"></span> 2+ weeks
+      <span class="dot red"></span> 3+ weeks — consider a follow-up offer
+    </p>
+  }
+
+  @if (isLoading()) {
+    <p>Loading customers…</p>
+  } @else if (activeTab() === 'subscribed') {
+    @if (subscribedCustomers().length === 0) {
+      <p>No subscribed customers found.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Plan</th>
+            <th>Membership Status</th>
+            <th>Membership Validity</th>
+            <th>Recurring Value</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of subscribedCustomers(); track sub.id) {
+            <tr>
+              <td>{{ sub.customerName }}</td>
+              <td>{{ sub.planName }}</td>
+              <td><span class="badge">{{ subscriptionStatusLabel(sub.status) }}</span></td>
+              <td>{{ sub.endDate | date: 'd MMM y' }}</td>
+              <td>{{ sub.recurringValue | currency: 'INR' }}</td>
+              <td class="actions">
+                <div class="actions-inner">
+                  <a [routerLink]="['/subscriptions/customers', sub.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <app-pagination
+        [pageNumber]="pageNumber()"
+        [pageSize]="pageSize()"
+        [totalCount]="totalCount()"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    }
+  } @else if (customers().length === 0) {
+    <p>No customers found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="sortable" (click)="sortByColumn('fullName')">Name {{ sortIndicator('fullName') }}</th>
+          <th class="sortable" (click)="sortByColumn('phoneNumber')">Phone {{ sortIndicator('phoneNumber') }}</th>
+          <th>Email</th>
+          <th>Membership</th>
+          <th>Last Order</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (customer of customers(); track customer.id) {
+          <tr [attr.data-tier]="activityTier(customer)" [title]="activityLabel(customer)">
+            <td class="avatar"><span class="avatar-icon">👤</span></td>
+            <td>{{ customer.fullName }}</td>
+            <td>{{ customer.phoneNumber }}</td>
+            <td>{{ customer.email || '—' }}</td>
+            <td><span class="badge">{{ customer.membershipLabel }}</span></td>
+            <td>{{ customer.lastOrderAtUtc ? (customer.lastOrderAtUtc | date: 'd MMM y') : 'Never' }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="customer.status === CustomerStatus.Inactive">
+                {{ customer.status === CustomerStatus.Inactive ? 'Inactive' : 'Active' }}
+              </span>
+            </td>
+            <td class="actions">
+              <div class="actions-inner">
+                <a [routerLink]="[customer.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [title]="customer.status === CustomerStatus.Inactive ? 'Activate' : 'Deactivate'"
+                  (click)="toggleStatus(customer)"
+                >
+                  {{ customer.status === CustomerStatus.Inactive ? '▶️' : '⏸️' }}
+                </button>
+                <button type="button" class="icon-btn danger" title="Delete" (click)="deleteCustomer(customer)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

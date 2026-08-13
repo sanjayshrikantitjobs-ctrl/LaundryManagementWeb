@@ -1,0 +1,115 @@
+<section class="customer-form">
+  <h1>{{ isEditMode() ? 'Edit Customer' : 'New Customer' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Full Name
+      <input type="text" formControlName="fullName" />
+    </label>
+
+    <label>
+      Phone Number
+      <input type="tel" formControlName="phoneNumber" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+
+    <label>
+      Credit Limit
+      <input type="number" formControlName="creditLimit" min="0" />
+    </label>
+
+    <label>
+      Notes
+      <textarea formControlName="notes" rows="3"></textarea>
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+
+  @if (isEditMode()) {
+    <div class="password-panel membership-panel">
+      <h2>Membership</h2>
+
+      @if (currentSubscription(); as sub) {
+        <p class="hint">
+          Currently on <strong>{{ sub.planName }}</strong> — valid until {{ sub.endDate | date: 'd MMM y' }}.
+        </p>
+        <form [formGroup]="statusForm" (ngSubmit)="updateMembership()" class="membership-form">
+          <label>
+            Status
+            <select formControlName="status">
+              @for (s of subscriptionStatuses; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Recurring Value
+            <input type="number" formControlName="recurringValue" min="0" />
+          </label>
+          <button type="submit" [disabled]="isSavingMembership() || statusForm.invalid">
+            {{ isSavingMembership() ? 'Saving…' : 'Update Membership' }}
+          </button>
+        </form>
+      } @else {
+        <p class="hint">Not currently on a subscription plan. Assign one below — validity is set automatically from the plan's billing cycle.</p>
+        <form [formGroup]="membershipForm" (ngSubmit)="assignMembership()" class="membership-form">
+          <label>
+            Plan
+            <select formControlName="subscriptionPlanId" (change)="onPlanSelected($any($event.target).value)">
+              <option value="" disabled>Select a plan…</option>
+              @for (plan of plans(); track plan.id) {
+                <option [value]="plan.id">{{ plan.name }} ({{ billingCycleLabel(plan.billingCycle) }}) — ₹{{ plan.price }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Recurring Value
+            <input type="number" formControlName="recurringValue" min="0" />
+          </label>
+          <label>
+            Start Date
+            <input type="date" formControlName="startDate" />
+          </label>
+          <button type="submit" [disabled]="isSavingMembership() || membershipForm.invalid">
+            {{ isSavingMembership() ? 'Saving…' : 'Assign Membership' }}
+          </button>
+        </form>
+      }
+
+      @if (membershipError()) { <p class="error">{{ membershipError() }}</p> }
+      @if (membershipSaved()) { <p class="success">Membership updated.</p> }
+    </div>
+
+    <div class="password-panel">
+      <h2>Reset Login Password</h2>
+      <p class="hint">Sets this customer's portal password directly — no old password needed.</p>
+      <div class="password-row">
+        <input
+          type="password"
+          placeholder="New password (min. 8 characters)"
+          [value]="newPassword()"
+          (input)="newPassword.set($any($event.target).value)"
+        />
+        <button type="button" [disabled]="isSavingPassword()" (click)="savePassword()">
+          {{ isSavingPassword() ? 'Saving…' : 'Set Password' }}
+        </button>
+      </div>
+      @if (passwordError()) { <p class="error">{{ passwordError() }}</p> }
+      @if (passwordSaved()) { <p class="success">Password updated.</p> }
+    </div>
+  }
+</section>

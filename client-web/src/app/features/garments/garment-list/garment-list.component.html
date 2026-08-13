@@ -1,0 +1,74 @@
+<section class="garment-list">
+  <header>
+    <h1>Garments</h1>
+    <div class="header-actions">
+      <a routerLink="/services" class="link">Services</a>
+      <a routerLink="/garments/pricing" class="link">Pricing Matrix</a>
+      @if (canEdit) {
+        <a routerLink="new" class="btn-primary">+ New Garment</a>
+      }
+    </div>
+  </header>
+
+  <div class="filters">
+    <input
+      type="search"
+      placeholder="Search by name…"
+      (input)="onSearch($any($event.target).value)"
+    />
+    <select (change)="onCategoryChange($any($event.target).value)">
+      <option value="">All Categories</option>
+      @for (category of categories(); track category.id) {
+        <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <p>Loading garments…</p>
+  } @else if (garments().length === 0) {
+    <p>No garments found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="sortable" (click)="sortByColumn('name')">Name {{ sortIndicator('name') }}</th>
+          <th>Category</th>
+          @if (canEdit) { <th></th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (garment of garments(); track garment.id) {
+          <tr>
+            <td class="thumb">
+              @if (garment.imageUrl) {
+                <img [src]="garment.imageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🧺</span>
+              }
+            </td>
+            <td>{{ garment.name }}</td>
+            <td>{{ garment.categoryName }}</td>
+            @if (canEdit) {
+              <td class="actions">
+                <div class="actions-inner">
+                  <a [routerLink]="[garment.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deleteGarment(garment)">🗑️</button>
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  }
+</section>

@@ -1,0 +1,47 @@
+<section class="plan-list">
+  <header>
+    <h1>Subscription Plans</h1>
+    <div class="header-actions">
+      <a routerLink="/subscriptions/customers" routerLinkActive="active" class="link">Customer Subscriptions</a>
+      <a routerLink="new" class="btn-primary">+ New Plan</a>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading plans…</p>
+  } @else if (plans().length === 0) {
+    <p>No subscription plans yet.</p>
+  } @else {
+    @for (group of groups(); track group.billingCycle) {
+      <section class="plan-group">
+        <h2>{{ group.title }}</h2>
+        <div class="plan-cards">
+          @for (plan of group.plans; track plan.id) {
+            <article class="plan-card" [class.inactive]="!plan.isActive">
+              <header>
+                <h3>{{ plan.name }}</h3>
+                <span class="price">₹{{ plan.price }}</span>
+              </header>
+              @if (plan.description) {
+                <p class="description">{{ plan.description }}</p>
+              }
+              <ul class="features">
+                <li>{{ plan.garmentsPerCycle }} garments/cycle</li>
+                @for (feature of plan.features; track feature.id) {
+                  <li>{{ feature.text }}</li>
+                }
+              </ul>
+              @if (!plan.isActive) {
+                <span class="badge">Inactive</span>
+              }
+              <div class="actions-inner">
+                <a [routerLink]="[plan.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button type="button" class="icon-btn danger" title="Delete" (click)="deletePlan(plan)">🗑️</button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

@@ -1,0 +1,38 @@
+<div class="pagination-bar">
+  <div class="page-size">
+    <label for="pageSize">Page Size:</label>
+    <select id="pageSize" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
+      @for (size of pageSizeOptions; track size) {
+        <option [ngValue]="size">{{ size }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="summary">
+    @if (totalCount() === 0) {
+      No records
+    } @else {
+      Showing {{ startItem() }}–{{ endItem() }} of {{ totalCount() }}
+    }
+  </div>
+
+  <div class="controls">
+    <button type="button" class="nav-btn" [disabled]="pageNumber() <= 1" (click)="goToPage(pageNumber() - 1)">
+      ‹ Previous
+    </button>
+
+    @for (page of pageNumbers(); track $index) {
+      @if (page === -1) {
+        <span class="ellipsis">…</span>
+      } @else {
+        <button type="button" class="page-btn" [class.active]="page === pageNumber()" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      }
+    }
+
+    <button type="button" class="nav-btn" [disabled]="pageNumber() >= totalPages()" (click)="goToPage(pageNumber() + 1)">
+      Next ›
+    </button>
+  </div>
+</div>
