@@ -22,12 +22,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- App Icon (commented out while images are missing) -->
-     <MauiIcon Include="Resources\Images\AppIcon\appicon.svg" ForegroundFile="Resources\Images\appiconfg.svg" Color="#3730A3" /> 
-    <!-- Splash Screen (remove or point to existing file if you don't have a splash.svg) -->
-     <MauiSplashScreen Include="Resources\Images\Splash\splash.svg" Color="#3730A3" BaseSize="128,128" /> 
+    <!-- App Icon — plain PNG source (the previous base64-embedded-PNG-in-SVG approach
+         rendered as the OS default icon instead of the actual artwork on-device). -->
+    <MauiIcon Include="Resources\Images\AppIcon\appicon.png" Color="#3730A3" />
+    <!-- Splash Screen — same fix, plain PNG instead of the embedded-SVG trick. -->
+    <MauiSplashScreen Include="Resources\Images\Splash\splash.png" Color="#3730A3" BaseSize="256,256" />
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
+    <MauiImage Remove="Resources\Images\appiconfg.svg" />
     <!-- Custom Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
   </ItemGroup>

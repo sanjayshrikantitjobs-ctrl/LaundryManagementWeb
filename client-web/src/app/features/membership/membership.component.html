@@ -1,0 +1,37 @@
+<section class="membership-page">
+  <header>
+    <h1>Membership Plans</h1>
+    <p>Subscribe to a recurring plan and save on regular laundry needs.</p>
+  </header>
+
+  @if (isLoading()) {
+    <p class="hint">Loading plans…</p>
+  } @else if (groups().length === 0) {
+    <p class="hint">No membership plans are available right now.</p>
+  } @else {
+    @for (group of groups(); track group.billingCycle) {
+      <section class="plan-group">
+        <h2>{{ group.title }}</h2>
+        <div class="plan-cards">
+          @for (plan of group.plans; track plan.id) {
+            <article class="plan-card">
+              <h3>{{ plan.name }}</h3>
+              <p class="price">₹{{ plan.price }} <span>/ cycle</span></p>
+              @if (plan.description) {
+                <p class="description">{{ plan.description }}</p>
+              }
+              <ul class="features">
+                <li>{{ plan.garmentsPerCycle }} garments/cycle</li>
+                @for (feature of plan.features; track feature.id) {
+                  <li>{{ feature.text }}</li>
+                }
+              </ul>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
+    <p class="cta">Interested in a plan? <a routerLink="/contact-us">Contact us to subscribe</a>.</p>
+  }
+</section>

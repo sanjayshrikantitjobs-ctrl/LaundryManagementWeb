@@ -3,6 +3,8 @@
     <h1>Services</h1>
     <div class="header-actions">
       <a routerLink="/garments" class="link">Garments</a>
+      <a routerLink="/services" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="link">Services</a>
+      <a routerLink="/services/categories" routerLinkActive="active" class="link">Categories</a>
       @if (canEdit) {
         <a routerLink="new" class="btn-primary">+ New Service</a>
       }
@@ -49,8 +51,10 @@
             <td>{{ service.priority }}</td>
             @if (canEdit) {
               <td class="actions">
-                <a [routerLink]="[service.id, 'edit']">Edit</a>
-                <button type="button" (click)="deleteService(service)">Delete</button>
+                <div class="actions-inner">
+                  <a [routerLink]="[service.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deleteService(service)">🗑️</button>
+                </div>
               </td>
             }
           </tr>

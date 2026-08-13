@@ -4,22 +4,25 @@
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.GarmentsPage"
              x:DataType="vm:GarmentsViewModel"
              Title="Garments">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewGarmentCommand}" IsEnabled="{Binding CanEditMasterData}" />
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="garments" />
 
-        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Picker Grid.Row="1" Margin="16,8" ItemsSource="{Binding Categories}" ItemDisplayBinding="{Binding Name}"
+                SelectedItem="{Binding SelectedCategory}" Title="Filter by category" />
+
+        <Button Grid.Row="2" Text="+ New Garment" HorizontalOptions="End" Margin="16,0,16,8"
+                Command="{Binding NewGarmentCommand}" IsVisible="{Binding CanEditMasterData}" />
+
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Garments}"
                             RemainingItemsThreshold="3"
                             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
@@ -32,22 +35,27 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:GarmentListItem">
-                        <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                                <Label Grid.Column="0" Text="{Binding Name, Converter={StaticResource GarmentIconConverter}}"
-                                       FontSize="28" VerticalOptions="Center" Margin="0,0,12,0" />
+                        <Frame Style="{StaticResource ListCard}" Padding="12,10" MinimumHeightRequest="72">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenGarmentCommand}" />
+                            </Frame.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="Transparent"
+                                        BackgroundColor="{StaticResource PrimaryLight}" WidthRequest="44" HeightRequest="44" Padding="0"
+                                        VerticalOptions="Center" Margin="0,0,12,0">
+                                    <Grid>
+                                        <Label Text="{Binding Name, Converter={StaticResource GarmentIconConverter}}"
+                                               FontSize="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                               Aspect="AspectFill" IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}" />
+                                    </Grid>
+                                </Border>
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                    <Label Text="{Binding Name}" FontAttributes="Bold" />
-                                    <Label Text="{Binding Category}" Style="{StaticResource SubtleLabel}" />
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="WordWrap" />
+                                    <Label Text="{Binding CategoryName}" Style="{StaticResource SubtleLabel}" LineBreakMode="WordWrap" />
                                 </VerticalStackLayout>
-                                <Button Grid.Column="2" Text="Edit" Style="{StaticResource OutlineButton}"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditGarmentCommand}" />
-                                <Button Grid.Column="3" Text="Delete" Style="{StaticResource DangerButton}"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteGarmentCommand}" />
                             </Grid>
                         </Frame>
                     </DataTemplate>

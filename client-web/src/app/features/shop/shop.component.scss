@@ -106,6 +106,33 @@
   }
 }
 
+.category-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+
+  .category-tab {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--color-text);
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &.active {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+      color: #fff;
+    }
+  }
+}
+
 .service-tabs {
   display: flex;
   gap: 12px;
@@ -255,6 +282,21 @@
 
     span {
       font-weight: 600;
+    }
+  }
+
+  .add-ons-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+
+    .add-on-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
     }
   }
 

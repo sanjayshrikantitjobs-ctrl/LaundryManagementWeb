@@ -18,10 +18,15 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(OrderFormPage), typeof(OrderFormPage));
         Routing.RegisterRoute(nameof(OrderDetailPage), typeof(OrderDetailPage));
         Routing.RegisterRoute(nameof(CustomerFormPage), typeof(CustomerFormPage));
+        Routing.RegisterRoute(nameof(CustomerDetailPage), typeof(CustomerDetailPage));
+        Routing.RegisterRoute(nameof(GarmentDetailPage), typeof(GarmentDetailPage));
+        Routing.RegisterRoute(nameof(UserDetailPage), typeof(UserDetailPage));
+        Routing.RegisterRoute(nameof(ServiceDetailPage), typeof(ServiceDetailPage));
         Routing.RegisterRoute(nameof(GarmentFormPage), typeof(GarmentFormPage));
         Routing.RegisterRoute(nameof(ServiceFormPage), typeof(ServiceFormPage));
         Routing.RegisterRoute(nameof(UserFormPage), typeof(UserFormPage));
         Routing.RegisterRoute(nameof(CartPage), typeof(CartPage));
+        Routing.RegisterRoute(nameof(SubscriptionPlanFormPage), typeof(SubscriptionPlanFormPage));
 
         GreetingLabel.Text = BuildGreeting(authService.FullName);
         BuildTabsForRole(authService.Role);
@@ -72,11 +77,13 @@ public partial class AppShell : Shell
             tabBar.Items.Add(CreateTab("Garments", "garments", typeof(GarmentsPage)));
             tabBar.Items.Add(CreateTab("Services", "services", typeof(ServicesPage)));
             tabBar.Items.Add(CreateTab("Pricing", "pricing", typeof(PricingMatrixPage)));
+            tabBar.Items.Add(CreateTab("Subscriptions", "subscriptions", typeof(SubscriptionsPage)));
         }
 
         if (isCustomer)
         {
             tabBar.Items.Add(CreateTab("Price List", "PriceListPage", typeof(PriceListPage)));
+            tabBar.Items.Add(CreateTab("Membership", "SubscriptionsPage", typeof(SubscriptionsPage)));
             tabBar.Items.Add(CreateTab("Settings", "SettingsPage", typeof(SettingsPage)));
             tabBar.Items.Add(CreateTab("Contact Us", "ContactUsPage", typeof(ContactUsPage)));
         }

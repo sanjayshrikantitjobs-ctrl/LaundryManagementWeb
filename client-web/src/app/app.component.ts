@@ -2,13 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 import { NotificationBellComponent } from './shared/notification-bell/notification-bell.component';
+import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
 import { SERVICE_INFO_CATEGORIES } from './features/service-info/service-info.data';
 import { homeRouteForRole } from './core/utils/role-home.util';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBellComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBellComponent, ConfirmDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

@@ -1,4 +1,5 @@
 using LaundryMgmt.Application.Common.Interfaces;
+using LaundryMgmt.Domain.Entities;
 using LaundryMgmt.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ public record CustomerAddressDto(
 public record CustomerDetailDto(
     Guid Id, string FullName, string PhoneNumber, string? Email,
     decimal WalletBalance, decimal CreditLimit, int LoyaltyPoints,
-    MembershipTier MembershipTier, CustomerStatus Status, string? Notes, List<CustomerAddressDto> Addresses);
+    MembershipTier MembershipTier, string MembershipLabel, CustomerStatus Status, string? Notes, List<CustomerAddressDto> Addresses);
 
 public record GetCustomerByIdQuery(Guid CustomerId) : IRequest<CustomerDetailDto>;
 
@@ -28,10 +29,16 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
             .FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken)
             ?? throw new KeyNotFoundException($"Customer {request.CustomerId} not found.");
 
+        var membershipLabel = await _db.CustomerSubscriptions
+            .Where(s => s.CustomerId == customer.Id && s.Status == SubscriptionStatus.Active)
+            .OrderByDescending(s => s.CreatedAtUtc)
+            .Select(s => s.SubscriptionPlan!.Name)
+            .FirstOrDefaultAsync(cancellationToken) ?? "None";
+
         return new CustomerDetailDto(
             customer.Id, customer.FullName, customer.PhoneNumber, customer.Email,
             customer.WalletBalance, customer.CreditLimit, customer.LoyaltyPoints,
-            customer.MembershipTier, customer.Status, customer.Notes,
+            customer.MembershipTier, membershipLabel, customer.Status, customer.Notes,
             customer.Addresses.Select(a => new CustomerAddressDto(
                 a.Id, a.Label, a.Line1, a.Line2, a.City, a.State, a.PostalCode, a.IsDefault)).ToList());
     }

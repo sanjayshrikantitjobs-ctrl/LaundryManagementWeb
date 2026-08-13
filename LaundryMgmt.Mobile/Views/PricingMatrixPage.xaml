@@ -7,17 +7,20 @@
              x:DataType="vm:PricingMatrixViewModel"
              Title="Pricing">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="pricing" />
 
-        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Picker Grid.Row="1" Margin="16,8" ItemsSource="{Binding Categories}" ItemDisplayBinding="{Binding CategoryName}"
+                SelectedItem="{Binding SelectedCategory}" Title="Category" />
+
+        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="3" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                             Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsLoading}" Command="{Binding InitializeCommand}"
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsLoading}" Command="{Binding InitializeCommand}"
                      IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView ItemsSource="{Binding Rows}">
                 <CollectionView.EmptyView>
@@ -32,7 +35,7 @@
                         <Frame Style="{StaticResource ListCard}">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="{Binding GarmentName}" FontAttributes="Bold" />
-                                <Label Text="{Binding Category}" Style="{StaticResource SubtleLabel}" />
+                                <Label Text="{Binding CategoryName}" Style="{StaticResource SubtleLabel}" />
 
                                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                                     <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cells}">

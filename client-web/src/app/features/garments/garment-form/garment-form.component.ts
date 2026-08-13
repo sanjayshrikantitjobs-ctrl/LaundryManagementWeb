@@ -6,6 +6,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GarmentsService } from '../garments.service';
 import { UploadService } from '../../../core/services/upload.service';
+import { CategoriesService } from '../../categories/categories.service';
+import { ServiceCategory } from '../../../core/models/catalog.models';
 
 @Component({
   selector: 'app-garment-form',
@@ -18,6 +20,7 @@ export class GarmentFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly garmentsService = inject(GarmentsService);
   private readonly uploadService = inject(UploadService);
+  private readonly categoriesService = inject(CategoriesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -26,25 +29,26 @@ export class GarmentFormComponent implements OnInit {
   readonly isUploading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly imageUrl = signal<string | undefined>(undefined);
+  readonly categories = signal<ServiceCategory[]>([]);
 
   private garmentId: string | null = null;
 
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
-    category: ['', [Validators.required, Validators.maxLength(100)]],
-    barcode: [''],
+    categoryId: ['', [Validators.required]],
     specialInstructions: ['']
   });
 
   ngOnInit(): void {
+    this.categoriesService.getCategories().subscribe((categories) => this.categories.set(categories));
+
     this.garmentId = this.route.snapshot.paramMap.get('id');
     if (this.garmentId) {
       this.isEditMode.set(true);
       this.garmentsService.getGarmentById(this.garmentId).subscribe((garment) => {
         this.form.patchValue({
           name: garment.name,
-          category: garment.category,
-          barcode: garment.barcode,
+          categoryId: garment.categoryId,
           specialInstructions: garment.specialInstructions
         });
         this.imageUrl.set(garment.imageUrl);
@@ -81,8 +85,7 @@ export class GarmentFormComponent implements OnInit {
     const value = this.form.getRawValue();
     const request = {
       name: value.name!,
-      category: value.category!,
-      barcode: value.barcode || undefined,
+      categoryId: value.categoryId!,
       specialInstructions: value.specialInstructions || undefined,
       imageUrl: this.imageUrl()
     };

@@ -37,12 +37,21 @@ public partial class PricingMatrixCell : ObservableObject
     partial void OnPricingTypeChanged(PricingType? value) => OnPropertyChanged(nameof(DisplayText));
 }
 
-public record PricingMatrixRow(Guid GarmentId, string GarmentName, string Category, List<PricingMatrixCell> Cells);
+public record PricingMatrixCategoryOption(Guid CategoryId, string CategoryName);
+
+public record PricingMatrixRow(Guid GarmentId, string GarmentName, Guid CategoryId, string CategoryName, List<PricingMatrixCell> Cells);
 
 public partial class PricingMatrixViewModel : ObservableObject
 {
     private readonly ApiClient _apiClient;
     private readonly AuthService _authService;
+
+    private PricingMatrixDto? _matrix;
+
+    /// <summary>Distinct categories derived from matrix.Services, in display order —
+    /// mirrors web's groupedServices. Only the selected category's services show as
+    /// columns; with a dozen categories showing every column at once would be unusable.</summary>
+    public ObservableCollection<PricingMatrixCategoryOption> Categories { get; } = new();
 
     public ObservableCollection<PricingMatrixRow> Rows { get; } = new();
 
@@ -51,6 +60,7 @@ public partial class PricingMatrixViewModel : ObservableObject
     /// AppRoles.ManagementRoles-only, which excludes DepartmentHead).</summary>
     public bool CanEditPrice => _authService.Role is not ("Customer" or "DepartmentHead");
 
+    [ObservableProperty] private PricingMatrixCategoryOption? selectedCategory;
     [ObservableProperty] private bool isLoading = true;
     [ObservableProperty] private string? errorMessage;
 
@@ -68,20 +78,22 @@ public partial class PricingMatrixViewModel : ObservableObject
 
         try
         {
-            var matrix = await _apiClient.GetPricingMatrixAsync();
-            Rows.Clear();
+            _matrix = await _apiClient.GetPricingMatrixAsync();
 
-            foreach (var garmentRow in matrix?.Garments ?? new List<PricingMatrixGarmentRowDto>())
+            Categories.Clear();
+            var seen = new HashSet<Guid>();
+            foreach (var service in _matrix?.Services ?? new List<PricingMatrixServiceDto>())
             {
-                var cells = (matrix!.Services).Select(service =>
-                {
-                    var existing = garmentRow.Prices.FirstOrDefault(c => c.ServiceId == service.Id);
-                    return new PricingMatrixCell(garmentRow.GarmentId, garmentRow.GarmentName, service.Id, service.Name,
-                        existing?.PricingType, existing?.Price);
-                }).ToList();
-
-                Rows.Add(new PricingMatrixRow(garmentRow.GarmentId, garmentRow.GarmentName, garmentRow.Category, cells));
+                if (seen.Add(service.CategoryId))
+                    Categories.Add(new PricingMatrixCategoryOption(service.CategoryId, service.CategoryName));
             }
+
+            // Only default-select a category on the very first load — reloading after a
+            // save must not reset whatever category the admin is currently working in.
+            if (SelectedCategory is null && Categories.Count > 0)
+                SelectedCategory = Categories[0];
+            else
+                RebuildRows();
         }
         catch (Exception ex)
         {
@@ -90,6 +102,34 @@ public partial class PricingMatrixViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    partial void OnSelectedCategoryChanged(PricingMatrixCategoryOption? value) => RebuildRows();
+
+    // A garment row shows under a category if it's the garment's own primary category,
+    // OR it already has a priced cell for one of that category's services — garments are
+    // a shared pool (e.g. "Boots" is priced under both Shoes & Footwear and Leather &
+    // Suede), so a strict category match alone would hide legitimately-priced cells.
+    private void RebuildRows()
+    {
+        Rows.Clear();
+        if (_matrix is null || SelectedCategory is null) return;
+
+        var categoryServices = _matrix.Services.Where(s => s.CategoryId == SelectedCategory.CategoryId).ToList();
+
+        foreach (var garmentRow in _matrix.Garments)
+        {
+            var cells = categoryServices.Select(service =>
+            {
+                var existing = garmentRow.Prices.FirstOrDefault(c => c.ServiceId == service.Id);
+                return new PricingMatrixCell(garmentRow.GarmentId, garmentRow.GarmentName, service.Id, service.Name,
+                    existing?.PricingType, existing?.Price);
+            }).ToList();
+
+            var hasPricedCell = cells.Any(c => c.Price is not null);
+            if (garmentRow.CategoryId == SelectedCategory.CategoryId || hasPricedCell)
+                Rows.Add(new PricingMatrixRow(garmentRow.GarmentId, garmentRow.GarmentName, garmentRow.CategoryId, garmentRow.CategoryName, cells));
         }
     }
 
@@ -116,8 +156,9 @@ public partial class PricingMatrixViewModel : ObservableObject
             var response = await _apiClient.SetGarmentPriceAsync(cell.GarmentId, cell.ServiceId, newType, newPrice);
             if (response.IsSuccessStatusCode)
             {
-                cell.PricingType = newType;
-                cell.Price = newPrice;
+                // Reload rather than just mutating the cell in place — a newly-priced
+                // garment may now need to appear as a cross-category row (see RebuildRows).
+                await InitializeAsync();
             }
             else
             {

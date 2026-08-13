@@ -6,6 +6,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ServicesService } from '../services.service';
 import { UploadService } from '../../../core/services/upload.service';
+import { CategoriesService } from '../../categories/categories.service';
+import { ServiceCategory } from '../../../core/models/catalog.models';
 
 @Component({
   selector: 'app-service-form',
@@ -18,6 +20,7 @@ export class ServiceFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly servicesService = inject(ServicesService);
   private readonly uploadService = inject(UploadService);
+  private readonly categoriesService = inject(CategoriesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -26,11 +29,13 @@ export class ServiceFormComponent implements OnInit {
   readonly isUploading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly imageUrl = signal<string | undefined>(undefined);
+  readonly categories = signal<ServiceCategory[]>([]);
 
   private serviceId: string | null = null;
 
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
+    categoryId: ['', [Validators.required]],
     basePrice: [0, [Validators.required, Validators.min(0)]],
     estimatedTimeHours: [1, [Validators.required, Validators.min(1)]],
     gstPercentage: [5, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -40,12 +45,15 @@ export class ServiceFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.categoriesService.getCategories().subscribe((categories) => this.categories.set(categories));
+
     this.serviceId = this.route.snapshot.paramMap.get('id');
     if (this.serviceId) {
       this.isEditMode.set(true);
       this.servicesService.getServiceById(this.serviceId).subscribe((service) => {
         this.form.patchValue({
           name: service.name,
+          categoryId: service.categoryId,
           basePrice: service.basePrice,
           estimatedTimeHours: service.estimatedTimeHours,
           gstPercentage: service.gstPercentage,
@@ -87,6 +95,7 @@ export class ServiceFormComponent implements OnInit {
     const value = this.form.getRawValue();
     const request = {
       name: value.name!,
+      categoryId: value.categoryId!,
       basePrice: value.basePrice!,
       estimatedTimeHours: value.estimatedTimeHours!,
       gstPercentage: value.gstPercentage!,

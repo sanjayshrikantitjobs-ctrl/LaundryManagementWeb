@@ -1,6 +1,6 @@
 namespace LaundryMgmt.Mobile.Views;
 
-/// <summary>Horizontally scrollable top nav for the Customer role's 8 destinations —
+/// <summary>Horizontally scrollable top nav for the Customer role's 9 destinations —
 /// replaces Shell's bottom TabBar for these pages (see Shell.SetTabBarIsVisible calls
 /// in each customer page's code-behind), which on Android caps visible tabs at ~5 and
 /// buries the rest under a "More" overflow menu. A full-width scrollable strip avoids
@@ -27,6 +27,7 @@ public partial class CustomerNavBar : ContentView
         SetChipState(MyRequestsChip, MyRequestsLabel, currentPage == "myrequests");
         SetChipState(OrdersChip, OrdersLabel, currentPage == "orders");
         SetChipState(PriceListChip, PriceListLabel, currentPage == "pricelist");
+        SetChipState(MembershipChip, MembershipLabel, currentPage == "membership");
         SetChipState(SettingsChip, SettingsLabel, currentPage == "settings");
         SetChipState(ContactUsChip, ContactUsLabel, currentPage == "contactus");
     }
@@ -48,6 +49,7 @@ public partial class CustomerNavBar : ContentView
     private async void OnMyRequestsTapped(object? sender, EventArgs e) => await NavigateAsync("MyRequestsPage");
     private async void OnOrdersTapped(object? sender, EventArgs e) => await NavigateAsync("orders");
     private async void OnPriceListTapped(object? sender, EventArgs e) => await NavigateAsync("PriceListPage");
+    private async void OnMembershipTapped(object? sender, EventArgs e) => await NavigateAsync("SubscriptionsPage");
     private async void OnSettingsTapped(object? sender, EventArgs e) => await NavigateAsync("SettingsPage");
     private async void OnContactUsTapped(object? sender, EventArgs e) => await NavigateAsync("ContactUsPage");
 

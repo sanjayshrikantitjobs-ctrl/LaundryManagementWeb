@@ -22,6 +22,60 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.AddOn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("AddOns");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Complaint", b =>
                 {
                     b.Property<Guid>("Id")
@@ -44,6 +98,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
@@ -101,6 +158,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -156,6 +216,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -242,6 +305,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
@@ -285,6 +351,71 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.ToTable("CustomerAddresses");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.CustomerSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly?>("NextBillingDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("RecurringValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SubscriptionPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SubscriptionPlanId");
+
+                    b.ToTable("CustomerSubscriptions");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Employee", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,6 +432,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
@@ -352,14 +486,8 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Barcode")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -371,6 +499,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
@@ -396,9 +527,7 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Barcode")
-                        .IsUnique()
-                        .HasFilter("[Barcode] IS NOT NULL");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Garments");
                 });
@@ -409,8 +538,25 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("EstimatedTimeHours")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExpressEtaHours")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("ExpressPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid>("GarmentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("GstPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
@@ -448,6 +594,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -497,6 +646,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount")
@@ -558,6 +710,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -605,6 +760,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EntityId")
@@ -680,6 +838,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset?>("DeliveredAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -699,6 +860,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsExpress")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSameDay")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
@@ -759,6 +923,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ImageType")
@@ -860,6 +1027,36 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.ToTable("OrderItems");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderItemAddOn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AddOnId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddOnId");
+
+                    b.HasIndex("OrderItemId");
+
+                    b.ToTable("OrderItemAddOns");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderStatusHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -949,6 +1146,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1006,6 +1206,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("DeliveryBoyEmployeeId")
@@ -1069,6 +1272,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -1127,6 +1333,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -1137,6 +1346,9 @@ namespace LaundryMgmt.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("EstimatedTimeHours")
@@ -1176,7 +1388,153 @@ namespace LaundryMgmt.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.ServiceCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IconOrImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ServiceCategories");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BillingCycle")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeletedReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GarmentsPerCycle")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("SubscriptionPlans");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.SubscriptionPlanFeature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SubscriptionPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubscriptionPlanId");
+
+                    b.ToTable("SubscriptionPlanFeatures");
                 });
 
             modelBuilder.Entity("LaundryMgmt.Infrastructure.Identity.ApplicationUser", b =>
@@ -1433,6 +1791,36 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.CustomerSubscription", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LaundryMgmt.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("SubscriptionPlan");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.Garment", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.ServiceCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.GarmentServicePrice", b =>
                 {
                     b.HasOne("LaundryMgmt.Domain.Entities.Garment", "Garment")
@@ -1526,6 +1914,25 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderItemAddOn", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.AddOn", "AddOn")
+                        .WithMany()
+                        .HasForeignKey("AddOnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LaundryMgmt.Domain.Entities.OrderItem", "OrderItem")
+                        .WithMany("AddOns")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AddOn");
+
+                    b.Navigation("OrderItem");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderStatusHistory", b =>
                 {
                     b.HasOne("LaundryMgmt.Domain.Entities.Order", null)
@@ -1569,6 +1976,28 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Navigation("DeliveryBoy");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.Service", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.ServiceCategory", "Category")
+                        .WithMany("Services")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.SubscriptionPlanFeature", b =>
+                {
+                    b.HasOne("LaundryMgmt.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                        .WithMany("Features")
+                        .HasForeignKey("SubscriptionPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubscriptionPlan");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1646,9 +2075,24 @@ namespace LaundryMgmt.Infrastructure.Migrations
                     b.Navigation("StatusHistory");
                 });
 
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.OrderItem", b =>
+                {
+                    b.Navigation("AddOns");
+                });
+
             modelBuilder.Entity("LaundryMgmt.Domain.Entities.Service", b =>
                 {
                     b.Navigation("GarmentPrices");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.ServiceCategory", b =>
+                {
+                    b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("LaundryMgmt.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Navigation("Features");
                 });
 #pragma warning restore 612, 618
         }

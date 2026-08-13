@@ -66,6 +66,16 @@
                 </VerticalStackLayout>
             </Border>
 
+            <Border x:Name="MembershipChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMembershipTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <Label Text="🎫" FontSize="20" HorizontalTextAlignment="Center" />
+                    <Label x:Name="MembershipLabel" Text="Membership" FontSize="10" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
             <Border x:Name="SettingsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" Padding="12,8" WidthRequest="76">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSettingsTapped" />

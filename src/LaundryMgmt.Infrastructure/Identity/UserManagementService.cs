@@ -25,7 +25,11 @@ public class UserManagementService : IUserManagementService
         string? search, UserRole? role, bool? isActive, int pageNumber, int pageSize,
         string? sortBy, string? sortDirection, CancellationToken cancellationToken = default)
     {
-        var query = _userManager.Users.AsQueryable();
+        // Customer accounts (created via self-registration) live in the same Identity
+        // store as staff accounts but belong exclusively to the Customers screen —
+        // exclude them here unconditionally so they can never leak into the admin
+        // Users list regardless of the caller's optional role filter.
+        var query = _userManager.Users.Where(u => u.Role != UserRole.Customer).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(u =>

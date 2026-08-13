@@ -2,12 +2,14 @@ using FluentValidation;
 using LaundryMgmt.Application.Common.Interfaces;
 using LaundryMgmt.Domain.Entities;
 using LaundryMgmt.Domain.Enums;
+using LaundryMgmt.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Orders.Commands.CreateOrder;
 
-public record CreateOrderItemDto(Guid GarmentId, Guid ServiceId, int Quantity, decimal? WeightKg, string? SpecialInstructions);
+public record CreateOrderItemDto(
+    Guid GarmentId, Guid ServiceId, int Quantity, decimal? WeightKg, string? SpecialInstructions, List<Guid>? AddOnIds = null);
 
 public record CreateOrderCommand(
     Guid CustomerId,
@@ -16,7 +18,8 @@ public record CreateOrderCommand(
     List<CreateOrderItemDto> Items,
     DateTimeOffset? PreferredPickupAtUtc = null,
     Guid? PickupAddressId = null,
-    string? PromoCode = null) : IRequest<Guid>;
+    string? PromoCode = null,
+    bool IsSameDay = false) : IRequest<Guid>;
 
 public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 {
@@ -67,7 +70,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             OrderNumber = GenerateOrderNumber(),
             CustomerId = request.CustomerId,
             Channel = request.Channel,
-            IsExpress = request.IsExpress
+            IsExpress = request.IsExpress,
+            IsSameDay = request.IsSameDay
         };
 
         var maxEtaHours = 0;
@@ -77,37 +81,73 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             var priceEntry = await _db.GarmentServicePrices
                 .Include(p => p.Service)
                 .FirstOrDefaultAsync(p => p.GarmentId == itemDto.GarmentId && p.ServiceId == itemDto.ServiceId, cancellationToken)
-                ?? throw new InvalidOperationException(
+                ?? throw new DomainException(
                     $"No price configured for garment {itemDto.GarmentId} + service {itemDto.ServiceId}.");
 
+            if (!priceEntry.IsActive)
+                throw new DomainException(
+                    $"Garment {itemDto.GarmentId} is not currently available under service {itemDto.ServiceId}.");
+
             var service = priceEntry.Service!;
+            var isWeightBased = priceEntry.PricingType == PricingType.WeightBased;
 
-            var unitPrice = priceEntry.PricingType == PricingType.WeightBased && itemDto.WeightKg.HasValue
-                ? priceEntry.Price * itemDto.WeightKg.Value
-                : priceEntry.Price;
+            // Per-item overrides win when set; otherwise fall back to the Service's own
+            // defaults. IsExpress (not Channel, which is purely about fulfillment method)
+            // is the single driver of express pricing/ETA.
+            decimal unitPrice;
+            if (request.IsExpress && priceEntry.ExpressPrice.HasValue)
+            {
+                unitPrice = isWeightBased && itemDto.WeightKg.HasValue
+                    ? priceEntry.ExpressPrice.Value * itemDto.WeightKg.Value
+                    : priceEntry.ExpressPrice.Value;
+            }
+            else
+            {
+                unitPrice = isWeightBased && itemDto.WeightKg.HasValue
+                    ? priceEntry.Price * itemDto.WeightKg.Value
+                    : priceEntry.Price;
 
-            // Express channel adds the service's configured per-item surcharge and
-            // shortens the promised turnaround to its express ETA (both admin-set on
-            // the Service — e.g. Steam Iron: +₹10 / 1 hour; Dry Clean/Wash: +₹40 / 24 hours).
-            if (request.Channel == OrderChannel.Express)
-                unitPrice += service.ExpressSurcharge;
+                if (request.IsExpress)
+                    unitPrice += service.ExpressSurcharge;
+            }
 
-            var lineTotal = priceEntry.PricingType == PricingType.WeightBased
-                ? unitPrice
-                : unitPrice * itemDto.Quantity;
+            var lineTotal = isWeightBased ? unitPrice : unitPrice * itemDto.Quantity;
 
-            order.Items.Add(new OrderItem
+            var orderItem = new OrderItem
             {
                 GarmentId = itemDto.GarmentId,
                 ServiceId = itemDto.ServiceId,
                 Quantity = itemDto.Quantity,
                 WeightKg = itemDto.WeightKg,
                 UnitPrice = unitPrice,
-                LineTotal = lineTotal,
                 SpecialInstructions = itemDto.SpecialInstructions
-            });
+            };
 
-            var etaHours = request.Channel == OrderChannel.Express ? service.ExpressEtaHours : service.EstimatedTimeHours;
+            if (itemDto.AddOnIds is { Count: > 0 })
+            {
+                var addOns = await _db.AddOns
+                    .Where(a => itemDto.AddOnIds.Contains(a.Id) && a.IsActive)
+                    .ToListAsync(cancellationToken);
+
+                if (addOns.Count != itemDto.AddOnIds.Distinct().Count())
+                    throw new DomainException("One or more selected add-ons are unavailable.");
+
+                foreach (var addOn in addOns)
+                {
+                    orderItem.AddOns.Add(new OrderItemAddOn { AddOnId = addOn.Id, Name = addOn.Name, Price = addOn.Price });
+                    lineTotal += addOn.Price; // once per line, not per unit
+                }
+            }
+
+            orderItem.LineTotal = lineTotal;
+            order.Items.Add(orderItem);
+
+            var gstPercentage = priceEntry.GstPercentage ?? service.GstPercentage;
+            order.GstAmount += Math.Round(lineTotal * gstPercentage / 100m, 2);
+
+            var etaHours = request.IsExpress
+                ? priceEntry.ExpressEtaHours ?? service.ExpressEtaHours
+                : priceEntry.EstimatedTimeHours ?? service.EstimatedTimeHours;
             maxEtaHours = Math.Max(maxEtaHours, etaHours);
         }
 
@@ -118,13 +158,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             var now = _dateTime.UtcNow;
             var normalizedCode = request.PromoCode.Trim().ToUpperInvariant();
 
+            // ValidFrom/ValidTo are optional (an unset bound means "no restriction on that
+            // side"), matching how promotions are created/displayed elsewhere (see
+            // GetActivePromotionsQuery) — a promo with no expiry must stay redeemable.
             var promotion = await _db.Promotions.FirstOrDefaultAsync(p =>
                 p.Code != null && p.Code == normalizedCode &&
                 p.IsActive &&
-                (p.ValidFrom.HasValue) &&
-                (p.ValidTo.HasValue && p.ValidTo >= now),
+                (!p.ValidFrom.HasValue || p.ValidFrom <= now) &&
+                (!p.ValidTo.HasValue || p.ValidTo >= now),
                 cancellationToken)
-                ?? throw new InvalidOperationException($"Promo code '{request.PromoCode}' is invalid or has expired.");
+                ?? throw new DomainException($"Promo code '{request.PromoCode}' is invalid or has expired.");
 
             var discount = promotion.DiscountPercent.HasValue
                 ? order.SubTotal * promotion.DiscountPercent.Value / 100m
@@ -139,7 +182,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             order.PromoCode = null;
         }
 
-        order.GstAmount = Math.Round(order.SubTotal * 0.05m, 2); // placeholder flat 5% GST, wire to Service.GstPercentage
         order.TotalAmount = order.SubTotal + order.GstAmount - order.DiscountAmount + order.DeliveryCharge;
         order.PromisedByUtc = DateTimeOffset.UtcNow.AddHours(maxEtaHours);
 

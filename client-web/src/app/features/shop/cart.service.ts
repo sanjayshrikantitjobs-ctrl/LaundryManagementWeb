@@ -2,11 +2,17 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PricingType } from '../../core/models/catalog.models';
 import { AuthService } from '../../core/services/auth.service';
 
+export interface CartItemAddOn {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface CartItem {
   garmentId: string;
   garmentName: string;
   garmentImageUrl?: string;
-  garmentCategory: string;
+  categoryName: string;
   serviceId: string;
   serviceName: string;
   pricingType: PricingType;
@@ -14,6 +20,7 @@ export interface CartItem {
   quantity: number;
   weightKg?: number;
   expressSurcharge: number;
+  selectedAddOns?: CartItemAddOn[];
 }
 
 const CART_KEY_PREFIX = 'laundry_mgmt_cart_';
@@ -53,21 +60,32 @@ export class CartService {
   }
 
   lineTotal(item: CartItem): number {
-    return item.pricingType === PricingType.WeightBased ? item.unitPrice * (item.weightKg || 0) : item.unitPrice * item.quantity;
+    const base = item.pricingType === PricingType.WeightBased ? item.unitPrice * (item.weightKg || 0) : item.unitPrice * item.quantity;
+    const addOnsTotal = (item.selectedAddOns ?? []).reduce((sum, a) => sum + a.price, 0);
+    return base + addOnsTotal;
   }
 
-  key(garmentId: string, serviceId: string): string {
-    return `${garmentId}:${serviceId}`;
+  /// <summary>Includes the selected add-on ids so that the same garment+service with
+  /// a different add-on combination becomes a distinct line rather than silently
+  /// merging quantities (e.g. "Shirt+Wash" and "Shirt+Wash+Stain Removal" must stay
+  /// separate).</summary>
+  key(garmentId: string, serviceId: string, addOnIds: string[] = []): string {
+    const addOnsKey = [...addOnIds].sort().join(',');
+    return `${garmentId}:${serviceId}:${addOnsKey}`;
+  }
+
+  private keyOf(item: CartItem): string {
+    return this.key(item.garmentId, item.serviceId, (item.selectedAddOns ?? []).map((a) => a.id));
   }
 
   add(item: CartItem): void {
-    const key = this.key(item.garmentId, item.serviceId);
-    const existing = this._items().find((i) => this.key(i.garmentId, i.serviceId) === key);
+    const key = this.keyOf(item);
+    const existing = this._items().find((i) => this.keyOf(i) === key);
 
     if (existing) {
       this._items.update((items) =>
         items.map((i) =>
-          this.key(i.garmentId, i.serviceId) === key
+          this.keyOf(i) === key
             ? { ...i, quantity: i.quantity + item.quantity, weightKg: item.weightKg ?? i.weightKg }
             : i
         )
@@ -77,20 +95,20 @@ export class CartService {
     }
   }
 
-  updateQuantity(garmentId: string, serviceId: string, quantity: number): void {
+  updateQuantity(item: CartItem, quantity: number): void {
     if (quantity <= 0) {
-      this.remove(garmentId, serviceId);
+      this.remove(item);
       return;
     }
-    const key = this.key(garmentId, serviceId);
+    const key = this.keyOf(item);
     this._items.update((items) =>
-      items.map((i) => (this.key(i.garmentId, i.serviceId) === key ? { ...i, quantity } : i))
+      items.map((i) => (this.keyOf(i) === key ? { ...i, quantity } : i))
     );
   }
 
-  remove(garmentId: string, serviceId: string): void {
-    const key = this.key(garmentId, serviceId);
-    this._items.update((items) => items.filter((i) => this.key(i.garmentId, i.serviceId) !== key));
+  remove(item: CartItem): void {
+    const key = this.keyOf(item);
+    this._items.update((items) => items.filter((i) => this.keyOf(i) !== key));
   }
 
   clear(): void {

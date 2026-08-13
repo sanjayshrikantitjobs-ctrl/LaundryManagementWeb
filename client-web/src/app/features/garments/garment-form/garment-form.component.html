@@ -9,12 +9,12 @@
 
     <label>
       Category
-      <input type="text" formControlName="category" placeholder="Menswear, Womenswear, Home…" />
-    </label>
-
-    <label>
-      Barcode
-      <input type="text" formControlName="barcode" />
+      <select formControlName="categoryId">
+        <option value="" disabled>Select a category…</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
     </label>
 
     <label>

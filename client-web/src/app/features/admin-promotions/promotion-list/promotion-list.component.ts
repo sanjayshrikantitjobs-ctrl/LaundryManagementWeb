@@ -6,6 +6,7 @@ import { PromotionListItem } from '../../../core/models/promotion.models';
 import { SortDirection } from '../../../core/models/order.models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({
   selector: 'app-promotion-list',
@@ -17,6 +18,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class PromotionListComponent implements OnInit {
   private readonly promotionsService = inject(PromotionsService);
   private readonly authService = inject(AuthService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly promotions = signal<PromotionListItem[]>([]);
   readonly isLoading = signal(true);
@@ -66,10 +68,17 @@ export class PromotionListComponent implements OnInit {
     return this.sortDirection() === 'asc' ? '▲' : '▼';
   }
 
-  deletePromotion(promotion: PromotionListItem): void {
-    if (!confirm(`Delete promotion "${promotion.title}"?`)) return;
+  async deletePromotion(promotion: PromotionListItem): Promise<void> {
+    const result = await this.confirmDialog.confirm({
+      title: 'Delete promotion',
+      message: `Delete promotion "${promotion.title}"? This cannot be undone.`,
+      requireReason: true,
+      confirmLabel: 'Delete',
+      danger: true
+    });
+    if (!result.confirmed) return;
 
-    this.promotionsService.deletePromotion(promotion.id).subscribe({
+    this.promotionsService.deletePromotion(promotion.id, result.reason).subscribe({
       next: () => this.loadPromotions()
     });
   }

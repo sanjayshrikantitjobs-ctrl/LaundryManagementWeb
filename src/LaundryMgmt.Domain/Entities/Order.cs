@@ -22,6 +22,7 @@ public class Order : AuditableEntity
     public OrderChannel Channel { get; set; } = OrderChannel.WalkIn;
     public OrderStatus Status { get; private set; } = OrderStatus.New;
     public bool IsExpress { get; set; }
+    public bool IsSameDay { get; set; }
 
     public decimal SubTotal { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -131,6 +132,23 @@ public class OrderItem : BaseEntity
 
     public string? Barcode { get; set; }
     public string? SpecialInstructions { get; set; }
+
+    public ICollection<OrderItemAddOn> AddOns { get; set; } = new List<OrderItemAddOn>();
+}
+
+/// <summary>Snapshot of an add-on selected for a specific order line — Name/Price are
+/// copied at order-creation time, matching OrderItem's own snapshot pattern, so later
+/// edits to the AddOn catalog don't retroactively change historical orders.</summary>
+public class OrderItemAddOn : BaseEntity
+{
+    public Guid OrderItemId { get; set; }
+    public OrderItem? OrderItem { get; set; }
+
+    public Guid AddOnId { get; set; }
+    public AddOn? AddOn { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
 }
 
 public class OrderStatusHistory : BaseEntity

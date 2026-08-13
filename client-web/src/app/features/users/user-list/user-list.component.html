@@ -33,6 +33,7 @@
     <table>
       <thead>
         <tr>
+          <th></th>
           <th class="sortable" (click)="sortByColumn('fullName')">Name {{ sortIndicator('fullName') }}</th>
           <th class="sortable" (click)="sortByColumn('userName')">Username {{ sortIndicator('userName') }}</th>
           <th>Email</th>
@@ -44,6 +45,7 @@
       <tbody>
         @for (user of users(); track user.id) {
           <tr>
+            <td class="avatar"><span class="avatar-icon">👤</span></td>
             <td>{{ user.fullName }}</td>
             <td>{{ user.userName }}</td>
             <td>{{ user.email || '—' }}</td>
@@ -52,10 +54,12 @@
               <span class="status-badge" [class.inactive]="!user.isActive">{{ user.isActive ? 'Active' : 'Inactive' }}</span>
             </td>
             <td class="actions">
-              <a [routerLink]="[user.id, 'edit']">Edit</a>
-              <button type="button" (click)="toggleActive(user)">
-                {{ user.isActive ? 'Deactivate' : 'Activate' }}
-              </button>
+              <div class="actions-inner">
+                <a [routerLink]="[user.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button type="button" class="icon-btn" [title]="user.isActive ? 'Deactivate' : 'Activate'" (click)="toggleActive(user)">
+                  {{ user.isActive ? '⏸️' : '▶️' }}
+                </button>
+              </div>
             </td>
           </tr>
         }

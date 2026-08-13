@@ -14,14 +14,27 @@
     gap: 16px;
   }
 
+  .filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
   input[type='search'] {
     width: 100%;
     max-width: 320px;
     padding: 10px 12px;
-    margin-bottom: 16px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
+  }
+
+  select {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font: inherit;
   }
 
   table {
@@ -53,11 +66,6 @@
     &:hover {
       color: var(--color-primary-dark);
     }
-  }
-
-  .actions {
-    display: flex;
-    gap: 12px;
   }
 
   .thumb {
@@ -101,12 +109,4 @@
     }
   }
 
-  button {
-    background: none;
-    border: none;
-    color: var(--color-danger);
-    cursor: pointer;
-    padding: 0;
-    font-weight: 500;
-  }
 }

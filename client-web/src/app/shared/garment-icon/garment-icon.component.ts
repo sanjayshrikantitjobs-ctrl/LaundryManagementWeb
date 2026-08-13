@@ -1,6 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+// Maps the 12 service-category names onto the 6 pictograms below. Anything not
+// listed here (Wash & Laundry, Ironing & Pressing, Dry Cleaning, Stain Removal,
+// Alteration & Repair, Commercial / B2B Laundry) falls through to @default.
+const CATEGORY_TO_ICON: Record<string, string> = {
+  'shoes & footwear': 'footwear',
+  'bags & accessories': 'bags',
+  'bedding & blankets': 'household',
+  'curtains & home furnishing': 'household',
+  'wedding & traditional wear': 'womenswear',
+  'leather & suede': 'menswear'
+};
+
 /// <summary>Hand-drawn line-art fallback icon shown when a garment has no uploaded
 /// photo, picked by its catalog category (Bags, Footwear, Household, Menswear,
 /// Womenswear, Woolen) so the shop grid reads as "shirt/dress/shoe/bag" at a glance
@@ -59,6 +71,7 @@ export class GarmentIconComponent {
   @Input() category = '';
 
   normalizedCategory(): string {
-    return this.category.trim().toLowerCase();
+    const normalized = this.category.trim().toLowerCase();
+    return CATEGORY_TO_ICON[normalized] ?? normalized;
   }
 }

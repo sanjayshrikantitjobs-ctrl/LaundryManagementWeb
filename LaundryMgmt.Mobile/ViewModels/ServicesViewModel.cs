@@ -27,14 +27,12 @@ public partial class ServicesViewModel : PagedListViewModel<ServiceListItem>
     [RelayCommand]
     private async Task NewServiceAsync() => await Shell.Current.GoToAsync(nameof(Views.ServiceFormPage));
 
+    /// <summary>Row tap opens the read-only detail page, where Edit/Delete now live
+    /// (replacing the old inline Delete-only button — see ServiceDetailViewModel).</summary>
     [RelayCommand]
-    private async Task DeleteServiceAsync(ServiceListItem? service)
+    private async Task OpenServiceAsync(ServiceListItem? service)
     {
         if (service is null) return;
-        var confirmed = await Shell.Current.DisplayAlert("Delete service", $"Delete \"{service.Name}\"?", "Delete", "Cancel");
-        if (!confirmed) return;
-
-        await _apiClient.DeleteServiceAsync(service.Id);
-        await RefreshAsync();
+        await Shell.Current.GoToAsync($"{nameof(Views.ServiceDetailPage)}?serviceId={service.Id}");
     }
 }

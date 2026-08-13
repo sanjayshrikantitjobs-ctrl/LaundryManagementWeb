@@ -99,17 +99,23 @@ public class ApiClient
     public Task<HttpResponseMessage> UpdateCustomerAsync(Guid id, UpdateCustomerRequest request) =>
         _http.PutAsJsonAsync($"api/v1/customers/{id}", request);
 
-    public Task<HttpResponseMessage> DeleteCustomerAsync(Guid id) =>
-        _http.DeleteAsync($"api/v1/customers/{id}");
+    public Task<HttpResponseMessage> DeleteCustomerAsync(Guid id, string? reason = null) =>
+        _http.DeleteAsync($"api/v1/customers/{id}?{Query(("reason", reason))}");
 
     public Task<HttpResponseMessage> SetCustomerStatusAsync(Guid id, CustomerStatus status) =>
         _http.PutAsJsonAsync($"api/v1/customers/{id}/status", new { status });
 
+    // ---- Service Categories ----
+
+    public Task<List<ServiceCategoryDto>?> GetServiceCategoriesAsync() =>
+        _http.GetFromJsonAsync<List<ServiceCategoryDto>>("api/v1/servicecategories");
+
     // ---- Garments ----
 
-    public Task<PaginatedList<GarmentListItem>?> GetGarmentsAsync(string? search = null, int pageNumber = 1, int pageSize = 200) =>
+    public Task<PaginatedList<GarmentListItem>?> GetGarmentsAsync(
+        string? search = null, Guid? categoryId = null, int pageNumber = 1, int pageSize = 200) =>
         _http.GetFromJsonAsync<PaginatedList<GarmentListItem>>(
-            $"api/v1/garments?{Query(("search", search), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
+            $"api/v1/garments?{Query(("search", search), ("categoryId", categoryId), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
 
     public Task<GarmentDetailDto?> GetGarmentByIdAsync(Guid id) =>
         _http.GetFromJsonAsync<GarmentDetailDto>($"api/v1/garments/{id}");
@@ -120,8 +126,8 @@ public class ApiClient
     public Task<HttpResponseMessage> UpdateGarmentAsync(Guid id, UpdateGarmentRequest request) =>
         _http.PutAsJsonAsync($"api/v1/garments/{id}", request);
 
-    public Task<HttpResponseMessage> DeleteGarmentAsync(Guid id) =>
-        _http.DeleteAsync($"api/v1/garments/{id}");
+    public Task<HttpResponseMessage> DeleteGarmentAsync(Guid id, string? reason = null) =>
+        _http.DeleteAsync($"api/v1/garments/{id}?{Query(("reason", reason))}");
 
     public Task<HttpResponseMessage> SetGarmentPriceAsync(Guid garmentId, Guid serviceId, PricingType pricingType, decimal price) =>
         _http.PutAsJsonAsync($"api/v1/garments/{garmentId}/prices/{serviceId}", new { pricingType, price });
@@ -135,11 +141,33 @@ public class ApiClient
         _http.GetFromJsonAsync<PaginatedList<ServiceListItem>>(
             $"api/v1/services?{Query(("search", search), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
 
+    public Task<ServiceDetailDto?> GetServiceByIdAsync(Guid id) =>
+        _http.GetFromJsonAsync<ServiceDetailDto>($"api/v1/services/{id}");
+
     public Task<HttpResponseMessage> CreateServiceAsync(CreateServiceRequest request) =>
         _http.PostAsJsonAsync("api/v1/services", request);
 
-    public Task<HttpResponseMessage> DeleteServiceAsync(Guid id) =>
-        _http.DeleteAsync($"api/v1/services/{id}");
+    public Task<HttpResponseMessage> UpdateServiceAsync(Guid id, UpdateServiceRequest request) =>
+        _http.PutAsJsonAsync($"api/v1/services/{id}", request);
+
+    public Task<HttpResponseMessage> DeleteServiceAsync(Guid id, string? reason = null) =>
+        _http.DeleteAsync($"api/v1/services/{id}?{Query(("reason", reason))}");
+
+    // ---- Subscription Plans ----
+
+    public Task<List<SubscriptionPlanDto>?> GetSubscriptionPlansAsync() =>
+        _http.GetFromJsonAsync<List<SubscriptionPlanDto>>("api/v1/subscriptionplans");
+
+    public Task<HttpResponseMessage> CreateSubscriptionPlanAsync(CreateSubscriptionPlanRequest request) =>
+        _http.PostAsJsonAsync("api/v1/subscriptionplans", request);
+
+    public Task<HttpResponseMessage> DeleteSubscriptionPlanAsync(Guid id) =>
+        _http.DeleteAsync($"api/v1/subscriptionplans/{id}");
+
+    public Task<PaginatedList<CustomerSubscriptionListItemDto>?> GetCustomerSubscriptionsAsync(
+        string? search = null, Guid? customerId = null, int pageNumber = 1, int pageSize = 20) =>
+        _http.GetFromJsonAsync<PaginatedList<CustomerSubscriptionListItemDto>>(
+            $"api/v1/customersubscriptions?{Query(("search", search), ("customerId", customerId), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
 
     // ---- Users (Admin-only) ----
 

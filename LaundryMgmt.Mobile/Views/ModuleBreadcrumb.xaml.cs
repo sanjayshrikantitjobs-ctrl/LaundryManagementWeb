@@ -31,6 +31,7 @@ public partial class ModuleBreadcrumb : ContentView
         CustomersChip.IsVisible = !isCustomer;
         GarmentsChip.IsVisible = !isCustomer;
         ServicesChip.IsVisible = !isCustomer;
+        SubscriptionsChip.IsVisible = !isCustomer;
         UsersChip.IsVisible = role == "Admin";
     }
 
@@ -41,6 +42,7 @@ public partial class ModuleBreadcrumb : ContentView
         SetChipState(GarmentsChip, GarmentsLabel, currentModule == "garments");
         SetChipState(ServicesChip, ServicesLabel, currentModule == "services");
         SetChipState(PricingChip, PricingLabel, currentModule == "pricing");
+        SetChipState(SubscriptionsChip, SubscriptionsLabel, currentModule == "subscriptions");
         SetChipState(UsersChip, UsersLabel, currentModule == "users");
     }
 
@@ -60,6 +62,7 @@ public partial class ModuleBreadcrumb : ContentView
     private async void OnGarmentsTapped(object? sender, EventArgs e) => await NavigateAsync("garments");
     private async void OnServicesTapped(object? sender, EventArgs e) => await NavigateAsync("services");
     private async void OnPricingTapped(object? sender, EventArgs e) => await NavigateAsync("pricing");
+    private async void OnSubscriptionsTapped(object? sender, EventArgs e) => await NavigateAsync("subscriptions");
     private async void OnUsersTapped(object? sender, EventArgs e) => await NavigateAsync("users");
 
     private static async Task NavigateAsync(string route)

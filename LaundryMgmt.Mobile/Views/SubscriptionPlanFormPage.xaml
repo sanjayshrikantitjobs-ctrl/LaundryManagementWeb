@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             x:Class="LaundryMgmt.Mobile.Views.SubscriptionPlanFormPage"
+             x:DataType="vm:SubscriptionPlanFormViewModel"
+             Title="New Plan">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Frame>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="NAME" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding Name}" Placeholder="Basic, Standard, Premium, Family…" />
+
+                    <Label Text="DESCRIPTION" Style="{StaticResource SectionLabel}" />
+                    <Editor Text="{Binding Description}" HeightRequest="70" />
+
+                    <Label Text="BILLING CYCLE" Style="{StaticResource SectionLabel}" />
+                    <Picker ItemsSource="{Binding BillingCycles}" SelectedItem="{Binding BillingCycle}" />
+
+                    <Label Text="GARMENTS PER CYCLE" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding GarmentsPerCycleText}" Keyboard="Numeric" />
+
+                    <Label Text="PRICE (₹)" Style="{StaticResource SectionLabel}" />
+                    <Entry Text="{Binding PriceText}" Keyboard="Numeric" />
+
+                    <Label Text="FEATURES (ONE PER LINE)" Style="{StaticResource SectionLabel}" />
+                    <Editor Text="{Binding FeaturesText}" Placeholder="Standard washing&#10;Free pickup/delivery" HeightRequest="100" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

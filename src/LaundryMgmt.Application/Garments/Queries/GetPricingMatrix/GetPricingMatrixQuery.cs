@@ -5,11 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Garments.Queries.GetPricingMatrix;
 
-public record PricingMatrixServiceDto(Guid Id, string Name);
+public record PricingMatrixServiceDto(Guid Id, string Name, Guid CategoryId, string CategoryName);
 
-public record PricingMatrixCellDto(Guid ServiceId, PricingType? PricingType, decimal? Price);
+public record PricingMatrixCellDto(
+    Guid ServiceId, PricingType? PricingType, decimal? Price,
+    decimal? ExpressPrice, decimal? GstPercentage, int? EstimatedTimeHours, int? ExpressEtaHours, bool IsActive);
 
-public record PricingMatrixGarmentRowDto(Guid GarmentId, string GarmentName, string Category, List<PricingMatrixCellDto> Prices);
+public record PricingMatrixGarmentRowDto(Guid GarmentId, string GarmentName, Guid CategoryId, string CategoryName, List<PricingMatrixCellDto> Prices);
 
 public record PricingMatrixDto(List<PricingMatrixServiceDto> Services, List<PricingMatrixGarmentRowDto> Garments);
 
@@ -25,18 +27,23 @@ public class GetPricingMatrixQueryHandler : IRequestHandler<GetPricingMatrixQuer
     public async Task<PricingMatrixDto> Handle(GetPricingMatrixQuery request, CancellationToken cancellationToken)
     {
         var services = await _db.Services
-            .OrderBy(s => s.Priority).ThenBy(s => s.Name)
-            .Select(s => new PricingMatrixServiceDto(s.Id, s.Name))
+            .OrderBy(s => s.Category!.DisplayOrder).ThenBy(s => s.Priority).ThenBy(s => s.Name)
+            .Select(s => new PricingMatrixServiceDto(s.Id, s.Name, s.CategoryId, s.Category!.Name))
             .ToListAsync(cancellationToken);
 
         var garments = await _db.Garments
-            .OrderBy(g => g.Category).ThenBy(g => g.Name)
+            .OrderBy(g => g.Name)
             .Select(g => new
             {
                 g.Id,
                 g.Name,
-                g.Category,
-                Prices = g.ServicePrices.Select(p => new { p.ServiceId, p.PricingType, p.Price })
+                g.CategoryId,
+                CategoryName = g.Category!.Name,
+                Prices = g.ServicePrices.Select(p => new
+                {
+                    p.ServiceId, p.PricingType, p.Price,
+                    p.ExpressPrice, p.GstPercentage, p.EstimatedTimeHours, p.ExpressEtaHours, p.IsActive
+                })
             })
             .ToListAsync(cancellationToken);
 
@@ -44,10 +51,10 @@ public class GetPricingMatrixQueryHandler : IRequestHandler<GetPricingMatrixQuer
         {
             var pricesByService = g.Prices.ToDictionary(p => p.ServiceId);
             var cells = services.Select(s => pricesByService.TryGetValue(s.Id, out var p)
-                ? new PricingMatrixCellDto(s.Id, p.PricingType, p.Price)
-                : new PricingMatrixCellDto(s.Id, null, null)).ToList();
+                ? new PricingMatrixCellDto(s.Id, p.PricingType, p.Price, p.ExpressPrice, p.GstPercentage, p.EstimatedTimeHours, p.ExpressEtaHours, p.IsActive)
+                : new PricingMatrixCellDto(s.Id, null, null, null, null, null, null, true)).ToList();
 
-            return new PricingMatrixGarmentRowDto(g.Id, g.Name, g.Category, cells);
+            return new PricingMatrixGarmentRowDto(g.Id, g.Name, g.CategoryId, g.CategoryName, cells);
         }).ToList();
 
         return new PricingMatrixDto(services, rows);

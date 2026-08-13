@@ -8,7 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UploadService } from '../../../core/services/upload.service';
 import { OrderGarmentImagesService } from '../order-garment-images.service';
 import { PickupDeliveryService } from '../../pickup-delivery/pickup-delivery.service';
-import { OrderDetail, OrderStatus, PaymentStatus } from '../../../core/models/order.models';
+import { OrderDetail, OrderItemDetail, OrderStatus, PaymentStatus } from '../../../core/models/order.models';
 import { GarmentImageType, OrderGarmentImage } from '../../../core/models/order-garment-image.models';
 import { Agent, OrderPickupDelivery } from '../../../core/models/pickup-delivery.models';
 import { UserRole } from '../../../core/models/user.models';
@@ -35,6 +35,10 @@ export class OrderDetailComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly orderStatusLabel = orderStatusLabel;
   readonly paymentStatusLabel = paymentStatusLabel;
+
+  addOnNames(item: OrderItemDetail): string {
+    return item.addOns.map((a) => a.name).join(', ');
+  }
 
   private readonly role = this.authService.currentUser()?.role ?? '';
   readonly isManagement = ['Admin', 'StoreManager', 'Staff'].includes(this.role);

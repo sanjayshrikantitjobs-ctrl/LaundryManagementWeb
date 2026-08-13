@@ -30,8 +30,21 @@
     </div>
   }
 
+  <div class="category-tabs">
+    @for (category of categories(); track category.id) {
+      <button
+        type="button"
+        class="category-tab"
+        [class.active]="selectedCategory()?.id === category.id"
+        (click)="selectCategory(category)"
+      >
+        {{ category.name }}
+      </button>
+    }
+  </div>
+
   <div class="service-tabs">
-    @for (service of services(); track service.id) {
+    @for (service of servicesForSelectedCategory(); track service.id) {
       <button
         type="button"
         class="service-tab"
@@ -59,11 +72,10 @@
             @if (garment.imageUrl) {
               <img [src]="garment.imageUrl" alt="" />
             } @else {
-              <app-garment-icon [category]="garment.category" />
+              <app-garment-icon [category]="selectedCategory()?.name ?? ''" />
             }
           </div>
           <h4>{{ garment.name }}</h4>
-          <p class="category">{{ garment.category }}</p>
           @if (priceFor(garment.id); as price) {
             <p class="price">
               ₹{{ price.price }}
@@ -83,6 +95,20 @@
               />
               <button type="button" (click)="setQuantity(garment.id, quantityFor(garment.id) + 1)">+</button>
             </div>
+            @if (canAddToCart(garment.id) && addOns().length) {
+              <div class="add-ons-row">
+                @for (addOn of addOns(); track addOn.id) {
+                  <label class="add-on-check">
+                    <input
+                      type="checkbox"
+                      [checked]="isAddOnSelected(garment.id, addOn.id)"
+                      (change)="toggleAddOn(garment.id, addOn.id)"
+                    />
+                    {{ addOn.name }} (+₹{{ addOn.price }})
+                  </label>
+                }
+              </div>
+            }
             <button type="button" class="btn-add" [disabled]="!canAddToCart(garment.id)" (click)="addToCart(garment)">
               Add to Cart
             </button>
@@ -109,29 +135,32 @@
         <p class="empty">Your cart is empty. Add some garments to get started.</p>
       } @else {
         <div class="cart-items">
-          @for (item of cart.items(); track item.garmentId + item.serviceId) {
+          @for (item of cart.items(); track item.garmentId + item.serviceId + (item.selectedAddOns ?? []).length) {
             <div class="cart-item">
               @if (item.garmentImageUrl) {
                 <img [src]="item.garmentImageUrl" alt="" />
               } @else {
-                <span class="thumb-placeholder"><app-garment-icon [category]="item.garmentCategory" /></span>
+                <span class="thumb-placeholder"><app-garment-icon [category]="item.categoryName" /></span>
               }
               <div class="cart-item-info">
                 <strong>{{ item.garmentName }}</strong>
                 <span>{{ item.serviceName }}</span>
+                @if (item.selectedAddOns?.length) {
+                  <span class="add-ons">+ {{ addOnsSummary(item) }}</span>
+                }
                 @if (item.pricingType === PricingType.WeightBased) {
                   <span class="qty">{{ item.weightKg }} kg</span>
                 } @else {
                   <div class="qty-row">
-                    <button type="button" (click)="cart.updateQuantity(item.garmentId, item.serviceId, item.quantity - 1)">−</button>
+                    <button type="button" (click)="cart.updateQuantity(item, item.quantity - 1)">−</button>
                     <span>{{ item.quantity }}</span>
-                    <button type="button" (click)="cart.updateQuantity(item.garmentId, item.serviceId, item.quantity + 1)">+</button>
+                    <button type="button" (click)="cart.updateQuantity(item, item.quantity + 1)">+</button>
                   </div>
                 }
               </div>
               <div class="cart-item-total">
                 ₹{{ lineTotal(item) }}
-                <button type="button" class="remove" (click)="cart.remove(item.garmentId, item.serviceId)">Remove</button>
+                <button type="button" class="remove" (click)="cart.remove(item)">Remove</button>
               </div>
             </div>
           }
@@ -141,6 +170,11 @@
           <label class="express-toggle">
             <input type="checkbox" [ngModel]="isExpress()" (ngModelChange)="isExpress.set($event)" />
             Express service (faster turnaround, small surcharge)
+          </label>
+
+          <label class="express-toggle">
+            <input type="checkbox" [ngModel]="isSameDay()" (ngModelChange)="isSameDay.set($event)" />
+            Same-day service
           </label>
 
           <div class="field">

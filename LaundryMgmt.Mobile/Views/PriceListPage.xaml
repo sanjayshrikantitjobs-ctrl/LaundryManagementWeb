@@ -8,10 +8,13 @@
              x:DataType="vm:PriceListViewModel"
              Title="Price List">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <views:CustomerNavBar Grid.Row="0" CurrentPage="pricelist" />
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Channels}" SelectionMode="Single"
+        <Picker Grid.Row="1" Margin="16,8" ItemsSource="{Binding Categories}" ItemDisplayBinding="{Binding CategoryName}"
+                SelectedItem="{Binding SelectedCategory}" Title="Category" />
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Channels}" SelectionMode="Single"
                          SelectedItem="{Binding SelectedChannel}" HeightRequest="56">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
@@ -29,24 +32,25 @@
                                 <VisualState Name="Selected">
                                     <VisualState.Setters>
                                         <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                        <Setter TargetName="ChannelLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Label Text="{Binding .}" TextColor="{StaticResource Primary}" FontSize="13" />
+                        <Label x:Name="ChannelLabel" Text="{Binding .}" TextColor="{StaticResource Primary}" FontSize="13" />
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <ActivityIndicator Grid.Row="3" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="4" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                             Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-        <CollectionView Grid.Row="3" ItemsSource="{Binding Rows}"
+        <CollectionView Grid.Row="4" ItemsSource="{Binding Rows}"
                          IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.EmptyView>
                 <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
@@ -60,7 +64,7 @@
                     <Frame Style="{StaticResource ListCard}">
                         <VerticalStackLayout Spacing="8">
                             <Label Text="{Binding GarmentName}" FontAttributes="Bold" />
-                            <Label Text="{Binding Category}" Style="{StaticResource SubtleLabel}" />
+                            <Label Text="{Binding CategoryName}" Style="{StaticResource SubtleLabel}" />
 
                             <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                                 <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cells}">

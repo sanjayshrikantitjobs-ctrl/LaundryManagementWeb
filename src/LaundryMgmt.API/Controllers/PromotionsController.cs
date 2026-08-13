@@ -67,9 +67,9 @@ public class PromotionsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeletePromotion(Guid id)
+    public async Task<IActionResult> DeletePromotion(Guid id, [FromQuery] string? reason)
     {
-        await _sender.Send(new DeletePromotionCommand(id));
+        await _sender.Send(new DeletePromotionCommand(id, reason));
         return NoContent();
     }
 }

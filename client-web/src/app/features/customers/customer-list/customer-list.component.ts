@@ -1,12 +1,15 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CustomersService } from '../customers.service';
-import { CustomerListItem, CustomerStatus, MembershipTier } from '../../../core/models/customer.models';
+import { CustomerListItem, CustomerStatus } from '../../../core/models/customer.models';
 import { SortDirection } from '../../../core/models/order.models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { SubscriptionsService } from '../../subscriptions/subscriptions.service';
+import { CustomerSubscriptionListItem, SubscriptionStatus } from '../../../core/models/subscription.models';
 
-type CustomerTab = 'all' | 'new' | 'inactive';
+type CustomerTab = 'all' | 'new' | 'inactive' | 'subscribed';
 type ActivityTier = 'new' | 'active' | 'yellow' | 'orange' | 'red';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -19,20 +22,23 @@ const DAY_MS = 24 * 60 * 60 * 1000;
   styleUrl: './customer-list.component.scss'
 })
 export class CustomerListComponent implements OnInit {
+  private readonly customersService = inject(CustomersService);
+  private readonly subscriptionsService = inject(SubscriptionsService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+
   readonly customers = signal<CustomerListItem[]>([]);
+  readonly subscribedCustomers = signal<CustomerSubscriptionListItem[]>([]);
   readonly isLoading = signal(true);
   readonly search = signal('');
   readonly totalCount = signal(0);
-  readonly MembershipTier = MembershipTier;
   readonly CustomerStatus = CustomerStatus;
+  readonly SubscriptionStatus = SubscriptionStatus;
   readonly activeTab = signal<CustomerTab>('all');
 
   readonly pageNumber = signal(1);
   readonly pageSize = signal(20);
   readonly sortBy = signal<string | null>(null);
   readonly sortDirection = signal<SortDirection>('asc');
-
-  constructor(private customersService: CustomersService) {}
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -77,26 +83,38 @@ export class CustomerListComponent implements OnInit {
     return this.sortDirection() === 'asc' ? '▲' : '▼';
   }
 
-  deleteCustomer(customer: CustomerListItem): void {
-    if (!confirm(`Delete customer "${customer.fullName}"?`)) return;
+  async deleteCustomer(customer: CustomerListItem): Promise<void> {
+    const result = await this.confirmDialog.confirm({
+      title: 'Delete customer',
+      message: `Delete customer "${customer.fullName}"? This cannot be undone.`,
+      requireReason: true,
+      confirmLabel: 'Delete',
+      danger: true
+    });
+    if (!result.confirmed) return;
 
-    this.customersService.deleteCustomer(customer.id).subscribe({
+    this.customersService.deleteCustomer(customer.id, result.reason).subscribe({
       next: () => this.loadCustomers()
     });
   }
 
-  toggleStatus(customer: CustomerListItem): void {
+  async toggleStatus(customer: CustomerListItem): Promise<void> {
     const nextStatus = customer.status === CustomerStatus.Active ? CustomerStatus.Inactive : CustomerStatus.Active;
     const action = nextStatus === CustomerStatus.Inactive ? 'Deactivate' : 'Activate';
-    if (!confirm(`${action} customer "${customer.fullName}"? Their orders and history will not be affected.`)) return;
+    const result = await this.confirmDialog.confirm({
+      title: `${action} customer`,
+      message: `${action} customer "${customer.fullName}"? Their orders and history will not be affected.`,
+      confirmLabel: action
+    });
+    if (!result.confirmed) return;
 
     this.customersService.setStatus(customer.id, nextStatus).subscribe({
       next: () => this.loadCustomers()
     });
   }
 
-  membershipLabel(tier: MembershipTier): string {
-    return MembershipTier[tier];
+  subscriptionStatusLabel(status: SubscriptionStatus): string {
+    return SubscriptionStatus[status];
   }
 
   activityTier(customer: CustomerListItem): ActivityTier {
@@ -128,6 +146,25 @@ export class CustomerListComponent implements OnInit {
   private loadCustomers(): void {
     this.isLoading.set(true);
     const tab = this.activeTab();
+
+    if (tab === 'subscribed') {
+      this.subscriptionsService
+        .getCustomerSubscriptions({
+          search: this.search() || undefined,
+          pageNumber: this.pageNumber(),
+          pageSize: this.pageSize()
+        })
+        .subscribe({
+          next: (result) => {
+            this.subscribedCustomers.set(result.items);
+            this.totalCount.set(result.totalCount);
+            this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false)
+        });
+      return;
+    }
+
     this.customersService
       .getCustomers({
         search: this.search() || undefined,

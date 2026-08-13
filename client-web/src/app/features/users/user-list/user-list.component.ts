@@ -1,10 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UsersService } from '../users.service';
 import { STAFF_ROLES, UserRole, UserSummary } from '../../../core/models/user.models';
 import { SortDirection } from '../../../core/models/order.models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 type UserTab = 'all' | 'active' | 'inactive';
 
@@ -16,6 +17,8 @@ type UserTab = 'all' | 'active' | 'inactive';
   styleUrl: './user-list.component.scss'
 })
 export class UserListComponent implements OnInit {
+  private readonly confirmDialog = inject(ConfirmDialogService);
+
   readonly users = signal<UserSummary[]>([]);
   readonly isLoading = signal(true);
   readonly search = signal('');
@@ -85,9 +88,14 @@ export class UserListComponent implements OnInit {
     return UserRole[role];
   }
 
-  toggleActive(user: UserSummary): void {
+  async toggleActive(user: UserSummary): Promise<void> {
     const action = user.isActive ? 'Deactivate' : 'Activate';
-    if (!confirm(`${action} user "${user.fullName}"?`)) return;
+    const result = await this.confirmDialog.confirm({
+      title: `${action} user`,
+      message: `${action} user "${user.fullName}"?`,
+      confirmLabel: action
+    });
+    if (!result.confirmed) return;
 
     this.usersService.setActive(user.id, !user.isActive).subscribe({
       next: () => this.loadUsers()

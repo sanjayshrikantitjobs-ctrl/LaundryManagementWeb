@@ -10,11 +10,19 @@
     </div>
   </header>
 
-  <input
-    type="search"
-    placeholder="Search by name or category…"
-    (input)="onSearch($any($event.target).value)"
-  />
+  <div class="filters">
+    <input
+      type="search"
+      placeholder="Search by name…"
+      (input)="onSearch($any($event.target).value)"
+    />
+    <select (change)="onCategoryChange($any($event.target).value)">
+      <option value="">All Categories</option>
+      @for (category of categories(); track category.id) {
+        <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
 
   @if (isLoading()) {
     <p>Loading garments…</p>
@@ -26,8 +34,7 @@
         <tr>
           <th></th>
           <th class="sortable" (click)="sortByColumn('name')">Name {{ sortIndicator('name') }}</th>
-          <th class="sortable" (click)="sortByColumn('category')">Category {{ sortIndicator('category') }}</th>
-          <th class="sortable" (click)="sortByColumn('barcode')">Barcode {{ sortIndicator('barcode') }}</th>
+          <th>Category</th>
           @if (canEdit) { <th></th> }
         </tr>
       </thead>
@@ -42,12 +49,13 @@
               }
             </td>
             <td>{{ garment.name }}</td>
-            <td>{{ garment.category }}</td>
-            <td>{{ garment.barcode || '—' }}</td>
+            <td>{{ garment.categoryName }}</td>
             @if (canEdit) {
               <td class="actions">
-                <a [routerLink]="[garment.id, 'edit']">Edit</a>
-                <button type="button" (click)="deleteGarment(garment)">Delete</button>
+                <div class="actions-inner">
+                  <a [routerLink]="[garment.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deleteGarment(garment)">🗑️</button>
+                </div>
               </td>
             }
           </tr>

@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Orders.Queries.GetOrderById;
 
+public record OrderItemAddOnDto(Guid Id, string Name, decimal Price);
+
 public record OrderItemDetailDto(
     Guid Id, string GarmentName, Guid ServiceId, string ServiceName, int Quantity, decimal? WeightKg,
-    decimal UnitPrice, decimal LineTotal, string? SpecialInstructions);
+    decimal UnitPrice, decimal LineTotal, string? SpecialInstructions, List<OrderItemAddOnDto> AddOns);
 
 public record OrderDetailDto(
-    Guid Id, string OrderNumber, OrderStatus Status, OrderChannel Channel, bool IsExpress,
+    Guid Id, string OrderNumber, OrderStatus Status, OrderChannel Channel, bool IsExpress, bool IsSameDay,
     decimal SubTotal, decimal DiscountAmount, string? PromoCode, decimal GstAmount, decimal DeliveryCharge, decimal TotalAmount,
     PaymentStatus PaymentStatus, decimal AmountPaid,
     DateTimeOffset CreatedAtUtc, DateTimeOffset? PromisedByUtc, DateTimeOffset? DeliveredAtUtc,
@@ -39,6 +41,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             .Include(o => o.Customer)
             .Include(o => o.Items).ThenInclude(i => i.Garment)
             .Include(o => o.Items).ThenInclude(i => i.Service)
+            .Include(o => o.Items).ThenInclude(i => i.AddOns)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken)
             ?? throw new KeyNotFoundException($"Order {request.OrderId} not found.");
 
@@ -54,12 +57,13 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             .FirstOrDefaultAsync(cancellationToken);
 
         return new OrderDetailDto(
-            order.Id, order.OrderNumber, order.Status, order.Channel, order.IsExpress,
+            order.Id, order.OrderNumber, order.Status, order.Channel, order.IsExpress, order.IsSameDay,
             order.SubTotal, order.DiscountAmount, order.PromoCode, order.GstAmount, order.DeliveryCharge, order.TotalAmount,
             order.PaymentStatus, order.AmountPaid,
             order.CreatedAtUtc, order.PromisedByUtc, order.DeliveredAtUtc, pickupScheduledAtUtc,
             order.Items.Select(i => new OrderItemDetailDto(
                 i.Id, i.Garment!.Name, i.ServiceId, i.Service!.Name, i.Quantity, i.WeightKg,
-                i.UnitPrice, i.LineTotal, i.SpecialInstructions)).ToList());
+                i.UnitPrice, i.LineTotal, i.SpecialInstructions,
+                i.AddOns.Select(a => new OrderItemAddOnDto(a.Id, a.Name, a.Price)).ToList())).ToList());
     }
 }

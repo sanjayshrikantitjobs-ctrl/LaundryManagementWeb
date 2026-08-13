@@ -90,7 +90,7 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerBody body)
     {
         await _sender.Send(new UpdateCustomerCommand(
-            id, body.FullName, body.PhoneNumber, body.Email, body.CreditLimit, body.MembershipTier, body.Notes));
+            id, body.FullName, body.PhoneNumber, body.Email, body.CreditLimit, body.Notes));
         return NoContent();
     }
 
@@ -98,9 +98,9 @@ public class CustomersController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteCustomer(Guid id)
+    public async Task<IActionResult> DeleteCustomer(Guid id, [FromQuery] string? reason)
     {
-        await _sender.Send(new DeleteCustomerCommand(id));
+        await _sender.Send(new DeleteCustomerCommand(id, reason));
         return NoContent();
     }
 
@@ -178,8 +178,7 @@ public class CustomersController : ControllerBase
 }
 
 public record UpdateCustomerBody(
-    string FullName, string PhoneNumber, string? Email, decimal CreditLimit,
-    LaundryMgmt.Domain.Enums.MembershipTier MembershipTier, string? Notes);
+    string FullName, string PhoneNumber, string? Email, decimal CreditLimit, string? Notes);
 
 public record AddAddressBody(
     string Label, string Line1, string? Line2, string City, string State, string PostalCode, bool IsDefault);

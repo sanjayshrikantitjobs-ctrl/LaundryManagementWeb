@@ -47,3 +47,58 @@ h1, h2, h3, h4 {
 a {
   color: var(--color-primary);
 }
+
+/* Shared icon-action-button styling for admin list grids (Edit/Delete/Deactivate
+   across Customers/Garments/Services/Categories/Add-ons/Promotions/Plans/Users).
+   Global (not component-scoped) so every grid gets the same normalized sizing and
+   vertical alignment from one place, instead of near-duplicate per-component CSS. */
+td.actions {
+  vertical-align: middle;
+}
+
+.actions-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Generic avatar placeholder for Customers/Users grids — no upload, just a visual
+   marker distinguishing rows at a glance. */
+td.avatar {
+  width: 40px;
+}
+
+.avatar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  font-size: 1rem;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-light);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+
+  &.danger {
+    background: var(--color-danger-light);
+  }
+}

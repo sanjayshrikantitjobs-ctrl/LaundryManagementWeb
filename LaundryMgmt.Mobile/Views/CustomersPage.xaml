@@ -8,11 +8,7 @@
              x:DataType="vm:CustomersViewModel"
              Title="Customers">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewCustomerCommand}" IsEnabled="{Binding CanEditMasterData}" />
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="customers" />
 
         <SearchBar Grid.Row="1"
@@ -25,14 +21,19 @@
                 <Button Text="All" CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" />
                 <Button Text="Active" CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" />
                 <Button Text="Inactive" CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" />
+                <Button Text="Subscribed" CommandParameter="{x:Static vm:CustomerTab.Subscribed}" Command="{Binding SetTabCommand}" />
             </HorizontalStackLayout>
         </ScrollView>
 
-        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Button Grid.Row="3" Text="+ New Customer" HorizontalOptions="End" Margin="16,0,16,8"
+                Command="{Binding NewCustomerCommand}" IsVisible="{Binding CanEditMasterData}" />
+
+        <Label Grid.Row="4" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <RefreshView Grid.Row="5" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}"
+                     IsVisible="{Binding IsSubscribedTab, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView ItemsSource="{Binding Customers}"
                             RemainingItemsThreshold="3"
                             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
@@ -45,32 +46,55 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:CustomerListItem">
-                        <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
-                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
-                                    <Label Text="{Binding FullName}" FontAttributes="Bold" />
-                                    <Label Text="{Binding PhoneNumber}" Style="{StaticResource SubtleLabel}" />
-                                    <Label Text="{Binding Status}" TextColor="{Binding Status, Converter={StaticResource CustomerStatusColorConverter}}"
-                                           FontAttributes="Bold" FontSize="12" />
-                                </VerticalStackLayout>
-                                <Button Grid.Row="0" Grid.Column="1" Text="Edit"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCustomerCommand}" />
-                                <Button Grid.Row="0" Grid.Column="2" Text="{Binding Status, Converter={StaticResource CustomerStatusToggleLabelConverter}}"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleStatusCommand}" />
-                                <Button Grid.Row="0" Grid.Column="3" Text="Delete" Style="{StaticResource DangerButton}"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCustomerCommand}" />
-                            </Grid>
+                        <Frame Style="{StaticResource ListCard}" Padding="16,14" MinimumHeightRequest="76">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenCustomerCommand}" />
+                            </Frame.GestureRecognizers>
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding FullName}" FontAttributes="Bold" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding PhoneNumber}" Style="{StaticResource SubtleLabel}" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding Status}" TextColor="{Binding Status, Converter={StaticResource CustomerStatusColorConverter}}"
+                                       FontAttributes="Bold" FontSize="12" />
+                            </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
+
+        <Grid Grid.Row="5" IsVisible="{Binding IsSubscribedTab}">
+            <ActivityIndicator IsRunning="{Binding IsLoadingSubscribed}" IsVisible="{Binding IsLoadingSubscribed}"
+                                Color="{StaticResource Primary}" VerticalOptions="Center" />
+            <CollectionView ItemsSource="{Binding SubscribedCustomers}"
+                            IsVisible="{Binding IsLoadingSubscribed, Converter={StaticResource InvertedBoolConverter}}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
+                        <Label Text="🎫" FontSize="40" HorizontalTextAlignment="Center" />
+                        <Label Text="No subscribed customers found." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CustomerSubscriptionListItemDto">
+                        <Frame Style="{StaticResource ListCard}">
+                            <VerticalStackLayout Spacing="4">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding CustomerName}" FontAttributes="Bold" />
+                                    <Label Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Badge}" />
+                                </Grid>
+                                <Label Text="{Binding PlanName}" Style="{StaticResource SubtleLabel}" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding EndDate, StringFormat='Valid until {0:d MMM y}'}" FontSize="12" />
+                                    <Label Grid.Column="1" Text="{Binding RecurringValue, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
     </Grid>
 
 </ContentPage>

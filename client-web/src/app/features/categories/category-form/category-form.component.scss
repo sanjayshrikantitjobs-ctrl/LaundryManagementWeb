@@ -1,0 +1,78 @@
+.category-form {
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+
+    &.checkbox {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  input, select, textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font: inherit;
+  }
+
+  .error {
+    color: var(--color-danger);
+  }
+
+  .image-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-accent-hover);
+    }
+  }
+
+  button[type='button'] {
+    background: none;
+    border: 1px solid var(--color-border);
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text);
+  }
+}

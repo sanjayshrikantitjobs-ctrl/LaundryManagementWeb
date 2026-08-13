@@ -8,11 +8,7 @@
              x:DataType="vm:OrdersViewModel"
              Title="Orders">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewOrderCommand}" />
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb x:Name="ManagementNavBar" Grid.Row="0" CurrentModule="orders" />
         <views:CustomerNavBar x:Name="CustomerNav" Grid.Row="0" CurrentPage="orders" IsVisible="False" />
 
@@ -26,11 +22,14 @@
             </HorizontalStackLayout>
         </ScrollView>
 
-        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Button Grid.Row="2" Text="+ New Order" HorizontalOptions="End" Margin="16,0,16,8"
+                Command="{Binding NewOrderCommand}" />
+
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Orders}"
                             RemainingItemsThreshold="3"
                             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">

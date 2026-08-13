@@ -1,0 +1,43 @@
+<section class="category-list">
+  <header>
+    <h1>Add-ons</h1>
+    <div class="header-actions">
+      <a routerLink="/categories" class="link">Categories</a>
+      <a routerLink="new" class="btn-primary">+ New Add-on</a>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading add-ons…</p>
+  } @else if (addOns().length === 0) {
+    <p>No add-ons found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (addOn of addOns(); track addOn.id) {
+          <tr>
+            <td>{{ addOn.name }}</td>
+            <td>{{ addOn.description || '—' }}</td>
+            <td>₹{{ addOn.price }}</td>
+            <td>{{ addOn.isActive ? 'Active' : 'Inactive' }}</td>
+            <td class="actions">
+              <div class="actions-inner">
+                <a [routerLink]="[addOn.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button type="button" class="icon-btn danger" title="Delete" (click)="deleteAddOn(addOn)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

@@ -6,15 +6,14 @@ using MediatR;
 namespace LaundryMgmt.Application.Garments.Commands.CreateGarment;
 
 public record CreateGarmentCommand(
-    string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl = null) : IRequest<Guid>;
+    string Name, Guid CategoryId, string? SpecialInstructions, string? ImageUrl = null) : IRequest<Guid>;
 
 public class CreateGarmentCommandValidator : AbstractValidator<CreateGarmentCommand>
 {
     public CreateGarmentCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Barcode).MaximumLength(64);
+        RuleFor(x => x.CategoryId).NotEmpty();
         RuleFor(x => x.ImageUrl).MaximumLength(500);
     }
 }
@@ -30,8 +29,7 @@ public class CreateGarmentCommandHandler : IRequestHandler<CreateGarmentCommand,
         var garment = new Garment
         {
             Name = request.Name.Trim(),
-            Category = request.Category.Trim(),
-            Barcode = request.Barcode,
+            CategoryId = request.CategoryId,
             SpecialInstructions = request.SpecialInstructions,
             ImageUrl = request.ImageUrl
         };

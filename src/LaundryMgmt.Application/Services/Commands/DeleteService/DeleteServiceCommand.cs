@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Services.Commands.DeleteService;
 
-public record DeleteServiceCommand(Guid ServiceId) : IRequest;
+public record DeleteServiceCommand(Guid ServiceId, string? Reason = null) : IRequest;
 
 public class DeleteServiceCommandHandler : IRequestHandler<DeleteServiceCommand>
 {
@@ -18,6 +18,7 @@ public class DeleteServiceCommandHandler : IRequestHandler<DeleteServiceCommand>
             .FirstOrDefaultAsync(s => s.Id == request.ServiceId, cancellationToken)
             ?? throw new KeyNotFoundException($"Service {request.ServiceId} not found.");
 
+        service.DeletedReason = request.Reason;
         _db.Services.Remove(service);
         await _db.SaveChangesAsync(cancellationToken);
     }

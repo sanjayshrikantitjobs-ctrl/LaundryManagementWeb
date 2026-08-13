@@ -6,7 +6,7 @@ using MediatR;
 namespace LaundryMgmt.Application.Services.Commands.CreateService;
 
 public record CreateServiceCommand(
-    string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    string Name, Guid CategoryId, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
     string? ImageUrl = null, decimal ExpressSurcharge = 0, int ExpressEtaHours = 24) : IRequest<Guid>;
 
 public class CreateServiceCommandValidator : AbstractValidator<CreateServiceCommand>
@@ -14,6 +14,7 @@ public class CreateServiceCommandValidator : AbstractValidator<CreateServiceComm
     public CreateServiceCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.CategoryId).NotEmpty();
         RuleFor(x => x.BasePrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.EstimatedTimeHours).GreaterThan(0);
         RuleFor(x => x.GstPercentage).InclusiveBetween(0, 100);
@@ -35,6 +36,7 @@ public class CreateServiceCommandHandler : IRequestHandler<CreateServiceCommand,
         var service = new Service
         {
             Name = request.Name.Trim(),
+            CategoryId = request.CategoryId,
             BasePrice = request.BasePrice,
             EstimatedTimeHours = request.EstimatedTimeHours,
             GstPercentage = request.GstPercentage,

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Garments.Commands.DeleteGarment;
 
-public record DeleteGarmentCommand(Guid GarmentId) : IRequest;
+public record DeleteGarmentCommand(Guid GarmentId, string? Reason = null) : IRequest;
 
 public class DeleteGarmentCommandHandler : IRequestHandler<DeleteGarmentCommand>
 {
@@ -18,6 +18,7 @@ public class DeleteGarmentCommandHandler : IRequestHandler<DeleteGarmentCommand>
             .FirstOrDefaultAsync(g => g.Id == request.GarmentId, cancellationToken)
             ?? throw new KeyNotFoundException($"Garment {request.GarmentId} not found.");
 
+        garment.DeletedReason = request.Reason;
         _db.Garments.Remove(garment);
         await _db.SaveChangesAsync(cancellationToken);
     }

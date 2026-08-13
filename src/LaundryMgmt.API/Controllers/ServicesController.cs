@@ -57,7 +57,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> UpdateService(Guid id, [FromBody] UpdateServiceBody body)
     {
         await _sender.Send(new UpdateServiceCommand(
-            id, body.Name, body.BasePrice, body.EstimatedTimeHours, body.GstPercentage, body.Priority, body.ImageUrl,
+            id, body.Name, body.CategoryId, body.BasePrice, body.EstimatedTimeHours, body.GstPercentage, body.Priority, body.ImageUrl,
             body.ExpressSurcharge, body.ExpressEtaHours));
         return NoContent();
     }
@@ -66,13 +66,13 @@ public class ServicesController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteService(Guid id)
+    public async Task<IActionResult> DeleteService(Guid id, [FromQuery] string? reason)
     {
-        await _sender.Send(new DeleteServiceCommand(id));
+        await _sender.Send(new DeleteServiceCommand(id, reason));
         return NoContent();
     }
 }
 
 public record UpdateServiceBody(
-    string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority, string? ImageUrl,
+    string Name, Guid CategoryId, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority, string? ImageUrl,
     decimal ExpressSurcharge, int ExpressEtaHours);

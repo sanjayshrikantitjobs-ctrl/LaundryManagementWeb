@@ -46,6 +46,9 @@
           <div class="item-info">
             <strong>{{ item.garmentName }}</strong>
             <span>{{ item.serviceName }}</span>
+            @if (item.addOns.length) {
+              <span class="add-ons">+ {{ addOnNames(item) }}</span>
+            }
           </div>
           <div class="item-qty">
             {{ item.weightKg ? item.weightKg + ' kg' : item.quantity + ' pcs' }}

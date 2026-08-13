@@ -1,18 +1,19 @@
 using FluentValidation;
 using LaundryMgmt.Application.Common.Interfaces;
-using LaundryMgmt.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Customers.Commands.UpdateCustomer;
 
+// Membership is no longer a manually-set field here — it's derived from the customer's
+// active CustomerSubscription (see GetCustomers/GetCustomerById's MembershipLabel) and
+// managed via the Subscriptions screens instead.
 public record UpdateCustomerCommand(
     Guid CustomerId,
     string FullName,
     string PhoneNumber,
     string? Email,
     decimal CreditLimit,
-    MembershipTier MembershipTier,
     string? Notes) : IRequest;
 
 public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCommand>
@@ -49,7 +50,6 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.PhoneNumber = normalizedPhone;
         customer.Email = request.Email?.Trim();
         customer.CreditLimit = request.CreditLimit;
-        customer.MembershipTier = request.MembershipTier;
         customer.Notes = request.Notes;
 
         await _db.SaveChangesAsync(cancellationToken);

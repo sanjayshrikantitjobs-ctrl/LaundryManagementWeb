@@ -23,23 +23,12 @@ public partial class UsersViewModel : PagedListViewModel<UserSummaryDto>
     [RelayCommand]
     private async Task NewUserAsync() => await Shell.Current.GoToAsync(nameof(Views.UserFormPage));
 
+    /// <summary>Row tap opens the read-only detail page, where Edit/Deactivate now
+    /// live (replacing the old inline per-row buttons — see UserDetailViewModel).</summary>
     [RelayCommand]
-    private async Task EditUserAsync(UserSummaryDto? user)
+    private async Task OpenUserAsync(UserSummaryDto? user)
     {
         if (user is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.UserFormPage)}?userId={user.Id}");
-    }
-
-    [RelayCommand]
-    private async Task ToggleActiveAsync(UserSummaryDto? user)
-    {
-        if (user is null) return;
-
-        var action = user.IsActive ? "Deactivate" : "Activate";
-        var confirmed = await Shell.Current.DisplayAlert($"{action} user", $"{action} \"{user.FullName}\"?", action, "Cancel");
-        if (!confirmed) return;
-
-        await _apiClient.SetUserActiveAsync(user.Id, !user.IsActive);
-        await RefreshAsync();
+        await Shell.Current.GoToAsync($"{nameof(Views.UserDetailPage)}?userId={user.Id}");
     }
 }

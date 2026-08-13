@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
+             x:Class="LaundryMgmt.Mobile.Views.ServiceDetailPage"
+             x:DataType="vm:ServiceDetailViewModel"
+             Title="Service">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+                   Padding="12,8" BackgroundColor="{StaticResource DangerLight}" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                Color="{StaticResource Primary}" VerticalOptions="Center" />
+
+            <Frame IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+                <VerticalStackLayout Spacing="10">
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                            HeightRequest="160" Padding="0"
+                            IsVisible="{Binding Service.ImageUrl, Converter={StaticResource IsNotNullConverter}}">
+                        <Image behaviors:TrustedImage.Url="{Binding Service.ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                               Aspect="AspectFill" />
+                    </Border>
+
+                    <Label Text="{Binding Service.Name}" FontAttributes="Bold" FontSize="20" />
+                    <Label Text="{Binding Service.CategoryName}" Style="{StaticResource SubtleLabel}" />
+
+                    <Grid ColumnDefinitions="*,*" RowSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="BASE PRICE" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.BasePrice, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="EST. TIME" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.EstimatedTimeHours, StringFormat='{0} hr'}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" RowSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="GST %" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.GstPercentage, StringFormat='{0}%'}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="PRIORITY" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.Priority}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" RowSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="EXPRESS SURCHARGE" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.ExpressSurcharge, StringFormat='₹{0:0.00}'}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="EXPRESS ETA" Style="{StaticResource SectionLabel}" />
+                            <Label Text="{Binding Service.ExpressEtaHours, StringFormat='{0} hr'}" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding CanEditMasterData}">
+                <Button Text="✏️ Edit" Command="{Binding EditCommand}" />
+                <Button Text="🗑️ Delete" Style="{StaticResource DangerButton}" Command="{Binding DeleteCommand}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,117 @@
+.plan-list {
+  padding: 24px;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .link {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-accent-hover);
+    }
+  }
+
+  .plan-group {
+    margin-bottom: 32px;
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+    }
+  }
+
+  .plan-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .plan-card {
+    position: relative;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &.inactive {
+      opacity: 0.6;
+    }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 0;
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .price {
+        font-weight: 700;
+        color: var(--color-primary);
+      }
+    }
+
+    .description {
+      margin: 0;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+    }
+
+    .features {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+
+      li::before {
+        content: '✓ ';
+        color: var(--color-accent);
+      }
+    }
+
+    .badge {
+      align-self: flex-start;
+      background: var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .actions-inner {
+      margin-top: auto;
+      padding-top: 8px;
+    }
+  }
+}

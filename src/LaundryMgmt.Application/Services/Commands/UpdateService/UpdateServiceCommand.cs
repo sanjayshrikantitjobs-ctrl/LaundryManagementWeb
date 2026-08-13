@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LaundryMgmt.Application.Services.Commands.UpdateService;
 
 public record UpdateServiceCommand(
-    Guid ServiceId, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    Guid ServiceId, string Name, Guid CategoryId, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
     string? ImageUrl = null, decimal ExpressSurcharge = 0, int ExpressEtaHours = 24) : IRequest;
 
 public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceCommand>
@@ -15,6 +15,7 @@ public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceComm
     {
         RuleFor(x => x.ServiceId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.CategoryId).NotEmpty();
         RuleFor(x => x.BasePrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.EstimatedTimeHours).GreaterThan(0);
         RuleFor(x => x.GstPercentage).InclusiveBetween(0, 100);
@@ -38,6 +39,7 @@ public class UpdateServiceCommandHandler : IRequestHandler<UpdateServiceCommand>
             ?? throw new KeyNotFoundException($"Service {request.ServiceId} not found.");
 
         service.Name = request.Name.Trim();
+        service.CategoryId = request.CategoryId;
         service.BasePrice = request.BasePrice;
         service.EstimatedTimeHours = request.EstimatedTimeHours;
         service.GstPercentage = request.GstPercentage;

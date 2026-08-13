@@ -1,0 +1,27 @@
+@if (request(); as req) {
+  <div class="modal-backdrop" (click)="cancel()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ req.title }}</h2>
+      <p>{{ req.message }}</p>
+
+      @if (req.requireReason) {
+        <label class="reason-field">
+          Reason
+          <textarea
+            [ngModel]="reason()"
+            (ngModelChange)="reason.set($event)"
+            rows="3"
+            placeholder="Why is this being deleted?"
+          ></textarea>
+        </label>
+      }
+
+      <div class="actions">
+        <button type="button" class="secondary" (click)="cancel()">Cancel</button>
+        <button type="button" [class.danger]="req.danger" [disabled]="reasonMissing" (click)="confirm()">
+          {{ req.confirmLabel ?? 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

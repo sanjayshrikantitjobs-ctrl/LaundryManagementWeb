@@ -21,9 +21,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
+    public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
     public DbSet<Garment> Garments => Set<Garment>();
     public DbSet<Service> Services => Set<Service>();
     public DbSet<GarmentServicePrice> GarmentServicePrices => Set<GarmentServicePrice>();
+    public DbSet<AddOn> AddOns => Set<AddOn>();
+    public DbSet<OrderItemAddOn> OrderItemAddOns => Set<OrderItemAddOn>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
@@ -39,6 +42,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
+    public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures => Set<SubscriptionPlanFeature>();
+    public DbSet<CustomerSubscription> CustomerSubscriptions => Set<CustomerSubscription>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

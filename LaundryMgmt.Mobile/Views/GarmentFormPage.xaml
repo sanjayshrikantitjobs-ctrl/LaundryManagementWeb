@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.GarmentFormPage"
              x:DataType="vm:GarmentFormViewModel"
              Title="New Garment">
@@ -14,10 +15,22 @@
                     <Entry Text="{Binding Name}" Placeholder="Shirt, Saree, Blanket…" />
 
                     <Label Text="CATEGORY" Style="{StaticResource SectionLabel}" />
-                    <Entry Text="{Binding Category}" Placeholder="Menswear, Womenswear, Home…" />
+                    <Picker ItemsSource="{Binding Categories}" ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedCategory}" Title="Select a category…" />
 
-                    <Label Text="BARCODE" Style="{StaticResource SectionLabel}" />
-                    <Entry Text="{Binding Barcode}" />
+                    <Label Text="SPECIAL INSTRUCTIONS" Style="{StaticResource SectionLabel}" />
+                    <Editor Text="{Binding SpecialInstructions}" HeightRequest="80" Placeholder="Handle with care, no bleach…" />
+
+                    <Label Text="IMAGE" Style="{StaticResource SectionLabel}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                            HeightRequest="120" Padding="0"
+                            IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}">
+                        <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                               Aspect="AspectFill" />
+                    </Border>
+                    <Button Text="Choose Image" Command="{Binding PickImageCommand}"
+                            IsEnabled="{Binding IsUploadingImage, Converter={StaticResource InvertedBoolConverter}}" />
+                    <ActivityIndicator IsRunning="{Binding IsUploadingImage}" IsVisible="{Binding IsUploadingImage}" />
                 </VerticalStackLayout>
             </Frame>
 

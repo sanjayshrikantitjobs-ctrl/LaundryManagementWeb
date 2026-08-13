@@ -29,11 +29,12 @@
                                 <VisualState Name="Selected">
                                     <VisualState.Setters>
                                         <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                        <Setter TargetName="CategoryLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Label TextColor="{StaticResource Primary}" FontSize="13">
+                        <Label x:Name="CategoryLabel" TextColor="{StaticResource Primary}" FontSize="13">
                             <Label.FormattedText>
                                 <FormattedString>
                                     <Span Text="{Binding Icon}" />

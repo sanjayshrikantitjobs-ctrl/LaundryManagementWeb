@@ -52,11 +52,12 @@
                                     <VisualState Name="Selected">
                                         <VisualState.Setters>
                                             <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                            <Setter TargetName="ServiceLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                                         </VisualState.Setters>
                                     </VisualState>
                                 </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
-                            <Label Text="{Binding Name}" TextColor="{StaticResource Primary}" FontSize="13" />
+                            <Label x:Name="ServiceLabel" Text="{Binding Name}" TextColor="{StaticResource Primary}" FontSize="13" />
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -90,7 +91,7 @@
 
                                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                                     <Label Text="{Binding Garment.Name}" FontAttributes="Bold" FontSize="15" />
-                                    <Label Text="{Binding Garment.Category}" Style="{StaticResource SubtleLabel}" FontSize="12" />
+                                    <Label Text="{Binding Garment.CategoryName}" Style="{StaticResource SubtleLabel}" FontSize="12" />
                                     <Label Text="{Binding PriceLabel}" TextColor="{StaticResource Primary}" FontAttributes="Bold" FontSize="15" />
                                 </VerticalStackLayout>
 

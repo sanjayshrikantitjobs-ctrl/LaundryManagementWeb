@@ -1,21 +1,23 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ServicesService } from '../services.service';
 import { ServiceListItem } from '../../../core/models/catalog.models';
 import { SortDirection } from '../../../core/models/order.models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({
   selector: 'app-service-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, PaginationComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, PaginationComponent],
   templateUrl: './service-list.component.html',
   styleUrl: './service-list.component.scss'
 })
 export class ServiceListComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly services = signal<ServiceListItem[]>([]);
   readonly isLoading = signal(true);
@@ -67,10 +69,17 @@ export class ServiceListComponent implements OnInit {
     return this.sortDirection() === 'asc' ? '▲' : '▼';
   }
 
-  deleteService(service: ServiceListItem): void {
-    if (!confirm(`Delete service "${service.name}"?`)) return;
+  async deleteService(service: ServiceListItem): Promise<void> {
+    const result = await this.confirmDialog.confirm({
+      title: 'Delete service',
+      message: `Delete service "${service.name}"? This cannot be undone.`,
+      requireReason: true,
+      confirmLabel: 'Delete',
+      danger: true
+    });
+    if (!result.confirmed) return;
 
-    this.servicesService.deleteService(service.id).subscribe({
+    this.servicesService.deleteService(service.id, result.reason).subscribe({
       next: () => this.loadServices()
     });
   }

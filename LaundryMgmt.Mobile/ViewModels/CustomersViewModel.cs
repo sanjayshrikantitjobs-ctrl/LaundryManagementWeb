@@ -9,7 +9,7 @@ namespace LaundryMgmt.Mobile.ViewModels;
 
 public enum CustomerTab
 {
-    All, Active, Inactive
+    All, Active, Inactive, Subscribed
 }
 
 public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
@@ -19,9 +19,16 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
 
     public ObservableCollection<CustomerListItem> Customers => Items;
 
+    // Subscribed Customers is a differently-shaped list (CustomerSubscriptionListItemDto,
+    // not CustomerListItem) so it can't reuse the base PagedListViewModel's Items/paging —
+    // it's a simple one-shot fetch instead, mirroring the web admin's equivalent tab.
+    public ObservableCollection<CustomerSubscriptionListItemDto> SubscribedCustomers { get; } = new();
+
     [ObservableProperty] private string searchText = string.Empty;
+    [ObservableProperty] private bool isLoadingSubscribed;
 
     public CustomerTab ActiveTab { get; private set; } = CustomerTab.All;
+    public bool IsSubscribedTab => ActiveTab == CustomerTab.Subscribed;
 
     public bool CanEditMasterData => _authService.Role is not ("Customer" or "DepartmentHead");
 
@@ -47,42 +54,39 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
     {
         ActiveTab = tab;
         OnPropertyChanged(nameof(ActiveTab));
-        RefreshCommand.Execute(null);
+        OnPropertyChanged(nameof(IsSubscribedTab));
+
+        if (tab == CustomerTab.Subscribed)
+            _ = LoadSubscribedAsync();
+        else
+            RefreshCommand.Execute(null);
+    }
+
+    private async Task LoadSubscribedAsync()
+    {
+        IsLoadingSubscribed = true;
+        try
+        {
+            var result = await _apiClient.GetCustomerSubscriptionsAsync(search: SearchText, pageSize: 50);
+            SubscribedCustomers.Clear();
+            foreach (var item in result?.Items ?? new List<CustomerSubscriptionListItemDto>())
+                SubscribedCustomers.Add(item);
+        }
+        finally
+        {
+            IsLoadingSubscribed = false;
+        }
     }
 
     [RelayCommand]
     private async Task NewCustomerAsync() => await Shell.Current.GoToAsync(nameof(Views.CustomerFormPage));
 
+    /// <summary>Row tap opens the read-only detail page, where Edit/Deactivate/Delete now
+    /// live (replacing the old inline per-row buttons — see CustomerDetailViewModel).</summary>
     [RelayCommand]
-    private async Task EditCustomerAsync(CustomerListItem? customer)
+    private async Task OpenCustomerAsync(CustomerListItem? customer)
     {
         if (customer is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.CustomerFormPage)}?customerId={customer.Id}");
-    }
-
-    [RelayCommand]
-    private async Task DeleteCustomerAsync(CustomerListItem? customer)
-    {
-        if (customer is null) return;
-        var confirmed = await Shell.Current.DisplayAlert("Delete customer", $"Delete \"{customer.FullName}\"?", "Delete", "Cancel");
-        if (!confirmed) return;
-
-        await _apiClient.DeleteCustomerAsync(customer.Id);
-        await RefreshAsync();
-    }
-
-    [RelayCommand]
-    private async Task ToggleStatusAsync(CustomerListItem? customer)
-    {
-        if (customer is null) return;
-
-        var nextStatus = customer.Status == CustomerStatus.Active ? CustomerStatus.Inactive : CustomerStatus.Active;
-        var action = nextStatus == CustomerStatus.Inactive ? "Deactivate" : "Activate";
-        var confirmed = await Shell.Current.DisplayAlert(
-            $"{action} customer", $"{action} \"{customer.FullName}\"? Their orders and history will not be affected.", action, "Cancel");
-        if (!confirmed) return;
-
-        await _apiClient.SetCustomerStatusAsync(customer.Id, nextStatus);
-        await RefreshAsync();
+        await Shell.Current.GoToAsync($"{nameof(Views.CustomerDetailPage)}?customerId={customer.Id}");
     }
 }

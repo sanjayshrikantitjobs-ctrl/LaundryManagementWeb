@@ -8,9 +8,11 @@ import { GarmentsService } from '../garments/garments.service';
 import { CustomersService } from '../customers/customers.service';
 import { OrdersService } from '../orders/orders.service';
 import { PromotionsService } from '../promotions/promotions.service';
-import { CartService, CartItem } from './cart.service';
+import { CategoriesService } from '../categories/categories.service';
+import { AddOnsService } from '../add-ons/add-ons.service';
+import { CartService, CartItem, CartItemAddOn } from './cart.service';
 import { GarmentIconComponent } from '../../shared/garment-icon/garment-icon.component';
-import { GarmentListItem, PricingType, ServiceListItem } from '../../core/models/catalog.models';
+import { AddOn, GarmentListItem, PricingType, ServiceCategory, ServiceListItem } from '../../core/models/catalog.models';
 import { CustomerAddress } from '../../core/models/customer.models';
 import { ActivePromotion } from '../../core/models/promotion.models';
 import { OrderChannel } from '../../core/models/order.models';
@@ -18,6 +20,8 @@ import { OrderChannel } from '../../core/models/order.models';
 interface PriceLookup {
   pricingType: PricingType;
   price: number;
+  expressPrice: number | null;
+  isActive: boolean;
 }
 
 @Component({
@@ -33,21 +37,28 @@ export class ShopComponent implements OnInit {
   private readonly customersService = inject(CustomersService);
   private readonly ordersService = inject(OrdersService);
   private readonly promotionsService = inject(PromotionsService);
+  private readonly categoriesService = inject(CategoriesService);
+  private readonly addOnsService = inject(AddOnsService);
   private readonly router = inject(Router);
   readonly cart = inject(CartService);
 
   readonly PricingType = PricingType;
 
   readonly promotions = signal<ActivePromotion[]>([]);
+  readonly categories = signal<ServiceCategory[]>([]);
   readonly services = signal<ServiceListItem[]>([]);
   readonly garments = signal<GarmentListItem[]>([]);
+  readonly addOns = signal<AddOn[]>([]);
   readonly priceLookup = signal<Map<string, PriceLookup>>(new Map());
   readonly addresses = signal<CustomerAddress[]>([]);
 
+  readonly selectedCategory = signal<ServiceCategory | null>(null);
   readonly selectedService = signal<ServiceListItem | null>(null);
   readonly quantities = signal<Map<string, number>>(new Map());
+  readonly selectedAddOnIds = signal<Map<string, Set<string>>>(new Map());
   readonly isCartOpen = signal(false);
   readonly isExpress = signal(false);
+  readonly isSameDay = signal(false);
   readonly selectedAddressId = signal<string | null>(null);
   readonly pickupAt = signal<string>('');
   readonly isPlacingOrder = signal(false);
@@ -61,6 +72,9 @@ export class ShopComponent implements OnInit {
   readonly appliedPromo = signal<ActivePromotion | null>(null);
   readonly promoError = signal<string | null>(null);
 
+  // Client-side preview only, based on the Service's flat surcharge — the
+  // authoritative total (which also accounts for any per-item ExpressPrice
+  // override) is computed server-side when the order is created.
   readonly expressExtra = computed(() =>
     this.isExpress()
       ? this.cart.items().reduce((sum, item) => sum + (item.expressSurcharge ?? 0) * item.quantity, 0)
@@ -79,10 +93,16 @@ export class ShopComponent implements OnInit {
 
   ngOnInit(): void {
     this.promotionsService.getActivePromotions().subscribe((promos) => this.promotions.set(promos));
+    this.addOnsService.getAddOns(true).subscribe((addOns) => this.addOns.set(addOns));
+
+    this.categoriesService.getCategories().subscribe((categories) => {
+      this.categories.set(categories.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder));
+      this.selectDefaultCategoryAndService();
+    });
 
     this.servicesService.getServices({ pageSize: 50 }).subscribe((result) => {
       this.services.set(result.items);
-      if (result.items.length) this.selectService(result.items[0]);
+      this.selectDefaultCategoryAndService();
     });
 
     this.garmentsService.getGarments({ pageSize: 200 }).subscribe((result) => this.garments.set(result.items));
@@ -92,7 +112,12 @@ export class ShopComponent implements OnInit {
       for (const row of matrix.garments) {
         for (const cell of row.prices) {
           if (cell.price !== null && cell.pricingType !== null) {
-            lookup.set(this.priceKey(row.garmentId, cell.serviceId), { pricingType: cell.pricingType, price: cell.price });
+            lookup.set(this.priceKey(row.garmentId, cell.serviceId), {
+              pricingType: cell.pricingType,
+              price: cell.price,
+              expressPrice: cell.expressPrice,
+              isActive: cell.isActive
+            });
           }
         }
       }
@@ -115,6 +140,35 @@ export class ShopComponent implements OnInit {
     return `${garmentId}:${serviceId}`;
   }
 
+  servicesForSelectedCategory(): ServiceListItem[] {
+    const category = this.selectedCategory();
+    if (!category) return [];
+    return this.services()
+      .filter((s) => s.categoryId === category.id)
+      .sort((a, b) => a.priority - b.priority);
+  }
+
+  selectCategory(category: ServiceCategory): void {
+    this.selectedCategory.set(category);
+    const firstService = this.servicesForSelectedCategory()[0];
+    if (firstService) this.selectService(firstService);
+  }
+
+  // Categories and services load via two independent, unordered HTTP calls — this runs
+  // after each resolves and only acts once both are in. Defaults to the first category
+  // (by displayOrder) that actually has a service, not just categories()[0], since an
+  // empty category would otherwise show an empty service/garment list on first load.
+  private selectDefaultCategoryAndService(): void {
+    if (this.selectedCategory() || this.categories().length === 0 || this.services().length === 0) return;
+
+    const category = this.categories().find((c) => this.services().some((s) => s.categoryId === c.id));
+    if (!category) return;
+
+    this.selectedCategory.set(category);
+    const firstService = this.servicesForSelectedCategory()[0];
+    if (firstService) this.selectService(firstService);
+  }
+
   selectService(service: ServiceListItem): void {
     this.selectedService.set(service);
   }
@@ -122,13 +176,14 @@ export class ShopComponent implements OnInit {
   priceFor(garmentId: string): PriceLookup | undefined {
     const service = this.selectedService();
     if (!service) return undefined;
-    return this.priceLookup().get(this.priceKey(garmentId, service.id));
+    const price = this.priceLookup().get(this.priceKey(garmentId, service.id));
+    return price?.isActive ? price : undefined;
   }
 
   garmentsForSelectedService(): GarmentListItem[] {
     const service = this.selectedService();
     if (!service) return [];
-    return this.garments().filter((g) => this.priceLookup().has(this.priceKey(g.id, service.id)));
+    return this.garments().filter((g) => this.priceFor(g.id));
   }
 
   quantityFor(garmentId: string): number {
@@ -144,32 +199,64 @@ export class ShopComponent implements OnInit {
     this.quantities.update((map) => new Map(map).set(garmentId, clamped));
   }
 
+  isAddOnSelected(garmentId: string, addOnId: string): boolean {
+    return this.selectedAddOnIds().get(garmentId)?.has(addOnId) ?? false;
+  }
+
+  toggleAddOn(garmentId: string, addOnId: string): void {
+    this.selectedAddOnIds.update((map) => {
+      const next = new Map(map);
+      const current = new Set(next.get(garmentId) ?? []);
+      if (current.has(addOnId)) current.delete(addOnId);
+      else current.add(addOnId);
+      next.set(garmentId, current);
+      return next;
+    });
+  }
+
   addToCart(garment: GarmentListItem): void {
     const service = this.selectedService();
+    const category = this.selectedCategory();
     const price = this.priceFor(garment.id);
     const quantity = this.quantityFor(garment.id);
-    if (!service || !price || quantity <= 0) return;
+    if (!service || !category || !price || quantity <= 0) return;
+
+    const selectedIds = this.selectedAddOnIds().get(garment.id) ?? new Set<string>();
+    const selectedAddOns: CartItemAddOn[] = this.addOns()
+      .filter((a) => selectedIds.has(a.id))
+      .map((a) => ({ id: a.id, name: a.name, price: a.price }));
 
     const item: CartItem = {
       garmentId: garment.id,
       garmentName: garment.name,
       garmentImageUrl: garment.imageUrl,
-      garmentCategory: garment.category,
+      categoryName: category.name,
       serviceId: service.id,
       serviceName: service.name,
       pricingType: price.pricingType,
       unitPrice: price.price,
       quantity: price.pricingType === PricingType.WeightBased ? 1 : quantity,
       weightKg: price.pricingType === PricingType.WeightBased ? quantity : undefined,
-      expressSurcharge: service.expressSurcharge
+      expressSurcharge: service.expressSurcharge,
+      selectedAddOns
     };
     this.cart.add(item);
     this.setQuantity(garment.id, 0);
+    this.selectedAddOnIds.update((map) => {
+      const next = new Map(map);
+      next.delete(garment.id);
+      return next;
+    });
     this.isCartOpen.set(true);
   }
 
   lineTotal(item: CartItem): number {
     return this.cart.lineTotal(item);
+  }
+
+  addOnsSummary(item: CartItem): string {
+    const names = (item.selectedAddOns ?? []).map((a) => a.name);
+    return names.join(', ');
   }
 
   applyPromoCode(): void {
@@ -234,13 +321,17 @@ export class ShopComponent implements OnInit {
         this.ordersService
           .createOrder({
             customerId: customer.id,
-            channel: this.isExpress() ? OrderChannel.Express : OrderChannel.PickupRequest,
+            // Channel is purely the fulfillment method (Shop always books a pickup);
+            // IsExpress alone drives express pricing/ETA server-side.
+            channel: OrderChannel.PickupRequest,
             isExpress: this.isExpress(),
+            isSameDay: this.isSameDay(),
             items: this.cart.items().map((i) => ({
               garmentId: i.garmentId,
               serviceId: i.serviceId,
               quantity: i.quantity,
-              weightKg: i.weightKg
+              weightKg: i.weightKg,
+              addOnIds: (i.selectedAddOns ?? []).map((a) => a.id)
             })),
             preferredPickupAtUtc: this.pickupAt() ? new Date(this.pickupAt()).toISOString() : undefined,
             pickupAddressId: this.selectedAddressId() ?? undefined,

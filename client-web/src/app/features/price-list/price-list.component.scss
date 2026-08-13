@@ -17,6 +17,12 @@
     }
   }
 
+  .filters {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .channel-select {
     display: flex;
     flex-direction: column;

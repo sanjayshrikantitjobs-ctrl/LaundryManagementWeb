@@ -16,6 +16,9 @@ export interface CustomerListItem {
   email?: string;
   whatsAppNumber?: string;
   membershipTier: MembershipTier;
+  /** Active subscription plan name, or "None" — the actual membership display value,
+   *  derived server-side; membershipTier is a legacy field no longer manually edited. */
+  membershipLabel: string;
   walletBalance: number;
   loyaltyPoints: number;
   status: CustomerStatus;
@@ -49,6 +52,7 @@ export interface CustomerDetail {
   creditLimit: number;
   loyaltyPoints: number;
   membershipTier: MembershipTier;
+  membershipLabel: string;
   status: CustomerStatus;
   notes?: string;
   addresses: CustomerAddress[];
@@ -78,6 +82,5 @@ export interface UpdateCustomerRequest {
   phoneNumber: string;
   email?: string;
   creditLimit: number;
-  membershipTier: MembershipTier;
   notes?: string;
 }

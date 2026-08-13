@@ -27,10 +27,10 @@ public class GarmentsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedList<GarmentListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<GarmentListItemDto>>> GetGarments(
-        [FromQuery] string? search, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? search, [FromQuery] Guid? categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
         [FromQuery] string? sortBy = null, [FromQuery] string? sortDirection = null)
     {
-        var result = await _sender.Send(new GetGarmentsQuery(search, pageNumber, pageSize, sortBy, sortDirection));
+        var result = await _sender.Send(new GetGarmentsQuery(search, categoryId, pageNumber, pageSize, sortBy, sortDirection));
         return Ok(result);
     }
 
@@ -68,7 +68,7 @@ public class GarmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateGarment(Guid id, [FromBody] UpdateGarmentBody body)
     {
-        await _sender.Send(new UpdateGarmentCommand(id, body.Name, body.Category, body.Barcode, body.SpecialInstructions, body.ImageUrl));
+        await _sender.Send(new UpdateGarmentCommand(id, body.Name, body.CategoryId, body.SpecialInstructions, body.ImageUrl));
         return NoContent();
     }
 
@@ -76,9 +76,9 @@ public class GarmentsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = AppRoles.ManagementRoles)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteGarment(Guid id)
+    public async Task<IActionResult> DeleteGarment(Guid id, [FromQuery] string? reason)
     {
-        await _sender.Send(new DeleteGarmentCommand(id));
+        await _sender.Send(new DeleteGarmentCommand(id, reason));
         return NoContent();
     }
 
@@ -88,11 +88,16 @@ public class GarmentsController : ControllerBase
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     public async Task<ActionResult<Guid>> SetPrice(Guid id, Guid serviceId, [FromBody] SetPriceBody body)
     {
-        var priceId = await _sender.Send(new SetGarmentServicePriceCommand(id, serviceId, body.PricingType, body.Price));
+        var priceId = await _sender.Send(new SetGarmentServicePriceCommand(
+            id, serviceId, body.PricingType, body.Price,
+            body.ExpressPrice, body.GstPercentage, body.EstimatedTimeHours, body.ExpressEtaHours, body.IsActive));
         return Ok(priceId);
     }
 }
 
-public record UpdateGarmentBody(string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl);
+public record UpdateGarmentBody(string Name, Guid CategoryId, string? SpecialInstructions, string? ImageUrl);
 
-public record SetPriceBody(PricingType PricingType, decimal Price);
+public record SetPriceBody(
+    PricingType PricingType, decimal Price,
+    decimal? ExpressPrice = null, decimal? GstPercentage = null,
+    int? EstimatedTimeHours = null, int? ExpressEtaHours = null, bool IsActive = true);

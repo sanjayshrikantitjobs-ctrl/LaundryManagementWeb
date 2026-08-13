@@ -8,6 +8,16 @@
     </label>
 
     <label>
+      Category
+      <select formControlName="categoryId">
+        <option value="" disabled>Select a category…</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
       Base Price
       <input type="number" formControlName="basePrice" min="0" />
     </label>

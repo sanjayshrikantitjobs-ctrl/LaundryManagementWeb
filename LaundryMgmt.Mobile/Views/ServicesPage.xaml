@@ -4,22 +4,22 @@
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
+             xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.ServicesPage"
              x:DataType="vm:ServicesViewModel"
              Title="Services">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewServiceCommand}" IsEnabled="{Binding CanEditMasterData}" />
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="services" />
 
-        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Button Grid.Row="1" Text="+ New Service" HorizontalOptions="End" Margin="16,8"
+                Command="{Binding NewServiceCommand}" IsVisible="{Binding CanEditMasterData}" />
+
+        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Services}"
                             RemainingItemsThreshold="3"
                             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
@@ -32,18 +32,27 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:ServiceListItem">
-                        <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="Auto,*,Auto">
-                                <Label Grid.Column="0" Text="{Binding Name, Converter={StaticResource ServiceIconConverter}}"
-                                       FontSize="28" VerticalOptions="Center" Margin="0,0,12,0" />
-                                <VerticalStackLayout Grid.Column="1">
-                                    <Label Text="{Binding Name}" FontAttributes="Bold" />
+                        <Frame Style="{StaticResource ListCard}" Padding="12,10" MinimumHeightRequest="72">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenServiceCommand}" />
+                            </Frame.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="Transparent"
+                                        BackgroundColor="{StaticResource PrimaryLight}" WidthRequest="44" HeightRequest="44" Padding="0"
+                                        VerticalOptions="Center" Margin="0,0,12,0">
+                                    <Grid>
+                                        <Label Text="{Binding Name, Converter={StaticResource ServiceIconConverter}}"
+                                               FontSize="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                               Aspect="AspectFill" IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}" />
+                                    </Grid>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="WordWrap" />
                                     <Label Text="{Binding BasePrice, StringFormat='₹{0:0.00}'}" Style="{StaticResource SubtleLabel}" />
                                 </VerticalStackLayout>
-                                <Button Grid.Column="2" Text="Delete" Style="{StaticResource DangerButton}"
-                                        CommandParameter="{Binding .}"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteServiceCommand}" />
                             </Grid>
                         </Frame>
                     </DataTemplate>

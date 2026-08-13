@@ -1,5 +1,6 @@
 using LaundryMgmt.Application.Common.Interfaces;
 using LaundryMgmt.Application.Common.Models;
+using LaundryMgmt.Domain.Entities;
 using LaundryMgmt.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ namespace LaundryMgmt.Application.Customers.Queries.GetCustomers;
 
 public record CustomerListItemDto(
     Guid Id, string FullName, string PhoneNumber, string? Email, string? WhatsAppNumber,
-    MembershipTier MembershipTier, decimal WalletBalance, int LoyaltyPoints,
+    MembershipTier MembershipTier, string MembershipLabel, decimal WalletBalance, int LoyaltyPoints,
     CustomerStatus Status, DateTimeOffset CreatedAtUtc, DateTimeOffset? LastOrderAtUtc);
 
 public record GetCustomersQuery(
@@ -58,7 +59,13 @@ public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, Pagin
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new CustomerListItemDto(
-                c.Id, c.FullName, c.PhoneNumber, c.Email, c.WhatsAppNumber, c.MembershipTier, c.WalletBalance, c.LoyaltyPoints,
+                c.Id, c.FullName, c.PhoneNumber, c.Email, c.WhatsAppNumber, c.MembershipTier,
+                _db.CustomerSubscriptions
+                    .Where(s => s.CustomerId == c.Id && s.Status == SubscriptionStatus.Active)
+                    .OrderByDescending(s => s.CreatedAtUtc)
+                    .Select(s => s.SubscriptionPlan!.Name)
+                    .FirstOrDefault() ?? "None",
+                c.WalletBalance, c.LoyaltyPoints,
                 c.Status, c.CreatedAtUtc, c.Orders.OrderByDescending(o => o.CreatedAtUtc).Select(o => (DateTimeOffset?)o.CreatedAtUtc).FirstOrDefault()))
             .ToListAsync(cancellationToken);
 

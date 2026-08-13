@@ -65,5 +65,22 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 
         builder.HasOne(i => i.Garment).WithMany().HasForeignKey(i => i.GarmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(i => i.Service).WithMany().HasForeignKey(i => i.ServiceId).OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(i => i.AddOns)
+            .WithOne(a => a.OrderItem)
+            .HasForeignKey(a => a.OrderItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class OrderItemAddOnConfiguration : IEntityTypeConfiguration<OrderItemAddOn>
+{
+    public void Configure(EntityTypeBuilder<OrderItemAddOn> builder)
+    {
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.Name).HasMaxLength(100).IsRequired();
+        builder.Property(a => a.Price).HasPrecision(18, 2);
+
+        builder.HasOne(a => a.AddOn).WithMany().HasForeignKey(a => a.AddOnId).OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Customers.Commands.DeleteCustomer;
 
-public record DeleteCustomerCommand(Guid CustomerId) : IRequest;
+public record DeleteCustomerCommand(Guid CustomerId, string? Reason = null) : IRequest;
 
 public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand>
 {
@@ -18,7 +18,9 @@ public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerComman
             .FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken)
             ?? throw new KeyNotFoundException($"Customer {request.CustomerId} not found.");
 
-        // AuditableEntitySaveChangesInterceptor turns this into a soft delete.
+        // AuditableEntitySaveChangesInterceptor turns this into a soft delete; setting
+        // DeletedReason here rides along with that same UPDATE.
+        customer.DeletedReason = request.Reason;
         _db.Customers.Remove(customer);
         await _db.SaveChangesAsync(cancellationToken);
     }

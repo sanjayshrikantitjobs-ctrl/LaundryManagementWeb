@@ -11,9 +11,12 @@ public interface IApplicationDbContext
 {
     DbSet<Customer> Customers { get; }
     DbSet<CustomerAddress> CustomerAddresses { get; }
+    DbSet<ServiceCategory> ServiceCategories { get; }
     DbSet<Garment> Garments { get; }
     DbSet<Service> Services { get; }
     DbSet<GarmentServicePrice> GarmentServicePrices { get; }
+    DbSet<AddOn> AddOns { get; }
+    DbSet<OrderItemAddOn> OrderItemAddOns { get; }
     DbSet<Order> Orders { get; }
     DbSet<OrderItem> OrderItems { get; }
     DbSet<OrderStatusHistory> OrderStatusHistories { get; }
@@ -29,6 +32,9 @@ public interface IApplicationDbContext
     DbSet<Promotion> Promotions { get; }
     DbSet<ContactMessage> ContactMessages { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<SubscriptionPlan> SubscriptionPlans { get; }
+    DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; }
+    DbSet<CustomerSubscription> CustomerSubscriptions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

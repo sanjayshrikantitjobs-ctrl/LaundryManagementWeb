@@ -8,11 +8,7 @@
              x:DataType="vm:UsersViewModel"
              Title="Users">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ New" Command="{Binding NewUserCommand}" />
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="users" />
 
         <SearchBar Grid.Row="1"
@@ -20,11 +16,14 @@
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding RefreshCommand}" />
 
-        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Button Grid.Row="2" Text="+ New User" HorizontalOptions="End" Margin="16,0,16,8"
+                Command="{Binding NewUserCommand}" />
+
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Users}"
                             RemainingItemsThreshold="3"
                             RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
@@ -37,23 +36,19 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:UserSummaryDto">
-                        <Frame Style="{StaticResource ListCard}">
-                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
-                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
-                                    <Label Text="{Binding FullName}" FontAttributes="Bold" />
-                                    <Label Text="{Binding UserName}" Style="{StaticResource SubtleLabel}" />
-                                    <Label Text="{Binding Role}" Style="{StaticResource Badge}" />
-                                    <Label Text="Inactive" TextColor="{StaticResource Danger}" FontAttributes="Bold" FontSize="12"
-                                           IsVisible="{Binding IsActive, Converter={StaticResource InvertedBoolConverter}}" />
-                                </VerticalStackLayout>
-                                <Button Grid.Row="0" Grid.Column="1" Text="Edit"
-                                        CommandParameter="{Binding .}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditUserCommand}" />
-                                <Button Grid.Row="0" Grid.Column="2" Text="{Binding IsActive, Converter={StaticResource ActiveToggleLabelConverter}}"
-                                        Style="{StaticResource DangerButton}"
-                                        CommandParameter="{Binding .}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleActiveCommand}" />
-                            </Grid>
+                        <Frame Style="{StaticResource ListCard}" Padding="16,14" MinimumHeightRequest="76">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding .}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenUserCommand}" />
+                            </Frame.GestureRecognizers>
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding FullName}" FontAttributes="Bold" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding UserName}" Style="{StaticResource SubtleLabel}" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding Role}" Style="{StaticResource Badge}" />
+                                <Label Text="Inactive" TextColor="{StaticResource Danger}" FontAttributes="Bold" FontSize="12"
+                                       IsVisible="{Binding IsActive, Converter={StaticResource InvertedBoolConverter}}" />
+                            </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

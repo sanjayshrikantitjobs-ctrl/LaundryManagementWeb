@@ -1,0 +1,51 @@
+<section class="category-list">
+  <header>
+    <h1>Service Categories</h1>
+    <div class="header-actions">
+      <a routerLink="/services" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="link">Services</a>
+      <a routerLink="/services/categories" routerLinkActive="active" class="link">Categories</a>
+      <a routerLink="/add-ons" class="link">Add-ons</a>
+      <a routerLink="new" class="btn-primary">+ New Category</a>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <p>Loading categories…</p>
+  } @else if (categories().length === 0) {
+    <p>No categories found.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categories(); track category.id) {
+          <tr>
+            <td class="thumb">
+              @if (category.iconOrImageUrl) {
+                <img [src]="category.iconOrImageUrl" alt="" />
+              } @else {
+                <span class="thumb-placeholder">🏷️</span>
+              }
+            </td>
+            <td>{{ category.name }}</td>
+            <td>{{ category.displayOrder }}</td>
+            <td>{{ category.isActive ? 'Active' : 'Inactive' }}</td>
+            <td class="actions">
+              <div class="actions-inner">
+                <a [routerLink]="[category.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                <button type="button" class="icon-btn danger" title="Delete" (click)="deleteCategory(category)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

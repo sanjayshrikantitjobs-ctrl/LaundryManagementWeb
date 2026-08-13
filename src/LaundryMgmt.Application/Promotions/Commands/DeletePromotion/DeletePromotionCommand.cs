@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LaundryMgmt.Application.Promotions.Commands.DeletePromotion;
 
-public record DeletePromotionCommand(Guid PromotionId) : IRequest;
+public record DeletePromotionCommand(Guid PromotionId, string? Reason = null) : IRequest;
 
 public class DeletePromotionCommandHandler : IRequestHandler<DeletePromotionCommand>
 {
@@ -18,6 +18,7 @@ public class DeletePromotionCommandHandler : IRequestHandler<DeletePromotionComm
             .FirstOrDefaultAsync(p => p.Id == request.PromotionId, cancellationToken)
             ?? throw new KeyNotFoundException($"Promotion {request.PromotionId} not found.");
 
+        promotion.DeletedReason = request.Reason;
         _db.Promotions.Remove(promotion);
         await _db.SaveChangesAsync(cancellationToken);
     }

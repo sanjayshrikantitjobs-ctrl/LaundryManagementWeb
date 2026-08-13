@@ -80,24 +80,37 @@ public static class MauiProgram
         builder.Services.AddTransient<CustomersPage>();
         builder.Services.AddTransient<CustomerFormViewModel>();
         builder.Services.AddTransient<CustomerFormPage>();
+        builder.Services.AddTransient<CustomerDetailViewModel>();
+        builder.Services.AddTransient<CustomerDetailPage>();
 
         builder.Services.AddTransient<GarmentsViewModel>();
         builder.Services.AddTransient<GarmentsPage>();
         builder.Services.AddTransient<GarmentFormViewModel>();
         builder.Services.AddTransient<GarmentFormPage>();
+        builder.Services.AddTransient<GarmentDetailViewModel>();
+        builder.Services.AddTransient<GarmentDetailPage>();
 
         builder.Services.AddTransient<ServicesViewModel>();
         builder.Services.AddTransient<ServicesPage>();
         builder.Services.AddTransient<ServiceFormViewModel>();
         builder.Services.AddTransient<ServiceFormPage>();
+        builder.Services.AddTransient<ServiceDetailViewModel>();
+        builder.Services.AddTransient<ServiceDetailPage>();
 
         builder.Services.AddTransient<PricingMatrixViewModel>();
         builder.Services.AddTransient<PricingMatrixPage>();
+
+        builder.Services.AddTransient<SubscriptionsViewModel>();
+        builder.Services.AddTransient<SubscriptionsPage>();
+        builder.Services.AddTransient<SubscriptionPlanFormViewModel>();
+        builder.Services.AddTransient<SubscriptionPlanFormPage>();
 
         builder.Services.AddTransient<UsersViewModel>();
         builder.Services.AddTransient<UsersPage>();
         builder.Services.AddTransient<UserFormViewModel>();
         builder.Services.AddTransient<UserFormPage>();
+        builder.Services.AddTransient<UserDetailViewModel>();
+        builder.Services.AddTransient<UserDetailPage>();
 
         builder.Services.AddTransient<ShopViewModel>();
         builder.Services.AddTransient<ShopPage>();

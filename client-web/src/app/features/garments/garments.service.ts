@@ -6,7 +6,7 @@ import {
   GarmentDetail,
   GarmentListItem,
   PricingMatrix,
-  PricingType,
+  SetGarmentServicePriceRequest,
   UpdateGarmentRequest
 } from '../../core/models/catalog.models';
 import { PaginatedList, SortDirection } from '../../core/models/order.models';
@@ -19,6 +19,7 @@ export class GarmentsService {
 
   getGarments(opts: {
     search?: string;
+    categoryId?: string;
     pageNumber?: number;
     pageSize?: number;
     sortBy?: string;
@@ -29,6 +30,7 @@ export class GarmentsService {
       .set('pageSize', opts.pageSize ?? 20);
 
     if (opts.search) params = params.set('search', opts.search);
+    if (opts.categoryId) params = params.set('categoryId', opts.categoryId);
     if (opts.sortBy) params = params.set('sortBy', opts.sortBy);
     if (opts.sortDirection) params = params.set('sortDirection', opts.sortDirection);
 
@@ -51,11 +53,13 @@ export class GarmentsService {
     return this.http.put<void>(`${this.baseUrl}/${id}`, request);
   }
 
-  deleteGarment(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deleteGarment(id: string, reason?: string): Observable<void> {
+    let params = new HttpParams();
+    if (reason) params = params.set('reason', reason);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { params });
   }
 
-  setPrice(garmentId: string, serviceId: string, pricingType: PricingType, price: number): Observable<string> {
-    return this.http.put<string>(`${this.baseUrl}/${garmentId}/prices/${serviceId}`, { pricingType, price });
+  setPrice(garmentId: string, serviceId: string, request: SetGarmentServicePriceRequest): Observable<string> {
+    return this.http.put<string>(`${this.baseUrl}/${garmentId}/prices/${serviceId}`, request);
   }
 }

@@ -40,7 +40,9 @@ export class ServicesService {
     return this.http.put<void>(`${this.baseUrl}/${id}`, request);
   }
 
-  deleteService(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deleteService(id: string, reason?: string): Observable<void> {
+    let params = new HttpParams();
+    if (reason) params = params.set('reason', reason);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { params });
   }
 }

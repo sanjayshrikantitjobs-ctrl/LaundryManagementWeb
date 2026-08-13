@@ -44,28 +44,40 @@ public record CustomerDetailDto(
     decimal WalletBalance, decimal CreditLimit, int LoyaltyPoints,
     MembershipTier MembershipTier, CustomerStatus Status, string? Notes, List<CustomerAddressDto> Addresses);
 
-public record GarmentListItem(Guid Id, string Name, string Category, string? Barcode, string? ImageUrl);
+public record ServiceCategoryDto(Guid Id, string Name, string? Description, string? IconOrImageUrl, int DisplayOrder, bool IsActive);
 
-public record CreateGarmentRequest(string Name, string Category, string? Barcode, string? SpecialInstructions);
+public record GarmentListItem(Guid Id, string Name, Guid CategoryId, string CategoryName, string? ImageUrl);
 
-public record UpdateGarmentRequest(string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl);
+public record CreateGarmentRequest(string Name, Guid CategoryId, string? SpecialInstructions);
+
+public record UpdateGarmentRequest(string Name, Guid CategoryId, string? SpecialInstructions, string? ImageUrl);
 
 public record ServiceListItem(
     Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
     string? ImageUrl, decimal ExpressSurcharge, int ExpressEtaHours);
 
-public record CreateServiceRequest(string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority);
+public record ServiceDetailDto(
+    Guid Id, string Name, Guid CategoryId, string CategoryName, decimal BasePrice, int EstimatedTimeHours,
+    decimal GstPercentage, int Priority, string? ImageUrl, decimal ExpressSurcharge, int ExpressEtaHours);
+
+public record CreateServiceRequest(
+    string Name, Guid CategoryId, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    string? ImageUrl = null, decimal ExpressSurcharge = 0, int ExpressEtaHours = 24);
+
+public record UpdateServiceRequest(
+    string Name, Guid CategoryId, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    string? ImageUrl, decimal ExpressSurcharge, int ExpressEtaHours);
 
 public record GarmentServicePriceDto(Guid ServiceId, string ServiceName, PricingType PricingType, decimal Price);
 
 public record GarmentDetailDto(
-    Guid Id, string Name, string Category, string? Barcode, string? SpecialInstructions, string? ImageUrl,
+    Guid Id, string Name, Guid CategoryId, string CategoryName, string? SpecialInstructions, string? ImageUrl,
     List<GarmentServicePriceDto> ServicePrices);
 
-public record PricingMatrixServiceDto(Guid Id, string Name);
+public record PricingMatrixServiceDto(Guid Id, string Name, Guid CategoryId, string CategoryName);
 
 public record PricingMatrixCellDto(Guid ServiceId, PricingType? PricingType, decimal? Price);
 
-public record PricingMatrixGarmentRowDto(Guid GarmentId, string GarmentName, string Category, List<PricingMatrixCellDto> Prices);
+public record PricingMatrixGarmentRowDto(Guid GarmentId, string GarmentName, Guid CategoryId, string CategoryName, List<PricingMatrixCellDto> Prices);
 
 public record PricingMatrixDto(List<PricingMatrixServiceDto> Services, List<PricingMatrixGarmentRowDto> Garments);

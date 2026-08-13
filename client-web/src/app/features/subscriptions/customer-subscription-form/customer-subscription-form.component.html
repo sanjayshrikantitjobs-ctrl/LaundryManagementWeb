@@ -1,0 +1,82 @@
+<section class="customer-subscription-form">
+  <h1>{{ isEditMode() ? 'Edit Subscription' : 'Assign Subscription' }}</h1>
+
+  <div class="customer-picker">
+    <label>Customer</label>
+    @if (selectedCustomer(); as customer) {
+      <div class="selected-customer">
+        <span>{{ customer.fullName }}{{ customer.phoneNumber ? ' · ' + customer.phoneNumber : '' }}</span>
+        @if (!isEditMode()) {
+          <button type="button" (click)="selectedCustomer.set(null); searchCustomers('')">Change</button>
+        }
+      </div>
+    } @else {
+      <input
+        type="search"
+        placeholder="Search customer by name or phone…"
+        (input)="searchCustomers($any($event.target).value)"
+      />
+      @if (customerResults().length > 0) {
+        <ul class="customer-results">
+          @for (customer of customerResults(); track customer.id) {
+            <li (click)="selectCustomer(customer)">{{ customer.fullName }} &middot; {{ customer.phoneNumber }}</li>
+          }
+        </ul>
+      }
+    }
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Plan
+      <select
+        formControlName="subscriptionPlanId"
+        [attr.disabled]="isEditMode() ? true : null"
+        (change)="onPlanChange($any($event.target).value)"
+      >
+        <option value="" disabled>Select a plan…</option>
+        @for (plan of plans(); track plan.id) {
+          <option [value]="plan.id">{{ plan.name }} (₹{{ plan.price }}/cycle)</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Recurring Value (₹)
+      <input type="number" formControlName="recurringValue" min="0" step="0.01" />
+    </label>
+
+    @if (!isEditMode()) {
+      <label>
+        Start Date
+        <input type="date" formControlName="startDate" />
+      </label>
+    } @else {
+      <label>
+        Status
+        <select formControlName="status">
+          <option [ngValue]="SubscriptionStatus.Active">Active</option>
+          <option [ngValue]="SubscriptionStatus.Paused">Paused</option>
+          <option [ngValue]="SubscriptionStatus.Cancelled">Cancelled</option>
+          <option [ngValue]="SubscriptionStatus.Expired">Expired</option>
+        </select>
+      </label>
+    }
+
+    <label>
+      Notes
+      <textarea formControlName="notes" rows="3"></textarea>
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving() || !selectedCustomer()">
+        {{ isSaving() ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</section>

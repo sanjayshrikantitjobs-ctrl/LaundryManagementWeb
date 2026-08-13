@@ -41,6 +41,13 @@
                 <Label x:Name="PricingLabel" Text="Pricing" TextColor="{StaticResource Primary}" FontSize="13" />
             </Border>
 
+            <Border x:Name="SubscriptionsChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSubscriptionsTapped" />
+                </Border.GestureRecognizers>
+                <Label x:Name="SubscriptionsLabel" Text="Subscriptions" TextColor="{StaticResource Primary}" FontSize="13" />
+            </Border>
+
             <Border x:Name="UsersChip" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="12,6">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnUsersTapped" />

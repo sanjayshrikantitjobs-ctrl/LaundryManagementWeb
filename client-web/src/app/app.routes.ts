@@ -51,6 +51,21 @@ export const routes: Routes = [
     loadChildren: () => import('./features/services/services.routes').then((m) => m.SERVICES_ROUTES)
   },
   {
+    path: 'add-ons',
+    canActivate: [authGuard, roleGuard(MANAGEMENT_ROLES)],
+    loadChildren: () => import('./features/add-ons/add-ons.routes').then((m) => m.ADD_ONS_ROUTES)
+  },
+  {
+    path: 'subscriptions',
+    canActivate: [authGuard, roleGuard(MANAGEMENT_ROLES)],
+    loadChildren: () => import('./features/subscriptions/subscriptions.routes').then((m) => m.SUBSCRIPTIONS_ROUTES)
+  },
+  {
+    path: 'membership',
+    canActivate: [authGuard, roleGuard(CUSTOMER_ONLY_ROLES)],
+    loadComponent: () => import('./features/membership/membership.component').then((m) => m.MembershipComponent)
+  },
+  {
     path: 'shop',
     canActivate: [authGuard, roleGuard(CUSTOMER_ONLY_ROLES)],
     loadComponent: () => import('./features/shop/shop.component').then((m) => m.ShopComponent)

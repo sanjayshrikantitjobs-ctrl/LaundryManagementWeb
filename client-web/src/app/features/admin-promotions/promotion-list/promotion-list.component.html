@@ -52,8 +52,10 @@
             </td>
             @if (canEdit) {
               <td class="actions">
-                <a [routerLink]="[promo.id, 'edit']">Edit</a>
-                <button type="button" (click)="deletePromotion(promo)">Delete</button>
+                <div class="actions-inner">
+                  <a [routerLink]="[promo.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
+                  <button type="button" class="icon-btn danger" title="Delete" (click)="deletePromotion(promo)">🗑️</button>
+                </div>
               </td>
             }
           </tr>

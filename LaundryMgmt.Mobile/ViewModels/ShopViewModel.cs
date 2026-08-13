@@ -155,7 +155,7 @@ public partial class ShopViewModel : ObservableObject
         }
 
         _cartService.Add(new CartItem(
-            row.Garment.Id, row.Garment.Name, row.Garment.ImageUrl, row.Garment.Category,
+            row.Garment.Id, row.Garment.Name, row.Garment.ImageUrl, row.Garment.CategoryName,
             row.ServiceId, row.ServiceName, row.PricingType, row.Price,
             1, weightKg, row.ExpressSurcharge));
 

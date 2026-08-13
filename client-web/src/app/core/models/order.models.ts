@@ -48,6 +48,12 @@ export interface PaginatedList<T> {
 
 export type SortDirection = 'asc' | 'desc';
 
+export interface OrderItemAddOnDetail {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface OrderItemDetail {
   id: string;
   garmentName: string;
@@ -58,6 +64,7 @@ export interface OrderItemDetail {
   unitPrice: number;
   lineTotal: number;
   specialInstructions?: string | null;
+  addOns: OrderItemAddOnDetail[];
 }
 
 export interface OrderDetail {
@@ -66,6 +73,7 @@ export interface OrderDetail {
   status: OrderStatus;
   channel: OrderChannel;
   isExpress: boolean;
+  isSameDay: boolean;
   subTotal: number;
   discountAmount: number;
   promoCode?: string | null;
@@ -87,6 +95,7 @@ export interface CreateOrderItem {
   quantity: number;
   weightKg?: number;
   specialInstructions?: string;
+  addOnIds?: string[];
 }
 
 export interface UpdateOrderRequest {
@@ -104,6 +113,7 @@ export interface CreateOrderRequest {
   preferredPickupAtUtc?: string;
   pickupAddressId?: string;
   promoCode?: string;
+  isSameDay?: boolean;
 }
 
 export interface LoginRequest {
