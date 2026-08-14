@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
+import { API_ORIGIN } from '../config/api-origin';
 import { OrderStatus } from '../models/order.models';
 
 export interface OrderStatusUpdate {
@@ -19,7 +20,7 @@ export class OrderHubService {
     if (this.connection) return;
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('/hubs/order-status')
+      .withUrl(`${API_ORIGIN}/hubs/order-status`)
       .withAutomaticReconnect()
       .build();
 
