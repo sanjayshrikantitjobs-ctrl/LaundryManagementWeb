@@ -30,7 +30,8 @@
   } @else if (users().length === 0) {
     <p>No users found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th></th>
@@ -46,11 +47,11 @@
         @for (user of users(); track user.id) {
           <tr>
             <td class="avatar"><span class="avatar-icon">👤</span></td>
-            <td>{{ user.fullName }}</td>
-            <td>{{ user.userName }}</td>
-            <td>{{ user.email || '—' }}</td>
-            <td><span class="badge">{{ roleLabel(user.role) }}</span></td>
-            <td>
+            <td data-label="Name">{{ user.fullName }}</td>
+            <td data-label="Username">{{ user.userName }}</td>
+            <td data-label="Email">{{ user.email || '—' }}</td>
+            <td data-label="Role"><span class="badge">{{ roleLabel(user.role) }}</span></td>
+            <td data-label="Status">
               <span class="status-badge" [class.inactive]="!user.isActive">{{ user.isActive ? 'Active' : 'Inactive' }}</span>
             </td>
             <td class="actions">
@@ -65,6 +66,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"

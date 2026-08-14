@@ -1,10 +1,10 @@
 @if (authService.isAuthenticated()) {
   <header class="app-header">
-    <span class="brand" (click)="closeMenu()" [routerLink]="homeLink">🧺 Laundry Mgmt</span>
-
     <button type="button" class="menu-toggle" (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen()">
       <span></span><span></span><span></span>
     </button>
+
+    <span class="brand" (click)="closeMenu()" [routerLink]="homeLink">🧺 Laundry Mgmt</span>
 
     <nav [class.open]="isMenuOpen()">
       @if (isCustomer) {
@@ -50,16 +50,22 @@
       }
 
       <div class="user-info mobile-only">
-        <app-notification-bell />
         <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
         <button type="button" (click)="logout()">Logout</button>
       </div>
     </nav>
 
-    <div class="user-info desktop-only">
+    @if (isMenuOpen()) {
+      <div class="nav-backdrop" (click)="closeMenu()"></div>
+    }
+
+    <div class="header-actions">
+      <a class="call-icon" href="tel:+919867343302" title="Call us: +91 98673 43302" aria-label="Call us">📞</a>
       <app-notification-bell />
-      <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
-      <button type="button" (click)="logout()">Logout</button>
+      <div class="user-info desktop-only">
+        <span>{{ authService.currentUser()?.fullName }} <em>({{ authService.currentUser()?.role }})</em></span>
+        <button type="button" (click)="logout()">Logout</button>
+      </div>
     </div>
   </header>
 }

@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              x:Class="LaundryMgmt.Mobile.Views.PriceListPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:PriceListViewModel"
              Title="Price List">
 

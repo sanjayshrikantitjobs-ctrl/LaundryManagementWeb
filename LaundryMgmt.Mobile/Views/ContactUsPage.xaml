@@ -6,6 +6,7 @@
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.ContactUsPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:ContactUsViewModel"
              Title="Contact Us">
 
@@ -14,6 +15,17 @@
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="16" Spacing="16">
+
+                <Border StrokeShape="RoundRectangle 22" Stroke="Transparent" BackgroundColor="{StaticResource Primary}"
+                        Padding="18,10" HorizontalOptions="Start">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CallUsCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="📞" FontSize="16" TextColor="{StaticResource White}" VerticalOptions="Center" />
+                        <Label Text="Call us: +91 98673 43302" TextColor="{StaticResource White}" FontAttributes="Bold" FontSize="13" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
 
                 <Frame>
                     <VerticalStackLayout Spacing="10">

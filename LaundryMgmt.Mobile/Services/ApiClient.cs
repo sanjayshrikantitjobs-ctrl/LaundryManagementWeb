@@ -161,6 +161,9 @@ public class ApiClient
     public Task<HttpResponseMessage> CreateSubscriptionPlanAsync(CreateSubscriptionPlanRequest request) =>
         _http.PostAsJsonAsync("api/v1/subscriptionplans", request);
 
+    public Task<HttpResponseMessage> UpdateSubscriptionPlanAsync(Guid id, UpdateSubscriptionPlanRequest request) =>
+        _http.PutAsJsonAsync($"api/v1/subscriptionplans/{id}", request);
+
     public Task<HttpResponseMessage> DeleteSubscriptionPlanAsync(Guid id) =>
         _http.DeleteAsync($"api/v1/subscriptionplans/{id}");
 
@@ -168,6 +171,17 @@ public class ApiClient
         string? search = null, Guid? customerId = null, int pageNumber = 1, int pageSize = 20) =>
         _http.GetFromJsonAsync<PaginatedList<CustomerSubscriptionListItemDto>>(
             $"api/v1/customersubscriptions?{Query(("search", search), ("customerId", customerId), ("pageNumber", pageNumber), ("pageSize", pageSize))}");
+
+    // ---- Notifications ----
+
+    public Task<List<NotificationDto>?> GetMyNotificationsAsync(int take = 30) =>
+        _http.GetFromJsonAsync<List<NotificationDto>>($"api/v1/notifications/mine?take={take}");
+
+    public Task<int> GetUnreadNotificationCountAsync() =>
+        _http.GetFromJsonAsync<int>("api/v1/notifications/mine/unread-count");
+
+    public Task<HttpResponseMessage> MarkNotificationReadAsync(Guid id) =>
+        _http.PutAsJsonAsync($"api/v1/notifications/{id}/read", new { });
 
     // ---- Users (Admin-only) ----
 

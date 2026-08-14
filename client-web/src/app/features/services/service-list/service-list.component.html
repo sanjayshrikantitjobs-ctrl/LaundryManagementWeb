@@ -22,7 +22,8 @@
   } @else if (services().length === 0) {
     <p>No services found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th></th>
@@ -44,11 +45,11 @@
                 <span class="thumb-placeholder">🧼</span>
               }
             </td>
-            <td>{{ service.name }}</td>
-            <td>{{ service.basePrice | currency: 'INR' }}</td>
-            <td>{{ service.gstPercentage }}%</td>
-            <td>{{ service.estimatedTimeHours }}</td>
-            <td>{{ service.priority }}</td>
+            <td data-label="Name">{{ service.name }}</td>
+            <td data-label="Base Price">{{ service.basePrice | currency: 'INR' }}</td>
+            <td data-label="GST %">{{ service.gstPercentage }}%</td>
+            <td data-label="Est. Time (hrs)">{{ service.estimatedTimeHours }}</td>
+            <td data-label="Priority">{{ service.priority }}</td>
             @if (canEdit) {
               <td class="actions">
                 <div class="actions-inner">
@@ -61,6 +62,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"

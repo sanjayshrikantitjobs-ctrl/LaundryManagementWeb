@@ -12,8 +12,11 @@ public partial class CustomerDetailViewModel : ObservableObject
 
     [ObservableProperty] private Guid? customerId;
     [ObservableProperty] private CustomerDetailDto? customer;
+    [ObservableProperty] private CustomerSubscriptionListItemDto? subscription;
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private string? errorMessage;
+
+    public bool HasSubscription => Subscription is not null;
 
     public bool CanEditMasterData => _authService.Role is not ("Customer" or "DepartmentHead");
 
@@ -36,6 +39,13 @@ public partial class CustomerDetailViewModel : ObservableObject
         try
         {
             Customer = await _apiClient.GetCustomerByIdAsync(id);
+
+            // The old MembershipTier field (None/Silver/Gold) is a legacy per-customer flag —
+            // membership is actually driven by whatever plan an admin has put the customer on,
+            // via CustomerSubscriptions (see SubscriptionsController). Prefer their active
+            // subscription, falling back to the most recent one if none is currently active.
+            var subs = await _apiClient.GetCustomerSubscriptionsAsync(customerId: id, pageSize: 5);
+            Subscription = subs?.Items.FirstOrDefault(s => s.Status == SubscriptionStatus.Active) ?? subs?.Items.FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -46,6 +56,8 @@ public partial class CustomerDetailViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    partial void OnSubscriptionChanged(CustomerSubscriptionListItemDto? value) => OnPropertyChanged(nameof(HasSubscription));
 
     [RelayCommand]
     private async Task EditAsync()

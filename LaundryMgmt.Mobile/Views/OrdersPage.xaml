@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              x:Class="LaundryMgmt.Mobile.Views.OrdersPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:OrdersViewModel"
              Title="Orders">
 
@@ -12,13 +13,97 @@
         <views:ModuleBreadcrumb x:Name="ManagementNavBar" Grid.Row="0" CurrentModule="orders" />
         <views:CustomerNavBar x:Name="CustomerNav" Grid.Row="0" CurrentPage="orders" IsVisible="False" />
 
-        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="12,8">
+        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="12,8" HorizontalScrollBarVisibility="Never">
             <HorizontalStackLayout Spacing="8">
-                <Button Text="All" CommandParameter="{x:Static vm:OrderTab.All}" Command="{Binding SetTabCommand}" />
-                <Button Text="New" CommandParameter="{x:Static vm:OrderTab.New}" Command="{Binding SetTabCommand}" />
-                <Button Text="In Progress" CommandParameter="{x:Static vm:OrderTab.InProgress}" Command="{Binding SetTabCommand}" />
-                <Button Text="Completed" CommandParameter="{x:Static vm:OrderTab.Completed}" Command="{Binding SetTabCommand}" />
-                <Button Text="Cancelled" CommandParameter="{x:Static vm:OrderTab.Cancelled}" Command="{Binding SetTabCommand}" />
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:OrderTab.All}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.All}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="All" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.All}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:OrderTab.New}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.New}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="New" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.New}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:OrderTab.InProgress}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.InProgress}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="In Progress" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.InProgress}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:OrderTab.Completed}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.Completed}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Completed" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.Completed}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:OrderTab.Cancelled}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.Cancelled}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Cancelled" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:OrderTab.Cancelled}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
             </HorizontalStackLayout>
         </ScrollView>
 

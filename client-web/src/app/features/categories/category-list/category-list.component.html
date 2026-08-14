@@ -14,7 +14,8 @@
   } @else if (categories().length === 0) {
     <p>No categories found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th></th>
@@ -34,9 +35,9 @@
                 <span class="thumb-placeholder">🏷️</span>
               }
             </td>
-            <td>{{ category.name }}</td>
-            <td>{{ category.displayOrder }}</td>
-            <td>{{ category.isActive ? 'Active' : 'Inactive' }}</td>
+            <td data-label="Name">{{ category.name }}</td>
+            <td data-label="Order">{{ category.displayOrder }}</td>
+            <td data-label="Status">{{ category.isActive ? 'Active' : 'Inactive' }}</td>
             <td class="actions">
               <div class="actions-inner">
                 <a [routerLink]="[category.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
@@ -47,5 +48,6 @@
         }
       </tbody>
     </table>
+    </div>
   }
 </section>

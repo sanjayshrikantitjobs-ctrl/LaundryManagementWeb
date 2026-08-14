@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.GarmentDetailPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:GarmentDetailViewModel"
              Title="Garment">
 

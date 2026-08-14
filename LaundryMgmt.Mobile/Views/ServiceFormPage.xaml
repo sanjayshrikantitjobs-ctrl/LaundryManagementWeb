@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.ServiceFormPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:ServiceFormViewModel"
              Title="New Service">
 

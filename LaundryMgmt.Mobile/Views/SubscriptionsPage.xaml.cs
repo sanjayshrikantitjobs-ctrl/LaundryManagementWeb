@@ -15,7 +15,6 @@ public partial class SubscriptionsPage : ContentPage
 
         // Shared between management ("Subscriptions") and Customer ("Membership") — same
         // dual-nav-strip pattern as OrdersPage.
-        Shell.SetTabBarIsVisible(this, false);
         if (authService.Role == "Customer")
         {
             ManagementNavBar.IsVisible = false;

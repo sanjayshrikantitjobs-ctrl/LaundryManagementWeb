@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              x:Class="LaundryMgmt.Mobile.Views.SubscriptionsPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:SubscriptionsViewModel"
              Title="Subscriptions">
 
@@ -34,6 +35,11 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:SubscriptionPlanDto">
                     <Frame Style="{StaticResource ListCard}">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer
+                                CommandParameter="{Binding .}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenPlanCommand}" />
+                        </Frame.GestureRecognizers>
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
@@ -52,11 +58,8 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
 
-                            <Button Text="Delete" Style="{StaticResource DangerButton}"
-                                    HorizontalOptions="End"
-                                    CommandParameter="{Binding .}"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeletePlanCommand}" />
+                            <Label Text="✏️ Tap to edit" FontSize="11" Style="{StaticResource SubtleLabel}" HorizontalOptions="End"
+                                   IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}" />
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>

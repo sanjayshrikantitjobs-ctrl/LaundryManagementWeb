@@ -31,7 +31,8 @@
       <p class="hint">No priced items in this category yet.</p>
     } @else {
       <div class="table-wrap">
-        <table>
+        <div class="table-scroll">
+          <table>
           <thead>
             <tr>
               <th>Garment</th>
@@ -45,7 +46,7 @@
               <tr>
                 <td class="garment-name">{{ row.garmentName }}</td>
                 @for (service of group.services; track service.id) {
-                  <td>
+                  <td [attr.data-label]="service.name">
                     @if (cellFor(row, service.id); as cell) {
                       <div class="cell">
                         <span class="cell-price">₹{{ displayPrice(cell) }}</span>
@@ -61,6 +62,7 @@
             }
           </tbody>
         </table>
+        </div>
       </div>
 
       @if (channel() === ChannelType.Express) {

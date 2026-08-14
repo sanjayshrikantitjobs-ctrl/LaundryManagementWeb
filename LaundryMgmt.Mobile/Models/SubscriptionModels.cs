@@ -18,6 +18,10 @@ public record CreateSubscriptionPlanRequest(
     string Name, string? Description, BillingCycle BillingCycle, int GarmentsPerCycle,
     decimal Price, int DisplayOrder, List<string> Features);
 
+public record UpdateSubscriptionPlanRequest(
+    string Name, string? Description, BillingCycle BillingCycle, int GarmentsPerCycle,
+    decimal Price, int DisplayOrder, bool IsActive, List<string> Features);
+
 public enum SubscriptionStatus
 {
     Active = 0,

@@ -23,7 +23,22 @@ public partial class ContactUsViewModel : ObservableObject
     [ObservableProperty] private string? errorMessage;
     [ObservableProperty] private string? statusMessage;
 
+    public const string SupportPhoneNumber = "+919867343302";
+
     public ContactUsViewModel(ApiClient apiClient) => _apiClient = apiClient;
+
+    [RelayCommand]
+    private async Task CallUsAsync()
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri($"tel:{SupportPhoneNumber}"));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Couldn't open the dialer: {ex.Message}";
+        }
+    }
 
     [RelayCommand]
     public async Task InitializeAsync()

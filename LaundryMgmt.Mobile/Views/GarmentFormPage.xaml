@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.GarmentFormPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:GarmentFormViewModel"
              Title="New Garment">
 

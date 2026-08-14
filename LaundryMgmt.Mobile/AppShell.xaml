@@ -5,10 +5,34 @@
        Title="Laundry Mgmt">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" Padding="16,0">
-            <Label x:Name="GreetingLabel" Grid.Column="0" Text="Laundry wala" TextColor="White" FontAttributes="Bold"
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="16" Padding="16,0">
+            <Label x:Name="GreetingLabel" Grid.Column="0" Text="Hello" TextColor="White" FontAttributes="Bold" FontSize="15"
                    VerticalOptions="Center" LineBreakMode="TailTruncation" />
-            <Button Grid.Column="1" Text="Logout" Clicked="OnLogoutClicked" />
+
+            <Label Grid.Column="1" Text="📞" FontSize="18" VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCallUsTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Grid Grid.Column="2" WidthRequest="30" HeightRequest="30">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnNotificationsTapped" />
+                </Grid.GestureRecognizers>
+                <Label Text="🔔" FontSize="19" HorizontalOptions="Center" VerticalOptions="Center" />
+                <Border x:Name="UnreadBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="#DC2626"
+                        HorizontalOptions="End" VerticalOptions="Start" Padding="4,1" Margin="0,-2,-4,0" IsVisible="False">
+                    <Label x:Name="UnreadBadgeLabel" Text="0" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="3" ColumnDefinitions="Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLogoutClicked" />
+                </Grid.GestureRecognizers>
+                <Label Grid.Column="0" Text="&#x23FB;" TextColor="White" FontSize="15" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="Logout" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
+            </Grid>
         </Grid>
     </Shell.TitleView>
 

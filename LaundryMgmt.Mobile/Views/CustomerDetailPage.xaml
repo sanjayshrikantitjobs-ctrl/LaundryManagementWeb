@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              x:Class="LaundryMgmt.Mobile.Views.CustomerDetailPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:CustomerDetailViewModel"
              Title="Customer">
 
@@ -41,16 +42,21 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <Grid ColumnDefinitions="*,*" RowSpacing="10">
+                    <VerticalStackLayout>
+                        <Label Text="LOYALTY POINTS" Style="{StaticResource SectionLabel}" />
+                        <Label Text="{Binding Customer.LoyaltyPoints}" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <Label Text="MEMBERSHIP" Style="{StaticResource SectionLabel}" />
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasSubscription}">
                         <VerticalStackLayout Grid.Column="0">
-                            <Label Text="LOYALTY POINTS" Style="{StaticResource SectionLabel}" />
-                            <Label Text="{Binding Customer.LoyaltyPoints}" FontAttributes="Bold" />
+                            <Label Text="{Binding Subscription.PlanName}" FontAttributes="Bold" />
+                            <Label Text="{Binding Subscription.EndDate, StringFormat='Valid until {0:d MMM y}'}" Style="{StaticResource SubtleLabel}" FontSize="12" />
                         </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1">
-                            <Label Text="MEMBERSHIP TIER" Style="{StaticResource SectionLabel}" />
-                            <Label Text="{Binding Customer.MembershipTier}" FontAttributes="Bold" />
-                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Subscription.Status}" Style="{StaticResource Badge}" VerticalOptions="Center" />
                     </Grid>
+                    <Label Text="Not subscribed to any plan." Style="{StaticResource SubtleLabel}"
+                           IsVisible="{Binding HasSubscription, Converter={StaticResource InvertedBoolConverter}}" />
 
                     <Label Text="NOTES" Style="{StaticResource SectionLabel}"
                            IsVisible="{Binding Customer.Notes, Converter={StaticResource IsNotNullConverter}}" />

@@ -8,6 +8,5 @@ public partial class ServiceInfoPage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
-        Shell.SetTabBarIsVisible(this, false);
     }
 }

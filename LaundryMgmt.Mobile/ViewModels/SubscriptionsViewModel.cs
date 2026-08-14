@@ -50,14 +50,13 @@ public partial class SubscriptionsViewModel : ObservableObject
     [RelayCommand]
     private async Task NewPlanAsync() => await Shell.Current.GoToAsync(nameof(Views.SubscriptionPlanFormPage));
 
+    /// <summary>Row tap opens the plan for editing (and, from there, deleting) — replacing
+    /// the old inline per-row Delete button, matching the Customers list's
+    /// tap-to-open-detail pattern (see CustomerDetailViewModel).</summary>
     [RelayCommand]
-    private async Task DeletePlanAsync(SubscriptionPlanDto? plan)
+    private async Task OpenPlanAsync(SubscriptionPlanDto? plan)
     {
-        if (plan is null) return;
-        var confirmed = await Shell.Current.DisplayAlert("Delete plan", $"Delete \"{plan.Name}\"?", "Delete", "Cancel");
-        if (!confirmed) return;
-
-        await _apiClient.DeleteSubscriptionPlanAsync(plan.Id);
-        await InitializeAsync();
+        if (plan is null || !CanEditMasterData) return;
+        await Shell.Current.GoToAsync($"{nameof(Views.SubscriptionPlanFormPage)}?planId={plan.Id}");
     }
 }

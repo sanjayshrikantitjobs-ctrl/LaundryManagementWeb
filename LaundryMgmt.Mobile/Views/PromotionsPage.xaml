@@ -5,6 +5,7 @@
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.PromotionsPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:PromotionsViewModel"
              Title="Promotions">
 

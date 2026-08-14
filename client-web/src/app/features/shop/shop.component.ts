@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { OrdersService } from '../orders/orders.service';
 import { PromotionsService } from '../promotions/promotions.service';
 import { CategoriesService } from '../categories/categories.service';
 import { AddOnsService } from '../add-ons/add-ons.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CartService, CartItem, CartItemAddOn } from './cart.service';
 import { GarmentIconComponent } from '../../shared/garment-icon/garment-icon.component';
 import { AddOn, GarmentListItem, PricingType, ServiceCategory, ServiceListItem } from '../../core/models/catalog.models';
@@ -24,6 +25,57 @@ interface PriceLookup {
   isActive: boolean;
 }
 
+type HeroIconKey = 'pickup' | 'care' | 'express' | 'loyalty';
+
+export interface TimeSlot {
+  label: string;
+  hour: number;
+}
+
+// 2-hour pickup/delivery windows — the same options on both apps (see mobile's
+// CartViewModel.TimeSlots) rather than letting the customer pick an arbitrary time
+// operations can't realistically commit to.
+export const TIME_SLOTS: TimeSlot[] = [
+  { label: '11am - 1pm', hour: 11 },
+  { label: '1pm - 3pm', hour: 13 },
+  { label: '3pm - 5pm', hour: 15 },
+  { label: '5pm - 7pm', hour: 17 }
+];
+
+interface HeroSlide {
+  iconKey: HeroIconKey;
+  title: string;
+  subtitle: string;
+}
+
+const HERO_SLIDE_INTERVAL_MS = 5000;
+
+// Kept identical in spirit to the mobile app's ShopViewModel.HeroSlides so the two
+// apps' home screens read as one product. iconKey selects one of the inline SVG
+// illustrations in shop.component.html (no external image assets to keep licensed).
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    iconKey: 'pickup',
+    title: 'Doorstep pickup, doorstep delivery',
+    subtitle: "Book a slot, leave your basket at the door, and we'll handle the rest — no store visits needed."
+  },
+  {
+    iconKey: 'care',
+    title: 'Care that matches every fabric',
+    subtitle: 'Delicate silks, everyday cottons, or stubborn stains — cleaned the right way, every time.'
+  },
+  {
+    iconKey: 'express',
+    title: 'In a hurry? Go Express',
+    subtitle: 'Same-day and rush options get your clothes back fast, without cutting corners.'
+  },
+  {
+    iconKey: 'loyalty',
+    title: 'Subscribe once, save every cycle',
+    subtitle: 'Monthly plans bundle your regular wash and dry-cleaning at a lower price.'
+  }
+];
+
 @Component({
   selector: 'app-shop',
   standalone: true,
@@ -31,7 +83,7 @@ interface PriceLookup {
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'
 })
-export class ShopComponent implements OnInit {
+export class ShopComponent implements OnInit, OnDestroy {
   private readonly servicesService = inject(ServicesService);
   private readonly garmentsService = inject(GarmentsService);
   private readonly customersService = inject(CustomersService);
@@ -39,10 +91,40 @@ export class ShopComponent implements OnInit {
   private readonly promotionsService = inject(PromotionsService);
   private readonly categoriesService = inject(CategoriesService);
   private readonly addOnsService = inject(AddOnsService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   readonly cart = inject(CartService);
 
   readonly PricingType = PricingType;
+  readonly timeSlots = TIME_SLOTS;
+
+  readonly heroSlides = HERO_SLIDES;
+  readonly activeHeroIndex = signal(0);
+  private heroTimer?: ReturnType<typeof setInterval>;
+
+  readonly greeting = computed(() => {
+    const hour = new Date().getHours();
+    const timeOfDay = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const fullName = this.authService.currentUser()?.fullName;
+    return fullName ? `${timeOfDay}, ${fullName.split(' ')[0]}` : timeOfDay;
+  });
+
+  setHeroSlide(index: number): void {
+    this.activeHeroIndex.set(index);
+    this.restartHeroTimer();
+  }
+
+  private restartHeroTimer(): void {
+    if (this.heroTimer) clearInterval(this.heroTimer);
+    this.heroTimer = setInterval(
+      () => this.activeHeroIndex.update((i) => (i + 1) % this.heroSlides.length),
+      HERO_SLIDE_INTERVAL_MS
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.heroTimer) clearInterval(this.heroTimer);
+  }
 
   readonly promotions = signal<ActivePromotion[]>([]);
   readonly categories = signal<ServiceCategory[]>([]);
@@ -54,13 +136,17 @@ export class ShopComponent implements OnInit {
 
   readonly selectedCategory = signal<ServiceCategory | null>(null);
   readonly selectedService = signal<ServiceListItem | null>(null);
+  readonly garmentSearch = signal('');
   readonly quantities = signal<Map<string, number>>(new Map());
   readonly selectedAddOnIds = signal<Map<string, Set<string>>>(new Map());
   readonly isCartOpen = signal(false);
   readonly isExpress = signal(false);
   readonly isSameDay = signal(false);
   readonly selectedAddressId = signal<string | null>(null);
-  readonly pickupAt = signal<string>('');
+  readonly pickupDate = signal<string>('');
+  readonly pickupSlotHour = signal<number | null>(null);
+  readonly deliveryDate = signal<string>('');
+  readonly deliverySlotHour = signal<number | null>(null);
   readonly isPlacingOrder = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isLoading = signal(true);
@@ -92,6 +178,8 @@ export class ShopComponent implements OnInit {
   readonly grandTotal = computed(() => this.cart.subtotal() + this.expressExtra() - this.discountAmount());
 
   ngOnInit(): void {
+    this.restartHeroTimer();
+
     this.promotionsService.getActivePromotions().subscribe((promos) => this.promotions.set(promos));
     this.addOnsService.getAddOns(true).subscribe((addOns) => this.addOns.set(addOns));
 
@@ -183,7 +271,10 @@ export class ShopComponent implements OnInit {
   garmentsForSelectedService(): GarmentListItem[] {
     const service = this.selectedService();
     if (!service) return [];
-    return this.garments().filter((g) => this.priceFor(g.id));
+    const term = this.garmentSearch().trim().toLowerCase();
+    return this.garments().filter(
+      (g) => this.priceFor(g.id) && (!term || g.name.toLowerCase().includes(term))
+    );
   }
 
   quantityFor(garmentId: string): number {
@@ -333,9 +424,10 @@ export class ShopComponent implements OnInit {
               weightKg: i.weightKg,
               addOnIds: (i.selectedAddOns ?? []).map((a) => a.id)
             })),
-            preferredPickupAtUtc: this.pickupAt() ? new Date(this.pickupAt()).toISOString() : undefined,
+            preferredPickupAtUtc: this.buildScheduledIso(this.pickupDate(), this.pickupSlotHour()),
             pickupAddressId: this.selectedAddressId() ?? undefined,
-            promoCode: this.appliedPromo()?.code ?? undefined
+            promoCode: this.appliedPromo()?.code ?? undefined,
+            preferredDeliveryAtUtc: this.buildScheduledIso(this.deliveryDate(), this.deliverySlotHour())
           })
           .subscribe({
             next: () => {
@@ -355,5 +447,16 @@ export class ShopComponent implements OnInit {
         this.errorMessage.set('Could not load your profile.');
       }
     });
+  }
+
+  // Combines a plain yyyy-MM-dd date with a slot's start hour into a local
+  // Date, then lets toISOString() do the UTC conversion — new Date(y, m, d, h)
+  // is always interpreted in the browser's local timezone, matching what the
+  // customer actually picked.
+  private buildScheduledIso(dateStr: string, hour: number | null): string | undefined {
+    if (!dateStr || hour === null) return undefined;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (!year || !month || !day) return undefined;
+    return new Date(year, month - 1, day, hour, 0, 0).toISOString();
   }
 }

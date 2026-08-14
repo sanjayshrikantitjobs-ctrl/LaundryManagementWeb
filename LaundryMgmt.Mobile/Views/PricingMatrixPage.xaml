@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              x:Class="LaundryMgmt.Mobile.Views.PricingMatrixPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:PricingMatrixViewModel"
              Title="Pricing">
 

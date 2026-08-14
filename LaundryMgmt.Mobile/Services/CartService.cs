@@ -31,7 +31,13 @@ public class CartService
         if (index >= 0)
         {
             var existing = Items[index];
-            Items[index] = existing with { Quantity = existing.Quantity + item.Quantity, WeightKg = item.WeightKg ?? existing.WeightKg };
+            // Weight-based lines price by WeightKg alone (LineTotal ignores Quantity), so a
+            // repeat add must accumulate weight rather than overwrite it — otherwise the
+            // weight from the first add silently disappears from the order total.
+            var weight = existing.WeightKg.HasValue || item.WeightKg.HasValue
+                ? (existing.WeightKg ?? 0) + (item.WeightKg ?? 0)
+                : (decimal?)null;
+            Items[index] = existing with { Quantity = existing.Quantity + item.Quantity, WeightKg = weight };
         }
         else
         {

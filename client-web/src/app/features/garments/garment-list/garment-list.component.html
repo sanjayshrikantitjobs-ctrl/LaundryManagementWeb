@@ -29,7 +29,8 @@
   } @else if (garments().length === 0) {
     <p>No garments found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th></th>
@@ -48,8 +49,8 @@
                 <span class="thumb-placeholder">🧺</span>
               }
             </td>
-            <td>{{ garment.name }}</td>
-            <td>{{ garment.categoryName }}</td>
+            <td data-label="Name">{{ garment.name }}</td>
+            <td data-label="Category">{{ garment.categoryName }}</td>
             @if (canEdit) {
               <td class="actions">
                 <div class="actions-inner">
@@ -62,6 +63,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LaundryMgmt.Mobile.Models;
@@ -6,10 +7,22 @@ using LaundryMgmt.Mobile.Services;
 
 namespace LaundryMgmt.Mobile.ViewModels;
 
+public record TimeSlot(string Label, int Hour);
+
 public partial class CartViewModel : ObservableObject
 {
     private readonly ApiClient _apiClient;
     private readonly CartService _cartService;
+
+    // 2-hour pickup/delivery windows — kept identical to client-web's TIME_SLOTS
+    // (shop.component.ts) so both apps offer the same options.
+    public List<TimeSlot> TimeSlots { get; } = new()
+    {
+        new TimeSlot("11am - 1pm", 11),
+        new TimeSlot("1pm - 3pm", 13),
+        new TimeSlot("3pm - 5pm", 15),
+        new TimeSlot("5pm - 7pm", 17)
+    };
 
     public ObservableCollection<CartItem> Items => _cartService.Items;
     public ObservableCollection<CustomerAddressDto> Addresses { get; } = new();
@@ -18,7 +31,9 @@ public partial class CartViewModel : ObservableObject
     [ObservableProperty] private bool isExpress;
     [ObservableProperty] private CustomerAddressDto? selectedAddress;
     [ObservableProperty] private DateTime pickupDate = DateTime.Today;
-    [ObservableProperty] private TimeSpan pickupTime = new(Math.Min(DateTime.Now.Hour + 1, 20), 0, 0);
+    [ObservableProperty] private int? pickupSlotHour;
+    [ObservableProperty] private DateTime deliveryDate = DateTime.Today;
+    [ObservableProperty] private int? deliverySlotHour;
     [ObservableProperty] private string promoCodeText = string.Empty;
     [ObservableProperty] private ActivePromotionDto? appliedPromo;
     [ObservableProperty] private string? promoMessage;
@@ -203,6 +218,15 @@ public partial class CartViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void SelectPickupSlot(int hour) => PickupSlotHour = hour;
+
+    [RelayCommand]
+    private void SelectDeliverySlot(int hour) => DeliverySlotHour = hour;
+
+    private static DateTimeOffset? BuildScheduled(DateTime date, int? hour) =>
+        hour is int h ? new DateTimeOffset(date.Date.AddHours(h), DateTimeOffset.Now.Offset) : null;
+
+    [RelayCommand]
     private async Task PlaceOrderAsync()
     {
         if (Items.Count == 0)
@@ -223,21 +247,20 @@ public partial class CartViewModel : ObservableObject
                 return;
             }
 
-            var preferredPickup = new DateTimeOffset(PickupDate.Date + PickupTime, DateTimeOffset.Now.Offset);
-
             var request = new CreateOrderRequest(
                 profile.Id,
                 IsExpress ? OrderChannel.Express : OrderChannel.PickupRequest,
                 IsExpress,
                 Items.Select(i => new CreateOrderItemRequest(i.GarmentId, i.ServiceId, i.Quantity, i.WeightKg, null)).ToList(),
-                preferredPickup,
+                BuildScheduled(PickupDate, PickupSlotHour),
                 SelectedAddress?.Id,
-                AppliedPromo?.Code);
+                AppliedPromo?.Code,
+                BuildScheduled(DeliveryDate, DeliverySlotHour));
 
             var response = await _apiClient.CreateOrderAsync(request);
             if (!response.IsSuccessStatusCode)
             {
-                ErrorMessage = "Couldn't place your order. Please try again.";
+                ErrorMessage = await ExtractErrorMessageAsync(response);
                 return;
             }
 
@@ -254,5 +277,38 @@ public partial class CartViewModel : ObservableObject
         {
             IsPlacingOrder = false;
         }
+    }
+
+    // The API's ExceptionHandlingMiddleware returns { title, errors? } — surfacing that
+    // instead of a generic message is the difference between "couldn't place order" and
+    // actually telling the customer why (e.g. "Promo code 'X' is invalid or has expired.").
+    private static async Task<string> ExtractErrorMessageAsync(HttpResponseMessage response)
+    {
+        var body = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(body))
+            return $"Couldn't place your order (status {(int)response.StatusCode}). Please try again.";
+
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (doc.RootElement.TryGetProperty("title", out var titleProp) && titleProp.ValueKind == JsonValueKind.String)
+            {
+                var title = titleProp.GetString();
+                if (doc.RootElement.TryGetProperty("errors", out var errorsProp) && errorsProp.ValueKind == JsonValueKind.Array
+                    && errorsProp.GetArrayLength() > 0)
+                {
+                    var firstError = errorsProp[0];
+                    if (firstError.TryGetProperty("errorMessage", out var msgProp))
+                        return $"{title}: {msgProp.GetString()}";
+                }
+                return title ?? body;
+            }
+        }
+        catch (JsonException)
+        {
+            // Not JSON (e.g. an ASP.NET default error page) — fall through to the raw body.
+        }
+
+        return body;
     }
 }

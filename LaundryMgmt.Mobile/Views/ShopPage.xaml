@@ -6,35 +6,67 @@
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.ShopPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:ShopViewModel"
              Title="Shop">
 
     <Grid>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
             <views:CustomerNavBar Grid.Row="0" CurrentPage="shop" />
 
-            <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Promotions}" Spacing="8" Padding="12,8">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:ActivePromotionDto">
-                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="0" WidthRequest="150">
-                                <VerticalStackLayout Spacing="0">
-                                    <Image behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
-                                           IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}"
-                                           HeightRequest="70" Aspect="AspectFill" />
-                                    <VerticalStackLayout Spacing="2" Padding="10,8">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{StaticResource Primary}" FontSize="13" />
-                                        <Label Text="{Binding Code}" Style="{StaticResource SubtleLabel}" FontSize="12"
-                                               IsVisible="{Binding Code, Converter={StaticResource IsNotNullConverter}}" />
+            <VerticalStackLayout Grid.Row="1" Spacing="6">
+                <CarouselView x:Name="HeroCarousel" ItemsSource="{Binding HeroSlides}" HeightRequest="190"
+                              Loop="True" IndicatorView="{x:Reference HeroIndicator}" Margin="12,10,12,0">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:HeroSlide">
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="22,20">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
+                                        <GradientStop Color="{StaticResource PrimaryDark}" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="19" TextColor="{StaticResource White}" LineBreakMode="WordWrap" />
+                                        <Label Text="{Binding Subtitle}" FontSize="12.5" TextColor="#E6FFF3" LineBreakMode="WordWrap" />
                                     </VerticalStackLayout>
-                                </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding Icon}" FontSize="40" VerticalOptions="Center" Margin="10,0,0,0" />
+                                </Grid>
                             </Border>
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </HorizontalStackLayout>
-            </ScrollView>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+                <IndicatorView x:Name="HeroIndicator" HorizontalOptions="Center"
+                               IndicatorColor="{StaticResource Gray300}" SelectedIndicatorColor="{StaticResource Primary}" />
+            </VerticalStackLayout>
 
-            <CollectionView Grid.Row="2" ItemsSource="{Binding Services}" SelectionMode="Single"
+            <VerticalStackLayout Grid.Row="2" Spacing="4" IsVisible="{Binding HasPromotions}">
+                <CarouselView x:Name="PromoCarousel" ItemsSource="{Binding Promotions}" HeightRequest="92"
+                              Loop="False" IndicatorView="{x:Reference PromoIndicator}" PeekAreaInsets="28" Margin="0,4">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ActivePromotionDto">
+                            <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="0" Margin="6,0">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Image Grid.Column="0" behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                           IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}"
+                                           WidthRequest="80" Aspect="AspectFill" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="12,6" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" FontSize="14" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Description}" Style="{StaticResource SubtleLabel}" FontSize="11" MaxLines="1" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Code}" TextColor="{StaticResource Accent}" FontAttributes="Bold" FontSize="11"
+                                               IsVisible="{Binding Code, Converter={StaticResource IsNotNullConverter}}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+                <IndicatorView x:Name="PromoIndicator" HorizontalOptions="Center"
+                               IndicatorColor="{StaticResource Gray300}" SelectedIndicatorColor="{StaticResource Primary}" />
+            </VerticalStackLayout>
+
+            <CollectionView Grid.Row="3" ItemsSource="{Binding Services}" SelectionMode="Single"
                              SelectedItem="{Binding SelectedService}" HeightRequest="56">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
@@ -63,14 +95,17 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+            <SearchBar Grid.Row="4" Placeholder="Search garments to add…"
+                       Text="{Binding GarmentSearch}" Margin="8,0" />
+
+            <Label Grid.Row="5" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                    IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                    Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-            <ActivityIndicator Grid.Row="4" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+            <ActivityIndicator Grid.Row="6" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                                 Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-            <CollectionView Grid.Row="4" ItemsSource="{Binding GarmentRows}"
+            <CollectionView Grid.Row="6" ItemsSource="{Binding GarmentRows}"
                              IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">

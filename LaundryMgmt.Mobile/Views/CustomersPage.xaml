@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:views="clr-namespace:LaundryMgmt.Mobile.Views"
              x:Class="LaundryMgmt.Mobile.Views.CustomersPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:CustomersViewModel"
              Title="Customers">
 
@@ -16,12 +17,79 @@
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding RefreshCommand}" />
 
-        <ScrollView Grid.Row="2" Orientation="Horizontal" Padding="12,0,12,8">
+        <ScrollView Grid.Row="2" Orientation="Horizontal" Padding="12,0,12,8" HorizontalScrollBarVisibility="Never">
             <HorizontalStackLayout Spacing="8">
-                <Button Text="All" CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" />
-                <Button Text="Active" CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" />
-                <Button Text="Inactive" CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" />
-                <Button Text="Subscribed" CommandParameter="{x:Static vm:CustomerTab.Subscribed}" Command="{Binding SetTabCommand}" />
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.All}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="All" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.All}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Active}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Active" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Active}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Inactive}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Inactive" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Inactive}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Subscribed}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Subscribed}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Subscribed" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Subscribed}">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
             </HorizontalStackLayout>
         </ScrollView>
 

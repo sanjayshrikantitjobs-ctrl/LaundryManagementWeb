@@ -6,6 +6,12 @@ using LaundryMgmt.Mobile.Services;
 
 namespace LaundryMgmt.Mobile.ViewModels;
 
+/// <summary>A single slide in the Shop page hero carousel — content-only (no photography
+/// assets in the app), so each slide pairs an emoji "icon" with a short benefit pitch.
+/// Kept identical in spirit to client-web's shop hero carousel (shop.component.ts) so the
+/// two apps read as one product.</summary>
+public record HeroSlide(string Icon, string Title, string Subtitle);
+
 /// <summary>One row in the garment grid for the currently-selected service — wraps
 /// the garment with its resolved price/pricing-type for that service. For non-weight-based
 /// garments, CartQuantity mirrors the live cart quantity for this garment+service pair
@@ -51,12 +57,22 @@ public partial class ShopViewModel : ObservableObject
     public ObservableCollection<ShopGarmentRow> GarmentRows { get; } = new();
     public ObservableCollection<ActivePromotionDto> Promotions { get; } = new();
 
+    public List<HeroSlide> HeroSlides { get; } = new()
+    {
+        new HeroSlide("🧺", "Doorstep pickup, doorstep delivery", "Book a slot, leave your basket at the door, and we'll handle the rest — no store visits needed."),
+        new HeroSlide("✨", "Care that matches every fabric", "Delicate silks, everyday cottons, or stubborn stains — cleaned the right way, every time."),
+        new HeroSlide("⚡", "In a hurry? Go Express", "Same-day and rush options get your clothes back fast, without cutting corners."),
+        new HeroSlide("🎁", "Subscribe once, save every cycle", "Monthly plans bundle your regular wash and dry-cleaning at a lower price.")
+    };
+
     [ObservableProperty] private ServiceListItem? selectedService;
+    [ObservableProperty] private string garmentSearch = string.Empty;
     [ObservableProperty] private bool isLoading = true;
     [ObservableProperty] private string? errorMessage;
 
     public int CartItemCount => _cartService.ItemCount;
     public bool HasCartItems => CartItemCount > 0;
+    public bool HasPromotions => Promotions.Count > 0;
 
     public ShopViewModel(ApiClient apiClient, CartService cartService)
     {
@@ -94,6 +110,7 @@ public partial class ShopViewModel : ObservableObject
             Promotions.Clear();
             foreach (var promo in promotions ?? new List<ActivePromotionDto>())
                 Promotions.Add(promo);
+            OnPropertyChanged(nameof(HasPromotions));
 
             SelectedService = Services.FirstOrDefault();
         }
@@ -118,14 +135,18 @@ public partial class ShopViewModel : ObservableObject
     }
 
     partial void OnSelectedServiceChanged(ServiceListItem? value) => RebuildGarmentRows();
+    partial void OnGarmentSearchChanged(string value) => RebuildGarmentRows();
 
     private void RebuildGarmentRows()
     {
         GarmentRows.Clear();
         if (SelectedService is null) return;
 
+        var term = GarmentSearch.Trim();
+
         foreach (var garment in _garments)
-            if (_priceLookup.TryGetValue((garment.Id, SelectedService.Id), out var priced))
+            if (_priceLookup.TryGetValue((garment.Id, SelectedService.Id), out var priced)
+                && (term.Length == 0 || garment.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
                 GarmentRows.Add(new ShopGarmentRow(garment, SelectedService, priced.Type, priced.Price));
 
         SyncCartQuantities();

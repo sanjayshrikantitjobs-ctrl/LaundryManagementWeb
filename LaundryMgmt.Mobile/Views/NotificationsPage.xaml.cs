@@ -2,11 +2,11 @@ using LaundryMgmt.Mobile.ViewModels;
 
 namespace LaundryMgmt.Mobile.Views;
 
-public partial class ContactUsPage : ContentPage
+public partial class NotificationsPage : ContentPage
 {
-    private readonly ContactUsViewModel _viewModel;
+    private readonly NotificationsViewModel _viewModel;
 
-    public ContactUsPage(ContactUsViewModel viewModel)
+    public NotificationsPage(NotificationsViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

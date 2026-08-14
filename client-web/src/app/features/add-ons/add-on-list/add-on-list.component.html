@@ -12,7 +12,8 @@
   } @else if (addOns().length === 0) {
     <p>No add-ons found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th>Name</th>
@@ -25,10 +26,10 @@
       <tbody>
         @for (addOn of addOns(); track addOn.id) {
           <tr>
-            <td>{{ addOn.name }}</td>
-            <td>{{ addOn.description || '—' }}</td>
-            <td>₹{{ addOn.price }}</td>
-            <td>{{ addOn.isActive ? 'Active' : 'Inactive' }}</td>
+            <td data-label="Name">{{ addOn.name }}</td>
+            <td data-label="Description">{{ addOn.description || '—' }}</td>
+            <td data-label="Price">₹{{ addOn.price }}</td>
+            <td data-label="Status">{{ addOn.isActive ? 'Active' : 'Inactive' }}</td>
             <td class="actions">
               <div class="actions-inner">
                 <a [routerLink]="[addOn.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
@@ -39,5 +40,6 @@
         }
       </tbody>
     </table>
+    </div>
   }
 </section>

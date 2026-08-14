@@ -1,11 +1,11 @@
 {
   "/api": {
-    "target": "https://localhost:5101",
+    "target": "https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net/",
     "secure": false,
     "changeOrigin": true
   },
   "/hubs": {
-    "target": "https://localhost:5101",
+    "target": "https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net/",
     "secure": false,
     "changeOrigin": true,
     "ws": true

@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:LaundryMgmt.Mobile.Models"
              xmlns:behaviors="clr-namespace:LaundryMgmt.Mobile.Behaviors"
              x:Class="LaundryMgmt.Mobile.Views.CartPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:CartViewModel"
              Title="Your Cart">
 
@@ -95,9 +96,155 @@
 
                 <Frame IsVisible="{Binding HasItems}">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="PICKUP SCHEDULE" Style="{StaticResource SectionLabel}" />
+                        <Label Text="PICKUP DATE &amp; TIME" Style="{StaticResource SectionLabel}" />
                         <DatePicker Date="{Binding PickupDate}" />
-                        <TimePicker Time="{Binding PickupTime}" />
+                        <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Start">
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="11" Command="{Binding SelectPickupSlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding PickupSlotHour}" Value="11">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="11am - 1pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding PickupSlotHour}" Value="11">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="13" Command="{Binding SelectPickupSlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding PickupSlotHour}" Value="13">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="1pm - 3pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding PickupSlotHour}" Value="13">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="15" Command="{Binding SelectPickupSlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding PickupSlotHour}" Value="15">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="3pm - 5pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding PickupSlotHour}" Value="15">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="17" Command="{Binding SelectPickupSlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding PickupSlotHour}" Value="17">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="5pm - 7pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding PickupSlotHour}" Value="17">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame IsVisible="{Binding HasItems}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="REQUEST DELIVERY DATE &amp; TIME (OPTIONAL)" Style="{StaticResource SectionLabel}" />
+                        <DatePicker Date="{Binding DeliveryDate}" />
+                        <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Start">
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="11" Command="{Binding SelectDeliverySlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding DeliverySlotHour}" Value="11">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="11am - 1pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DeliverySlotHour}" Value="11">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="13" Command="{Binding SelectDeliverySlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding DeliverySlotHour}" Value="13">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="1pm - 3pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DeliverySlotHour}" Value="13">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="15" Command="{Binding SelectDeliverySlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding DeliverySlotHour}" Value="15">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="3pm - 5pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DeliverySlotHour}" Value="15">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="14,7" Margin="0,4,8,0" BackgroundColor="{StaticResource PrimaryLight}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="17" Command="{Binding SelectDeliverySlotCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding DeliverySlotHour}" Value="17">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="5pm - 7pm" TextColor="{StaticResource Primary}" FontSize="12" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DeliverySlotHour}" Value="17">
+                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                        </FlexLayout>
                     </VerticalStackLayout>
                 </Frame>
 

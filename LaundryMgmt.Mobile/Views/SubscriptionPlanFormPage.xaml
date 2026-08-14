@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:LaundryMgmt.Mobile.ViewModels"
              x:Class="LaundryMgmt.Mobile.Views.SubscriptionPlanFormPage"
+             Shell.TabBarIsVisible="False"
              x:DataType="vm:SubscriptionPlanFormViewModel"
-             Title="New Plan">
+             Title="Plan">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="10">
@@ -27,12 +28,18 @@
 
                     <Label Text="FEATURES (ONE PER LINE)" Style="{StaticResource SectionLabel}" />
                     <Editor Text="{Binding FeaturesText}" Placeholder="Standard washing&#10;Free pickup/delivery" HeightRequest="100" />
+
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsEditMode}">
+                        <Label Grid.Column="0" Text="ACTIVE" Style="{StaticResource SectionLabel}" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding IsActive}" />
+                    </Grid>
                 </VerticalStackLayout>
             </Frame>
 
             <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" />
 
             <Button Text="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}" />
+            <Button Text="🗑️ Delete" Style="{StaticResource DangerButton}" Command="{Binding DeleteCommand}" IsVisible="{Binding IsEditMode}" />
         </VerticalStackLayout>
     </ScrollView>
 

@@ -30,12 +30,13 @@ public static class MauiProgram
             // has to be listening on that network interface, not just loopback — see
             // the "0.0.0.0" applicationUrl in Properties/launchSettings.json.
             if (DeviceInfo.Current.DeviceType == DeviceType.Physical)
-                return $"https://{DevMachineLanIp}:5101";
+                return $"https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net";
+            //return $"https://{DevMachineLanIp}:5101";
 #endif
 #if ANDROID
-            return "https://10.0.2.2:5101"; // Android emulator's alias for the host machine
+            return "https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net"; // Android emulator's alias for the host machine
 #else
-            return "https://localhost:5101"; // iOS simulator / Mac Catalyst / Windows: same machine as the API
+            return "https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net"; // iOS simulator / Mac Catalyst / Windows: same machine as the API
 #endif
         }
     }
@@ -131,6 +132,9 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<ContactUsViewModel>();
         builder.Services.AddTransient<ContactUsPage>();
+
+        builder.Services.AddTransient<NotificationsViewModel>();
+        builder.Services.AddTransient<NotificationsPage>();
 
 //#if DEBUG
 //        builder.Logging.AddDebug();

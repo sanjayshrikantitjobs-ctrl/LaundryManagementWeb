@@ -21,7 +21,8 @@
     </div>
 
     <div class="grid-wrapper">
-      <table>
+      <div class="table-scroll">
+        <table>
         <thead>
           <tr>
             <th>Garment</th>
@@ -36,7 +37,7 @@
               <td class="garment-name">{{ row.garmentName }}</td>
               @for (service of visibleGroup()?.services ?? []; track service.id) {
                 @if (cellFor(row, service.id); as cell) {
-                  <td class="price-cell" [class.inactive]="!cell.isActive">
+                  <td class="price-cell" [class.inactive]="!cell.isActive" [attr.data-label]="service.name">
                     <div class="price-cell-inner">
                       <input
                         type="number"
@@ -60,6 +61,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   }
 

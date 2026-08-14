@@ -25,7 +25,8 @@ public record CreateOrderItemRequest(Guid GarmentId, Guid ServiceId, int Quantit
 
 public record CreateOrderRequest(
     Guid CustomerId, OrderChannel Channel, bool IsExpress, List<CreateOrderItemRequest> Items,
-    DateTimeOffset? PreferredPickupAtUtc = null, Guid? PickupAddressId = null, string? PromoCode = null);
+    DateTimeOffset? PreferredPickupAtUtc = null, Guid? PickupAddressId = null, string? PromoCode = null,
+    DateTimeOffset? PreferredDeliveryAtUtc = null);
 
 public record OrderItemDetailDto(
     Guid Id, string GarmentName, Guid ServiceId, string ServiceName, int Quantity, decimal? WeightKg,

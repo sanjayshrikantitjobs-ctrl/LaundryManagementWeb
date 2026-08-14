@@ -1,4 +1,5 @@
 using LaundryMgmt.Mobile.Services;
+using LaundryMgmt.Mobile.ViewModels;
 using LaundryMgmt.Mobile.Views;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,12 +9,15 @@ public partial class AppShell : Shell
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly AuthService _authService;
+    private readonly ApiClient _apiClient;
+    private IDispatcherTimer? _unreadPollTimer;
 
-    public AppShell(IServiceProvider serviceProvider, AuthService authService)
+    public AppShell(IServiceProvider serviceProvider, AuthService authService, ApiClient apiClient)
     {
         InitializeComponent();
         _serviceProvider = serviceProvider;
         _authService = authService;
+        _apiClient = apiClient;
 
         Routing.RegisterRoute(nameof(OrderFormPage), typeof(OrderFormPage));
         Routing.RegisterRoute(nameof(OrderDetailPage), typeof(OrderDetailPage));
@@ -27,21 +31,66 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(UserFormPage), typeof(UserFormPage));
         Routing.RegisterRoute(nameof(CartPage), typeof(CartPage));
         Routing.RegisterRoute(nameof(SubscriptionPlanFormPage), typeof(SubscriptionPlanFormPage));
+        Routing.RegisterRoute(nameof(NotificationsPage), typeof(NotificationsPage));
 
         GreetingLabel.Text = BuildGreeting(authService.FullName);
         BuildTabsForRole(authService.Role);
+
+        Loaded += (_, _) => StartUnreadPolling();
     }
 
+    // Mirrors client-web's notification-bell polling (25s interval, see
+    // notification-bell.component.ts) so the badge count in the title bar stays fresh
+    // without the user needing to open the notifications page.
+    private void StartUnreadPolling()
+    {
+        _unreadPollTimer = Dispatcher.CreateTimer();
+        _unreadPollTimer.Interval = TimeSpan.FromSeconds(25);
+        _unreadPollTimer.Tick += async (_, _) => await RefreshUnreadCountAsync();
+        _unreadPollTimer.Start();
+        _ = RefreshUnreadCountAsync();
+    }
+
+    private async Task RefreshUnreadCountAsync()
+    {
+        try
+        {
+            var count = _authService.Role is null ? 0 : await _apiClient.GetUnreadNotificationCountAsync();
+            UnreadBadgeLabel.Text = count > 9 ? "9+" : count.ToString();
+            UnreadBadge.IsVisible = count > 0;
+        }
+        catch
+        {
+            // Best-effort — a failed poll just leaves the badge as it was.
+        }
+    }
+
+    private async void OnNotificationsTapped(object? sender, EventArgs e) =>
+        await GoToAsync(nameof(NotificationsPage));
+
+    private static async void OnCallUsTapped(object? sender, EventArgs e)
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri($"tel:{ContactUsViewModel.SupportPhoneNumber}"));
+        }
+        catch
+        {
+            // Best-effort — no dialer available on this device/emulator.
+        }
+    }
+
+    // Keeps the title bar from being crowded out by a long name (e.g. "Good evening,
+    // System Administrator") — just the first name, and only its first 8 characters
+    // if even that alone is long.
     private static string BuildGreeting(string? fullName)
     {
-        var timeOfDay = DateTime.Now.Hour switch
-        {
-            < 12 => "Good morning",
-            < 17 => "Good afternoon",
-            _ => "Good evening"
-        };
+        if (string.IsNullOrWhiteSpace(fullName)) return "Hello";
 
-        return string.IsNullOrWhiteSpace(fullName) ? timeOfDay : $"{timeOfDay}, {fullName}";
+        var firstName = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullName;
+        if (firstName.Length > 8) firstName = firstName[..8];
+
+        return $"Hello, {firstName}";
     }
 
     private void BuildTabsForRole(string? role)
