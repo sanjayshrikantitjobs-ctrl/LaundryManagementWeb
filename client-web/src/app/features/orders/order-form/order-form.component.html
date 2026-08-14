@@ -43,7 +43,8 @@
       </label>
     </div>
 
-    <table class="items" formArrayName="items">
+    <div class="table-scroll">
+      <table class="items" formArrayName="items">
       <thead>
         <tr>
           <th>Garment</th>
@@ -58,7 +59,7 @@
       <tbody>
         @for (item of items.controls; track $index; let i = $index) {
           <tr [formGroupName]="i">
-            <td>
+            <td data-label="Garment">
               <select formControlName="garmentId">
                 <option value="" disabled>Select garment</option>
                 @for (garment of garments(); track garment.id) {
@@ -66,7 +67,7 @@
                 }
               </select>
             </td>
-            <td>
+            <td data-label="Service">
               <select formControlName="serviceId">
                 <option value="" disabled>Select service</option>
                 @for (service of services(); track service.id) {
@@ -74,23 +75,24 @@
                 }
               </select>
             </td>
-            <td><input type="number" formControlName="quantity" min="1" /></td>
-            <td><input type="number" formControlName="weightKg" min="0" step="0.1" placeholder="—" /></td>
-            <td><input type="text" formControlName="specialInstructions" /></td>
-            <td>
+            <td data-label="Qty"><input type="number" formControlName="quantity" min="1" /></td>
+            <td data-label="Weight (kg)"><input type="number" formControlName="weightKg" min="0" step="0.1" placeholder="—" /></td>
+            <td data-label="Notes"><input type="text" formControlName="specialInstructions" /></td>
+            <td data-label="Line Total">
               @if (lineTotal(item); as total) {
                 {{ total | currency: 'INR' }}
               } @else {
                 <span class="no-price">no price set</span>
               }
             </td>
-            <td>
+            <td class="actions">
               <button type="button" (click)="removeItem(i)" [disabled]="items.length === 1">&times;</button>
             </td>
           </tr>
         }
       </tbody>
     </table>
+    </div>
 
     <button type="button" class="add-item" (click)="addItem()">+ Add item</button>
 

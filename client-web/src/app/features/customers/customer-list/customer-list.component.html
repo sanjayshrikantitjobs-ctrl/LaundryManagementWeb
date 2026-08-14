@@ -31,7 +31,8 @@
     @if (subscribedCustomers().length === 0) {
       <p>No subscribed customers found.</p>
     } @else {
-      <table>
+      <div class="table-scroll">
+        <table>
         <thead>
           <tr>
             <th>Customer</th>
@@ -45,11 +46,11 @@
         <tbody>
           @for (sub of subscribedCustomers(); track sub.id) {
             <tr>
-              <td>{{ sub.customerName }}</td>
-              <td>{{ sub.planName }}</td>
-              <td><span class="badge">{{ subscriptionStatusLabel(sub.status) }}</span></td>
-              <td>{{ sub.endDate | date: 'd MMM y' }}</td>
-              <td>{{ sub.recurringValue | currency: 'INR' }}</td>
+              <td data-label="Customer">{{ sub.customerName }}</td>
+              <td data-label="Plan">{{ sub.planName }}</td>
+              <td data-label="Membership Status"><span class="badge">{{ subscriptionStatusLabel(sub.status) }}</span></td>
+              <td data-label="Membership Validity">{{ sub.endDate | date: 'd MMM y' }}</td>
+              <td data-label="Recurring Value">{{ sub.recurringValue | currency: 'INR' }}</td>
               <td class="actions">
                 <div class="actions-inner">
                   <a [routerLink]="['/subscriptions/customers', sub.id, 'edit']" class="icon-btn" title="Edit">✏️</a>
@@ -59,6 +60,7 @@
           }
         </tbody>
       </table>
+      </div>
 
       <app-pagination
         [pageNumber]="pageNumber()"
@@ -71,7 +73,8 @@
   } @else if (customers().length === 0) {
     <p>No customers found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th></th>
@@ -88,12 +91,12 @@
         @for (customer of customers(); track customer.id) {
           <tr [attr.data-tier]="activityTier(customer)" [title]="activityLabel(customer)">
             <td class="avatar"><span class="avatar-icon">👤</span></td>
-            <td>{{ customer.fullName }}</td>
-            <td>{{ customer.phoneNumber }}</td>
-            <td>{{ customer.email || '—' }}</td>
-            <td><span class="badge">{{ customer.membershipLabel }}</span></td>
-            <td>{{ customer.lastOrderAtUtc ? (customer.lastOrderAtUtc | date: 'd MMM y') : 'Never' }}</td>
-            <td>
+            <td data-label="Name">{{ customer.fullName }}</td>
+            <td data-label="Phone">{{ customer.phoneNumber }}</td>
+            <td data-label="Email">{{ customer.email || '—' }}</td>
+            <td data-label="Membership"><span class="badge">{{ customer.membershipLabel }}</span></td>
+            <td data-label="Last Order">{{ customer.lastOrderAtUtc ? (customer.lastOrderAtUtc | date: 'd MMM y') : 'Never' }}</td>
+            <td data-label="Status">
               <span class="status-badge" [class.inactive]="customer.status === CustomerStatus.Inactive">
                 {{ customer.status === CustomerStatus.Inactive ? 'Inactive' : 'Active' }}
               </span>
@@ -116,6 +119,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"

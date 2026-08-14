@@ -114,6 +114,7 @@ export interface CreateOrderRequest {
   pickupAddressId?: string;
   promoCode?: string;
   isSameDay?: boolean;
+  preferredDeliveryAtUtc?: string;
 }
 
 export interface LoginRequest {

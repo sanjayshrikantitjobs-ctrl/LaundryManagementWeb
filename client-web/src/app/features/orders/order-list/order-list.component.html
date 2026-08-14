@@ -17,7 +17,8 @@
   } @else if (orders().length === 0) {
     <p>No orders in this view.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th class="sortable" (click)="sortByColumn('orderNumber')">Order # {{ sortIndicator('orderNumber') }}</th>
@@ -33,18 +34,19 @@
       <tbody>
         @for (order of orders(); track order.id) {
           <tr [routerLink]="[order.id]" class="clickable-row">
-            <td>{{ order.orderNumber }}</td>
+            <td data-label="Order #">{{ order.orderNumber }}</td>
             @if (!isCustomer) {
-              <td>{{ order.customerName }}</td>
+              <td data-label="Customer">{{ order.customerName }}</td>
             }
-            <td><span class="badge">{{ statusLabel(order.status) }}</span></td>
-            <td>{{ paymentStatusLabel(order.paymentStatus) }}</td>
-            <td>{{ order.totalAmount | currency: 'INR' }}</td>
-            <td>{{ order.promisedByUtc ? (order.promisedByUtc | date: 'd MMM, h:mm a') : '—' }}</td>
+            <td data-label="Status"><span class="badge">{{ statusLabel(order.status) }}</span></td>
+            <td data-label="Payment">{{ paymentStatusLabel(order.paymentStatus) }}</td>
+            <td data-label="Total">{{ order.totalAmount | currency: 'INR' }}</td>
+            <td data-label="Expected Delivery">{{ order.promisedByUtc ? (order.promisedByUtc | date: 'd MMM, h:mm a') : '—' }}</td>
           </tr>
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"

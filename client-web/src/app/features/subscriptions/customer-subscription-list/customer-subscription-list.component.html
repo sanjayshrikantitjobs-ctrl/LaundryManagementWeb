@@ -18,7 +18,8 @@
   } @else if (subscriptions().length === 0) {
     <p>No customer subscriptions found.</p>
   } @else {
-    <table>
+    <div class="table-scroll">
+      <table>
       <thead>
         <tr>
           <th>Customer</th>
@@ -33,12 +34,12 @@
       <tbody>
         @for (subscription of subscriptions(); track subscription.id) {
           <tr>
-            <td>{{ subscription.customerName }}</td>
-            <td>{{ subscription.planName }}</td>
-            <td>₹{{ subscription.recurringValue }}</td>
-            <td>{{ subscription.startDate }}</td>
-            <td>{{ subscription.nextBillingDate || '—' }}</td>
-            <td>
+            <td data-label="Customer">{{ subscription.customerName }}</td>
+            <td data-label="Plan">{{ subscription.planName }}</td>
+            <td data-label="Recurring Value">₹{{ subscription.recurringValue }}</td>
+            <td data-label="Start Date">{{ subscription.startDate }}</td>
+            <td data-label="Next Billing">{{ subscription.nextBillingDate || '—' }}</td>
+            <td data-label="Status">
               <span class="status" [class]="'status-' + statusLabel(subscription.status).toLowerCase()">
                 {{ statusLabel(subscription.status) }}
               </span>
@@ -50,6 +51,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <app-pagination
       [pageNumber]="pageNumber()"
