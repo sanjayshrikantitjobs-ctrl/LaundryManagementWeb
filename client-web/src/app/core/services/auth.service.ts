@@ -23,10 +23,13 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('/api/v1/auth/login', request).pipe(
-      tap((response) => this.applySession(response))
-    );
-  }
+  return this.http.post<LoginResponse>(
+    'https://laundrymgmt-api-hmesarcqhtchg8gg.centralindia-01.azurewebsites.net/api/v1/auth/login',
+    request
+  ).pipe(
+    tap((response) => this.applySession(response))
+  );
+}
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>('/api/v1/auth/register', request);
