@@ -27,6 +27,14 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
     [ObservableProperty] private string searchText = string.Empty;
     [ObservableProperty] private bool isLoadingSubscribed;
 
+    // Purely decorative counts for the status filter chips (e.g. "Active 12") — same
+    // idea as OrdersViewModel.RefreshCountsAsync: pageSize:1 against the existing
+    // endpoints, display-only, never touches ActiveTab/Items/SubscribedCustomers.
+    [ObservableProperty] private int allCount;
+    [ObservableProperty] private int activeCount;
+    [ObservableProperty] private int inactiveCount;
+    [ObservableProperty] private int subscribedCount;
+
     public CustomerTab ActiveTab { get; private set; } = CustomerTab.All;
     public bool IsSubscribedTab => ActiveTab == CustomerTab.Subscribed;
 
@@ -60,6 +68,35 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
             _ = LoadSubscribedAsync();
         else
             RefreshCommand.Execute(null);
+    }
+
+    /// <summary>Fetches the total count for every status tab in parallel (pageSize:1,
+    /// discarding the single item) so the filter chips can show "Active 12, Inactive 3,
+    /// Subscribed 5" all at once. Best-effort and silent on failure.</summary>
+    [RelayCommand]
+    public async Task RefreshCountsAsync()
+    {
+        try
+        {
+            // Two different result shapes (CustomerListItem vs CustomerSubscriptionListItemDto)
+            // so this can't use the single-type Task.WhenAll<T> overload — the plain
+            // Task[] overload runs them all concurrently regardless.
+            var allTask = _apiClient.GetCustomersAsync(search: SearchText, pageNumber: 1, pageSize: 1);
+            var activeTask = _apiClient.GetCustomersAsync(search: SearchText, pageNumber: 1, pageSize: 1, status: CustomerStatus.Active);
+            var inactiveTask = _apiClient.GetCustomersAsync(search: SearchText, pageNumber: 1, pageSize: 1, status: CustomerStatus.Inactive);
+            var subscribedTask = _apiClient.GetCustomerSubscriptionsAsync(search: SearchText, pageSize: 1);
+
+            await Task.WhenAll(allTask, activeTask, inactiveTask, subscribedTask);
+
+            AllCount = allTask.Result?.TotalCount ?? 0;
+            ActiveCount = activeTask.Result?.TotalCount ?? 0;
+            InactiveCount = inactiveTask.Result?.TotalCount ?? 0;
+            SubscribedCount = subscribedTask.Result?.TotalCount ?? 0;
+        }
+        catch
+        {
+            // Best-effort — leave whatever counts were last successfully loaded.
+        }
     }
 
     private async Task LoadSubscribedAsync()

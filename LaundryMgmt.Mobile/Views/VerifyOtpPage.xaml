@@ -6,7 +6,7 @@
              x:DataType="vm:VerifyOtpViewModel"
              Title="Verify phone">
 
-    <Grid BackgroundColor="{StaticResource PrimaryDark}">
+    <Grid BackgroundColor="{StaticResource HeaderNavy}">
         <VerticalStackLayout Padding="32" Spacing="16" VerticalOptions="Center">
             <Label Text="Verify your phone" FontSize="22" FontAttributes="Bold"
                    TextColor="{StaticResource White}" HorizontalTextAlignment="Center" />

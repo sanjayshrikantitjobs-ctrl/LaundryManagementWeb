@@ -14,12 +14,12 @@ public partial class SubscriptionsPage : ContentPage
         BindingContext = viewModel;
 
         // Shared between management ("Subscriptions") and Customer ("Membership") — same
-        // dual-nav-strip pattern as OrdersPage.
+        // dual-chrome pattern as OrdersPage: each role gets its own hamburger-driven
+        // drawer overlay.
         if (authService.Role == "Customer")
-        {
-            ManagementNavBar.IsVisible = false;
-            CustomerNav.IsVisible = true;
-        }
+            CustomerDrawerOverlay.IsVisible = true;
+        else
+            AdminDrawerOverlay.IsVisible = true;
     }
 
     protected override async void OnAppearing()

@@ -9,98 +9,132 @@
              x:DataType="vm:CustomersViewModel"
              Title="Customers">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
-        <views:ModuleBreadcrumb Grid.Row="0" CurrentModule="customers" />
-
-        <SearchBar Grid.Row="1"
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <SearchBar Grid.Row="0"
                    Placeholder="Search by name, phone or email…"
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding RefreshCommand}" />
 
-        <ScrollView Grid.Row="2" Orientation="Horizontal" Padding="12,0,12,8" HorizontalScrollBarVisibility="Never">
+        <!-- Status filter: same compact, horizontally-scrollable segmented chip strip
+             as OrdersPage — live counts, subtle press animation, unchanged
+             SetTabCommand/ActiveTab underneath. -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="12,4,12,8" HorizontalScrollBarVisibility="Never">
             <HorizontalStackLayout Spacing="8">
-                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource Border}" StrokeThickness="1"
+                        BackgroundColor="{StaticResource Surface}" Padding="14,9" MinimumHeightRequest="42">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" />
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.All}" Command="{Binding SetTabCommand}" Tapped="OnStatusChipTapped" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.All}">
-                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                            <Setter Property="Stroke" Value="Transparent" />
+                            <Setter TargetName="AllLabel" Property="Label.TextColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="AllLabel" Property="Label.FontAttributes" Value="Bold" />
+                            <Setter TargetName="AllBadge" Property="Border.BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="AllCountLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="All" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.All}">
-                                <Setter Property="TextColor" Value="{StaticResource White}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label x:Name="AllLabel" Text="All" FontSize="13.5" TextColor="{StaticResource Gray600}"
+                               VerticalOptions="Center" LineBreakMode="NoWrap" />
+                        <Border x:Name="AllBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                                Padding="6,2" MinimumWidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label x:Name="AllCountLabel" Text="{Binding AllCount}" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Gray600}" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </Border>
 
-                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource Border}" StrokeThickness="1"
+                        BackgroundColor="{StaticResource Surface}" Padding="14,9" MinimumHeightRequest="42">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" />
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Active}" Command="{Binding SetTabCommand}" Tapped="OnStatusChipTapped" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Active}">
-                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                            <Setter Property="Stroke" Value="Transparent" />
+                            <Setter TargetName="ActiveLabel" Property="Label.TextColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="ActiveLabel" Property="Label.FontAttributes" Value="Bold" />
+                            <Setter TargetName="ActiveBadge" Property="Border.BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="ActiveCountLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="Active" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Active}">
-                                <Setter Property="TextColor" Value="{StaticResource White}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label x:Name="ActiveLabel" Text="Active" FontSize="13.5" TextColor="{StaticResource Gray600}"
+                               VerticalOptions="Center" LineBreakMode="NoWrap" />
+                        <Border x:Name="ActiveBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                                Padding="6,2" MinimumWidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label x:Name="ActiveCountLabel" Text="{Binding ActiveCount}" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Gray600}" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </Border>
 
-                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource Border}" StrokeThickness="1"
+                        BackgroundColor="{StaticResource Surface}" Padding="14,9" MinimumHeightRequest="42">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" />
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Inactive}" Command="{Binding SetTabCommand}" Tapped="OnStatusChipTapped" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Inactive}">
-                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                            <Setter Property="Stroke" Value="Transparent" />
+                            <Setter TargetName="InactiveLabel" Property="Label.TextColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="InactiveLabel" Property="Label.FontAttributes" Value="Bold" />
+                            <Setter TargetName="InactiveBadge" Property="Border.BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="InactiveCountLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="Inactive" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Inactive}">
-                                <Setter Property="TextColor" Value="{StaticResource White}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label x:Name="InactiveLabel" Text="Inactive" FontSize="13.5" TextColor="{StaticResource Gray600}"
+                               VerticalOptions="Center" LineBreakMode="NoWrap" />
+                        <Border x:Name="InactiveBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                                Padding="6,2" MinimumWidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label x:Name="InactiveCountLabel" Text="{Binding InactiveCount}" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Gray600}" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </Border>
 
-                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="16,8" BackgroundColor="{StaticResource PrimaryLight}">
+                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource Border}" StrokeThickness="1"
+                        BackgroundColor="{StaticResource Surface}" Padding="14,9" MinimumHeightRequest="42">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Subscribed}" Command="{Binding SetTabCommand}" />
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:CustomerTab.Subscribed}" Command="{Binding SetTabCommand}" Tapped="OnStatusChipTapped" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Subscribed}">
-                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                            <Setter Property="Stroke" Value="Transparent" />
+                            <Setter TargetName="SubscribedLabel" Property="Label.TextColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="SubscribedLabel" Property="Label.FontAttributes" Value="Bold" />
+                            <Setter TargetName="SubscribedBadge" Property="Border.BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter TargetName="SubscribedCountLabel" Property="Label.TextColor" Value="{StaticResource White}" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="Subscribed" TextColor="{StaticResource Primary}" FontSize="13" FontAttributes="Bold">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding ActiveTab}" Value="{x:Static vm:CustomerTab.Subscribed}">
-                                <Setter Property="TextColor" Value="{StaticResource White}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label x:Name="SubscribedLabel" Text="Subscribed" FontSize="13.5" TextColor="{StaticResource Gray600}"
+                               VerticalOptions="Center" LineBreakMode="NoWrap" />
+                        <Border x:Name="SubscribedBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Gray50}"
+                                Padding="6,2" MinimumWidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label x:Name="SubscribedCountLabel" Text="{Binding SubscribedCount}" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Gray600}" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </Border>
             </HorizontalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="3" Text="+ New Customer" HorizontalOptions="End" Margin="16,0,16,8"
+        <Button Grid.Row="2" Text="+ New Customer" HorizontalOptions="End" Margin="16,0,16,8"
                 Command="{Binding NewCustomerCommand}" IsVisible="{Binding CanEditMasterData}" />
 
-        <Label Grid.Row="4" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Label Grid.Row="3" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <RefreshView Grid.Row="5" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}"
+        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}"
                      IsVisible="{Binding IsSubscribedTab, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView ItemsSource="{Binding Customers}"
                             RemainingItemsThreshold="3"
@@ -132,7 +166,7 @@
             </CollectionView>
         </RefreshView>
 
-        <Grid Grid.Row="5" IsVisible="{Binding IsSubscribedTab}">
+        <Grid Grid.Row="4" IsVisible="{Binding IsSubscribedTab}">
             <ActivityIndicator IsRunning="{Binding IsLoadingSubscribed}" IsVisible="{Binding IsLoadingSubscribed}"
                                 Color="{StaticResource Primary}" VerticalOptions="Center" />
             <CollectionView ItemsSource="{Binding SubscribedCustomers}"
@@ -163,6 +197,9 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
+        </Grid>
+
+        <views:AdminDrawer CurrentPage="customers" />
     </Grid>
 
 </ContentPage>

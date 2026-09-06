@@ -56,6 +56,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<CartService>();
         builder.Services.AddSingleton<AuthService>();
         builder.Services.AddSingleton<DeliveryOrderHubService>();
+        builder.Services.AddSingleton<CustomerDrawerService>();
 
         builder.Services.AddTransient<AppShell>();
 
@@ -113,8 +114,13 @@ public static class MauiProgram
         builder.Services.AddTransient<UserDetailViewModel>();
         builder.Services.AddTransient<UserDetailPage>();
 
-        builder.Services.AddTransient<ShopViewModel>();
+        // Singleton — shared between ShopPage and GarmentListPage so the in-progress
+        // category/service selection and loaded catalogue survive navigating between
+        // the two (and aren't silently reset every time ShopPage's OnAppearing re-fires
+        // on the way back).
+        builder.Services.AddSingleton<ShopViewModel>();
         builder.Services.AddTransient<ShopPage>();
+        builder.Services.AddTransient<GarmentListPage>();
         builder.Services.AddTransient<CartViewModel>();
         builder.Services.AddTransient<CartPage>();
 

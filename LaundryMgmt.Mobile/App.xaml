@@ -11,8 +11,10 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
             <converters:GarmentIconConverter x:Key="GarmentIconConverter" />
             <converters:ServiceIconConverter x:Key="ServiceIconConverter" />
+            <converters:CategoryIconConverter x:Key="CategoryIconConverter" />
             <converters:CustomerStatusColorConverter x:Key="CustomerStatusColorConverter" />
             <converters:CustomerStatusToggleLabelConverter x:Key="CustomerStatusToggleLabelConverter" />
             <converters:ActiveToggleLabelConverter x:Key="ActiveToggleLabelConverter" />

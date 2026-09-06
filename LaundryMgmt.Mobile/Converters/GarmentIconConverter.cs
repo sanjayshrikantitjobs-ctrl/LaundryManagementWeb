@@ -53,3 +53,32 @@ public class ServiceIconConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
 }
+
+/// <summary>Same idea for a service category on the Home page — a representative
+/// glyph for whichever categories don't have a real photo configured yet.</summary>
+public class CategoryIconConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var text = value as string ?? string.Empty;
+        return text.ToLowerInvariant() switch
+        {
+            var t when t.Contains("stain") => "💧",
+            var t when t.Contains("shoe") || t.Contains("footwear") => "👟",
+            var t when t.Contains("bag") || t.Contains("accessor") => "👜",
+            var t when t.Contains("bedding") || t.Contains("blanket") || t.Contains("linen") => "🛏️",
+            var t when t.Contains("curtain") || t.Contains("furnishing") || t.Contains("home") => "🪟",
+            var t when t.Contains("wedding") || t.Contains("traditional") => "👘",
+            var t when t.Contains("leather") || t.Contains("suede") => "🧥",
+            var t when t.Contains("alteration") || t.Contains("repair") => "✂️",
+            var t when t.Contains("commercial") || t.Contains("b2b") => "🏢",
+            var t when t.Contains("dry clean") => "🧴",
+            var t when t.Contains("iron") || t.Contains("press") => "♨️",
+            var t when t.Contains("wash") || t.Contains("laundry") => "🧺",
+            _ => "🧺"
+        };
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}

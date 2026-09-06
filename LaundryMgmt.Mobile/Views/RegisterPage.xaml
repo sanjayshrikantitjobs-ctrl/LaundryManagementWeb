@@ -6,9 +6,12 @@
              x:DataType="vm:RegisterViewModel"
              Title="Create account">
 
-    <Grid BackgroundColor="{StaticResource PrimaryDark}">
+    <Grid BackgroundColor="{StaticResource HeaderNavy}">
         <ScrollView>
             <VerticalStackLayout Padding="32" Spacing="16" VerticalOptions="Center">
+                <Image Source="brand_mark.png" Aspect="AspectFit" WidthRequest="56" HeightRequest="56" HorizontalOptions="Center" />
+                <Label Text="Shrios Laundry Wala" FontSize="16" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}" HorizontalTextAlignment="Center" />
                 <Label Text="Create your account" FontSize="22" FontAttributes="Bold"
                        TextColor="{StaticResource White}" HorizontalTextAlignment="Center" Margin="0,0,0,8" />
 

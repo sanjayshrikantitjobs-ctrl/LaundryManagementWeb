@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+             x:Class="LaundryMgmt.Mobile.Views.AdminDrawer"
+             InputTransparent="False">
+
+    <Grid x:Name="RootGrid" HorizontalOptions="Fill" VerticalOptions="Fill">
+
+        <!-- Backdrop: dims the page behind the drawer; tapping it closes the drawer.
+             Starts input-transparent (closed) so it never blocks the page underneath;
+             code-behind flips this only while the drawer is actually open. -->
+        <BoxView x:Name="Backdrop" Color="{StaticResource HeaderNavy}" Opacity="0" InputTransparent="True"
+                 HorizontalOptions="Fill" VerticalOptions="Fill">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackdropTapped" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Sliding panel. No Shadow here deliberately — a Shadow on a Border that
+             also has an animated TranslationX has a known MAUI/Android rendering bug
+             where the content can fail to composite at all (shows the dimmed backdrop
+             with nothing on top of it); a plain 1px edge stroke gives definition
+             instead without that risk. -->
+        <Border x:Name="Panel" HorizontalOptions="Start" VerticalOptions="Fill" WidthRequest="280"
+                Stroke="{StaticResource Border}" StrokeThickness="1" BackgroundColor="{StaticResource Surface}" Padding="0">
+            <Border.StrokeShape>
+                <shapes:Rectangle />
+            </Border.StrokeShape>
+
+            <Grid RowDefinitions="Auto,*,Auto">
+
+                <!-- Brand header -->
+                <Border Grid.Row="0" StrokeShape="Rectangle" Stroke="Transparent" BackgroundColor="{StaticResource HeaderNavy}" Padding="18,24,16,18">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" WidthRequest="42" HeightRequest="42" Padding="0">
+                            <Image Source="brand_mark.png" Aspect="AspectFit" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="Shrios Laundry Wala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource White}" LineBreakMode="TailTruncation" />
+                            <Label x:Name="UserNameLabel" Text="Welcome back" FontSize="12" TextColor="{StaticResource NavyMuted}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="2" WidthRequest="30" HeightRequest="30" StrokeShape="RoundRectangle 15" Stroke="Transparent"
+                                BackgroundColor="{StaticResource HeaderNavyLight}" VerticalOptions="Start">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBackdropTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#x2715;" TextColor="{StaticResource White}" FontSize="13" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Nav items -->
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Padding="10,14" Spacing="2">
+
+                        <!-- Orders: a shopping bag with a loop handle -->
+                        <Border x:Name="OrdersItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnOrdersTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="19" WidthRequest="18">
+                                        <shapes:Polygon Points="2,6 16,6 18,19 0,19" Fill="{StaticResource Primary}" VerticalOptions="End" HeightRequest="13" />
+                                        <shapes:RoundRectangle Stroke="{StaticResource Primary}" StrokeThickness="2.2" Fill="Transparent"
+                                                                CornerRadius="6" WidthRequest="10" HeightRequest="11" VerticalOptions="Start" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="OrdersLabel" Grid.Column="1" Text="Orders" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Customers: a person — head plus shoulders -->
+                        <Border x:Name="CustomersItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCustomersTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="19" WidthRequest="18">
+                                        <shapes:Ellipse Fill="{StaticResource Primary}" WidthRequest="8" HeightRequest="8" VerticalOptions="Start" HorizontalOptions="Center" />
+                                        <shapes:Polygon Points="2,19 16,19 13,9 5,9" Fill="{StaticResource Primary}" VerticalOptions="End" HeightRequest="10" WidthRequest="18" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="CustomersLabel" Grid.Column="1" Text="Customers" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Garments: a clothes hanger — hook ring, triangle frame, bar -->
+                        <Border x:Name="GarmentsItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnGarmentsTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="18" WidthRequest="20">
+                                        <shapes:Ellipse Stroke="{StaticResource Primary}" StrokeThickness="2" Fill="Transparent"
+                                                        WidthRequest="5" HeightRequest="5" VerticalOptions="Start" HorizontalOptions="Center" />
+                                        <shapes:Polygon Points="10,2 20,15 0,15" Stroke="{StaticResource Primary}" StrokeThickness="2" Fill="Transparent"
+                                                        VerticalOptions="End" HeightRequest="13" WidthRequest="20" />
+                                        <shapes:Rectangle Fill="{StaticResource Primary}" WidthRequest="17" HeightRequest="2"
+                                                           VerticalOptions="End" HorizontalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="GarmentsLabel" Grid.Column="1" Text="Garments" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Services: a washing machine — body, drum window, control strip -->
+                        <Border x:Name="ServicesItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnServicesTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="19" WidthRequest="18">
+                                        <shapes:RoundRectangle Fill="{StaticResource Primary}" WidthRequest="18" HeightRequest="19" CornerRadius="3" />
+                                        <shapes:Rectangle Fill="{StaticResource White}" WidthRequest="10" HeightRequest="2.5" VerticalOptions="Start" Margin="0,2.5,0,0" />
+                                        <shapes:Ellipse Fill="{StaticResource White}" WidthRequest="10" HeightRequest="10" VerticalOptions="End" Margin="0,0,0,2" />
+                                        <shapes:Ellipse Fill="{StaticResource Primary}" WidthRequest="5" HeightRequest="5" VerticalOptions="End" Margin="0,0,0,4.5" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="ServicesLabel" Grid.Column="1" Text="Services" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Pricing: a coin/rupee badge -->
+                        <Border x:Name="PricingItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPricingTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="20" WidthRequest="20">
+                                        <shapes:Ellipse Fill="{StaticResource Primary}" WidthRequest="20" HeightRequest="20" />
+                                        <Label Text="₹" TextColor="{StaticResource White}" FontAttributes="Bold" FontSize="13"
+                                               HorizontalOptions="Center" VerticalOptions="Center" Margin="0,-1,0,0" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="PricingLabel" Grid.Column="1" Text="Pricing" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Subscriptions: a membership card with a stripe -->
+                        <Border x:Name="SubscriptionsItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSubscriptionsTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid>
+                                        <shapes:RoundRectangle Fill="{StaticResource Primary}" WidthRequest="20" HeightRequest="15" CornerRadius="3" />
+                                        <shapes:Rectangle Fill="{StaticResource White}" WidthRequest="20" HeightRequest="3.5" VerticalOptions="Start" Margin="0,4,0,0" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="SubscriptionsLabel" Grid.Column="1" Text="Subscriptions" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Users: two overlapping people — team/staff accounts. Admin only. -->
+                        <Border x:Name="UsersItem" StrokeShape="RoundRectangle 12" Stroke="Transparent" Padding="10,11">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnUsersTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="46,*" ColumnSpacing="4">
+                                <Border Style="{StaticResource IconBadge}">
+                                    <Grid HeightRequest="18" WidthRequest="20">
+                                        <shapes:Ellipse Fill="{StaticResource Primary}" Opacity="0.5" WidthRequest="7" HeightRequest="7"
+                                                        HorizontalOptions="Start" VerticalOptions="Start" />
+                                        <shapes:Polygon Points="0,9 12,9 10,18 2,18" Fill="{StaticResource Primary}" Opacity="0.5"
+                                                        HorizontalOptions="Start" VerticalOptions="End" WidthRequest="12" HeightRequest="9" />
+                                        <shapes:Ellipse Fill="{StaticResource Primary}" WidthRequest="7" HeightRequest="7"
+                                                        HorizontalOptions="End" VerticalOptions="Start" Margin="0,3,0,0" />
+                                        <shapes:Polygon Points="0,9 12,9 10,18 2,18" Fill="{StaticResource Primary}"
+                                                        HorizontalOptions="End" VerticalOptions="End" WidthRequest="12" HeightRequest="9" Margin="0,3,0,0" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="UsersLabel" Grid.Column="1" Text="Users" FontSize="14.5" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- Footer -->
+                <VerticalStackLayout Grid.Row="2" Spacing="0">
+                    <BoxView HeightRequest="1" Color="{StaticResource Border}" />
+                    <Label Text="Shrios Laundry Wala · v1.0" FontSize="11" TextColor="{StaticResource Gray600}"
+                           HorizontalOptions="Center" Padding="0,10,0,14" />
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

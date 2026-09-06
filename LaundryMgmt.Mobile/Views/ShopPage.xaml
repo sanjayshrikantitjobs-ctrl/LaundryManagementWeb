@@ -11,172 +11,89 @@
              Title="Shop">
 
     <Grid>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
-            <views:CustomerNavBar Grid.Row="0" CurrentPage="shop" />
+        <!-- No outer ScrollView: the hero and section label size to content (Auto), and
+             the categories grid takes the entire remaining screen height (the "*" row)
+             and is vertically centered within it — that's what previously left a big
+             dead strip of white space below a fixed-height category box, and forced the
+             grid into its own tiny nested scroll region instead of just fitting. -->
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="0">
 
-            <VerticalStackLayout Grid.Row="1" Spacing="6">
-                <CarouselView x:Name="HeroCarousel" ItemsSource="{Binding HeroSlides}" HeightRequest="190"
-                              Loop="True" IndicatorView="{x:Reference HeroIndicator}" Margin="12,10,12,0">
-                    <CarouselView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:HeroSlide">
-                            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" Padding="22,20">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
-                                        <GradientStop Color="{StaticResource PrimaryDark}" Offset="1.0" />
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="19" TextColor="{StaticResource White}" LineBreakMode="WordWrap" />
-                                        <Label Text="{Binding Subtitle}" FontSize="12.5" TextColor="#E6FFF3" LineBreakMode="WordWrap" />
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="1" Text="{Binding Icon}" FontSize="40" VerticalOptions="Center" Margin="10,0,0,0" />
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </CarouselView.ItemTemplate>
-                </CarouselView>
-                <IndicatorView x:Name="HeroIndicator" HorizontalOptions="Center"
-                               IndicatorColor="{StaticResource Gray300}" SelectedIndicatorColor="{StaticResource Primary}" />
+            <!-- Hero: a real photo carousel (bundled marketing banners). AspectFit
+                 (never AspectFill) so the banner is always shown in full — the
+                 source images aren't the same aspect ratio as the device width, and
+                 AspectFill was cropping the headline text off the top/bottom. The
+                 surrounding Surface fill means any left/right letterboxing blends
+                 into the images' own light background instead of showing bars. -->
+            <VerticalStackLayout Grid.Row="0" Spacing="6" Margin="14,10,14,0">
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource Surface}" Padding="0">
+                    <CarouselView x:Name="HeroCarousel" ItemsSource="{Binding HeroSlides}" HeightRequest="190"
+                                  Loop="True" IndicatorView="{x:Reference HeroIndicator}">
+                        <CarouselView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:HeroSlide">
+                                <Image Source="{Binding ImageSource}" Aspect="AspectFit" />
+                            </DataTemplate>
+                        </CarouselView.ItemTemplate>
+                    </CarouselView>
+                </Border>
+                <IndicatorView x:Name="HeroIndicator" HorizontalOptions="Center" HeightRequest="6"
+                               IndicatorColor="{StaticResource Border}" SelectedIndicatorColor="{StaticResource Primary}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Row="2" Spacing="4" IsVisible="{Binding HasPromotions}">
-                <CarouselView x:Name="PromoCarousel" ItemsSource="{Binding Promotions}" HeightRequest="92"
-                              Loop="False" IndicatorView="{x:Reference PromoIndicator}" PeekAreaInsets="28" Margin="0,4">
-                    <CarouselView.ItemTemplate>
-                        <DataTemplate x:DataType="models:ActivePromotionDto">
-                            <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}" Padding="0" Margin="6,0">
-                                <Grid ColumnDefinitions="Auto,*">
-                                    <Image Grid.Column="0" behaviors:TrustedImage.Url="{Binding ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
-                                           IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNullConverter}}"
-                                           WidthRequest="80" Aspect="AspectFill" />
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="12,6" VerticalOptions="Center">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{StaticResource PrimaryDark}" FontSize="14" LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Description}" Style="{StaticResource SubtleLabel}" FontSize="11" MaxLines="1" LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Code}" TextColor="{StaticResource Accent}" FontAttributes="Bold" FontSize="11"
-                                               IsVisible="{Binding Code, Converter={StaticResource IsNotNullConverter}}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </CarouselView.ItemTemplate>
-                </CarouselView>
-                <IndicatorView x:Name="PromoIndicator" HorizontalOptions="Center"
-                               IndicatorColor="{StaticResource Gray300}" SelectedIndicatorColor="{StaticResource Primary}" />
-            </VerticalStackLayout>
+            <Label Grid.Row="1" Text="What do you need cleaned?" Style="{StaticResource SectionLabel}" Margin="16,16,16,4" />
 
-            <CollectionView Grid.Row="3" ItemsSource="{Binding Services}" SelectionMode="Single"
-                             SelectedItem="{Binding SelectedService}" HeightRequest="56">
+            <!-- Categories: a wrapping grid, sized to fill the rest of the screen and
+                 centered within it. Tapping one navigates straight to GarmentListPage,
+                 which opens on "All" services for that category. -->
+            <CollectionView Grid.Row="2" ItemsSource="{Binding Categories}" SelectionMode="Single"
+                             SelectedItem="{Binding SelectedCategory}" Margin="6,0,6,16" VerticalOptions="Center">
                 <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                    <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="4" VerticalItemSpacing="22" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ServiceListItem">
-                        <Border StrokeShape="RoundRectangle 16" Stroke="Transparent" Padding="14,8" Margin="4,8">
+                    <DataTemplate x:DataType="models:ServiceCategoryDto">
+                        <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="Transparent" Padding="4,10">
                             <VisualStateManager.VisualStateGroups>
                                 <VisualStateGroup Name="CommonStates">
-                                    <VisualState Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
+                                    <VisualState Name="Normal" />
                                     <VisualState Name="Selected">
                                         <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                                            <Setter TargetName="ServiceLabel" Property="Label.TextColor" Value="{StaticResource White}" />
+                                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                                            <Setter TargetName="CategoryLabel" Property="Label.TextColor" Value="{StaticResource PrimaryDark}" />
+                                            <Setter TargetName="CategoryLabel" Property="Label.FontAttributes" Value="Bold" />
                                         </VisualState.Setters>
                                     </VisualState>
                                 </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
-                            <Label x:Name="ServiceLabel" Text="{Binding Name}" TextColor="{StaticResource Primary}" FontSize="13" />
+                            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                <Border WidthRequest="84" HeightRequest="84" StrokeShape="RoundRectangle 42" Stroke="Transparent"
+                                        BackgroundColor="{StaticResource PrimaryLight}" Padding="0" HorizontalOptions="Center">
+                                    <Grid>
+                                        <Image behaviors:TrustedImage.Url="{Binding IconOrImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
+                                               IsVisible="{Binding IconOrImageUrl, Converter={StaticResource IsNotNullConverter}}" Aspect="AspectFill" />
+                                        <Label Text="{Binding Name, Converter={StaticResource CategoryIconConverter}}" FontSize="30"
+                                               HorizontalOptions="Center" VerticalOptions="Center"
+                                               IsVisible="{Binding IconOrImageUrl, Converter={StaticResource IsNullOrEmptyConverter}}" />
+                                    </Grid>
+                                </Border>
+                                <Label x:Name="CategoryLabel" Text="{Binding Name}" FontSize="14" TextColor="{StaticResource Gray900}"
+                                       HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" MaxLines="2" WidthRequest="106" />
+                            </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <SearchBar Grid.Row="4" Placeholder="Search garments to add…"
-                       Text="{Binding GarmentSearch}" Margin="8,0" />
+            <VerticalStackLayout Grid.Row="2" VerticalOptions="Center">
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+                       Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-            <Label Grid.Row="5" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
-                   IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
-                   Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
-
-            <ActivityIndicator Grid.Row="6" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                Color="{StaticResource Primary}" VerticalOptions="Center" />
-
-            <CollectionView Grid.Row="6" ItemsSource="{Binding GarmentRows}"
-                             IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
-                <CollectionView.EmptyView>
-                    <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
-                        <Label Text="🧺" FontSize="40" HorizontalTextAlignment="Center" />
-                        <Label Text="No garments available for this service." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
-                    </VerticalStackLayout>
-                </CollectionView.EmptyView>
-
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ShopGarmentRow">
-                        <Frame Style="{StaticResource ListCard}" Padding="10">
-                            <Grid ColumnDefinitions="72,*,Auto" ColumnSpacing="12">
-                                <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent"
-                                        BackgroundColor="{StaticResource Gray50}" WidthRequest="72" HeightRequest="72" Padding="0">
-                                    <Image behaviors:TrustedImage.Url="{Binding Garment.ImageUrl, Converter={StaticResource ResolvedImageUrlConverter}}"
-                                           Aspect="AspectFill" IsVisible="{Binding Garment.ImageUrl, Converter={StaticResource IsNotNullConverter}}" />
-                                </Border>
-
-                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                    <Label Text="{Binding Garment.Name}" FontAttributes="Bold" FontSize="15" />
-                                    <Label Text="{Binding Garment.CategoryName}" Style="{StaticResource SubtleLabel}" FontSize="12" />
-                                    <Label Text="{Binding PriceLabel}" TextColor="{StaticResource Primary}" FontAttributes="Bold" FontSize="15" />
-                                </VerticalStackLayout>
-
-                                <VerticalStackLayout Grid.Column="2" Spacing="6" WidthRequest="118" VerticalOptions="Center">
-                                    <Entry Placeholder="kg" Keyboard="Numeric" Text="{Binding WeightKgText}"
-                                           IsVisible="{Binding IsWeightBased}" WidthRequest="70" HorizontalOptions="End" />
-
-                                    <Button Text="Add to Cart" FontSize="11" Padding="10,6" CornerRadius="16"
-                                            IsVisible="{Binding IsInCart, Converter={StaticResource InvertedBoolConverter}}"
-                                            CommandParameter="{Binding .}"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AddToCartCommand}" />
-
-                                    <Border StrokeShape="RoundRectangle 16" Stroke="{StaticResource Primary}" StrokeThickness="1.5"
-                                            BackgroundColor="{StaticResource White}" Padding="4"
-                                            IsVisible="{Binding IsInCart}">
-                                        <Grid ColumnDefinitions="Auto,*,Auto" HorizontalOptions="Center">
-                                            <Button Grid.Column="0" Text="−" FontSize="16" FontAttributes="Bold" Padding="0" WidthRequest="30" HeightRequest="30"
-                                                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                                                    CommandParameter="{Binding .}"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DecrementCartQuantityCommand}" />
-                                            <Label Grid.Column="1" Text="{Binding CartQuantity}" FontAttributes="Bold" VerticalOptions="Center"
-                                                   HorizontalTextAlignment="Center" WidthRequest="24" />
-                                            <Button Grid.Column="2" Text="+" FontSize="16" FontAttributes="Bold" Padding="0" WidthRequest="30" HeightRequest="30"
-                                                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                                                    CommandParameter="{Binding .}"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IncrementCartQuantityCommand}" />
-                                        </Grid>
-                                    </Border>
-                                </VerticalStackLayout>
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                    Color="{StaticResource Primary}" Margin="0,20" />
+            </VerticalStackLayout>
         </Grid>
 
-        <Border StrokeShape="RoundRectangle 28" Stroke="Transparent" BackgroundColor="{StaticResource Primary}"
-                WidthRequest="56" HeightRequest="56" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,20">
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding OpenCartCommand}" />
-            </Border.GestureRecognizers>
-            <Grid>
-                <Label Text="🛒" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center" />
-                <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource Danger}"
-                        HorizontalOptions="End" VerticalOptions="Start" Margin="0,-4,-4,0" Padding="5,1"
-                        IsVisible="{Binding HasCartItems}">
-                    <Label Text="{Binding CartItemCount}" TextColor="{StaticResource White}" FontSize="11" />
-                </Border>
-            </Grid>
-        </Border>
+        <views:CustomerDrawer CurrentPage="shop" />
     </Grid>
 
 </ContentPage>

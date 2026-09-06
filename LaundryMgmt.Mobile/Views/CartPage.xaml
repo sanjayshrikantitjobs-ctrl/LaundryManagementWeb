@@ -16,8 +16,8 @@
 
                 <VerticalStackLayout IsVisible="{Binding HasItems, Converter={StaticResource InvertedBoolConverter}}"
                                       Padding="24" Spacing="8" VerticalOptions="Center">
-                    <Label Text="🛒" FontSize="40" HorizontalTextAlignment="Center" />
-                    <Label Text="Your cart is empty." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    <Label Text="Your cart is empty." FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="{StaticResource Gray600}" />
+                    <Label Text="Browse the shop to add garments." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="10">

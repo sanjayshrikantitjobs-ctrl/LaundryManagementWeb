@@ -10,21 +10,27 @@
              x:DataType="vm:ContactUsViewModel"
              Title="Contact Us">
 
-    <Grid RowDefinitions="Auto,*">
-        <views:CustomerNavBar Grid.Row="0" CurrentPage="contactus" />
+    <Grid>
+        <Grid RowDefinitions="*">
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16" Spacing="16">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16,14" Spacing="16">
 
-                <Border StrokeShape="RoundRectangle 22" Stroke="Transparent" BackgroundColor="{StaticResource Primary}"
-                        Padding="18,10" HorizontalOptions="Start">
+                <Border StrokeShape="RoundRectangle 16" Stroke="Transparent" BackgroundColor="{StaticResource HeaderNavy}"
+                        Padding="18,14">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding CallUsCommand}" />
                     </Border.GestureRecognizers>
-                    <HorizontalStackLayout Spacing="8">
-                        <Label Text="📞" FontSize="16" TextColor="{StaticResource White}" VerticalOptions="Center" />
-                        <Label Text="Call us: +91 98673 43302" TextColor="{StaticResource White}" FontAttributes="Bold" FontSize="13" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Grid.Column="0" Style="{StaticResource IconBadge}" BackgroundColor="{StaticResource HeaderNavyLight}">
+                            <Label Text="&#x260E;" FontSize="16" TextColor="{StaticResource White}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                            <Label Text="Need help fast?" TextColor="{StaticResource NavyMuted}" FontSize="11.5" />
+                            <Label Text="Call +91 98673 43302" TextColor="{StaticResource White}" FontAttributes="Bold" FontSize="14.5" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="&#x203A;" TextColor="{StaticResource White}" FontSize="20" VerticalOptions="Center" />
+                    </Grid>
                 </Border>
 
                 <Frame>
@@ -39,8 +45,8 @@
                         <Image behaviors:TrustedImage.Url="{Binding PhotoUrl, Converter={StaticResource ResolvedImageUrlConverter}}" HeightRequest="120" Aspect="AspectFit"
                                IsVisible="{Binding PhotoUrl, Converter={StaticResource IsNotNullConverter}}" />
                         <HorizontalStackLayout Spacing="8">
-                            <Button Text="📷 Take Photo" Style="{StaticResource OutlineButton}" Command="{Binding TakePhotoCommand}" />
-                            <Button Text="🖼️ Choose Photo" Style="{StaticResource OutlineButton}" Command="{Binding PickPhotoCommand}" />
+                            <Button Text="Take Photo" Style="{StaticResource OutlineButton}" Command="{Binding TakePhotoCommand}" />
+                            <Button Text="Choose Photo" Style="{StaticResource OutlineButton}" Command="{Binding PickPhotoCommand}" />
                             <Button Text="Remove" Style="{StaticResource DangerButton}" Command="{Binding RemovePhotoCommand}"
                                     IsVisible="{Binding PhotoUrl, Converter={StaticResource IsNotNullConverter}}" />
                         </HorizontalStackLayout>
@@ -89,6 +95,9 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
+        </Grid>
+
+        <views:CustomerDrawer CurrentPage="contactus" />
     </Grid>
 
 </ContentPage>

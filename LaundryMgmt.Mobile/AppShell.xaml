@@ -2,38 +2,75 @@
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        x:Class="LaundryMgmt.Mobile.AppShell"
-       Title="Laundry Mgmt">
+       Title="Shrios Laundry Wala"
+       Shell.BackgroundColor="{StaticResource HeaderNavy}"
+       Shell.ForegroundColor="White"
+       Shell.TitleColor="White"
+       Shell.UnselectedColor="{StaticResource NavyMuted}"
+       Shell.DisabledColor="{StaticResource NavyMuted}">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="16" Padding="16,0">
-            <Label x:Name="GreetingLabel" Grid.Column="0" Text="Hello" TextColor="White" FontAttributes="Bold" FontSize="15"
-                   VerticalOptions="Center" LineBreakMode="TailTruncation" />
+        <Border StrokeShape="Rectangle" Stroke="Transparent" Padding="0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="{StaticResource HeaderNavy}" Offset="0.0" />
+                    <GradientStop Color="{StaticResource HeaderBlue}" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
 
-            <Label Grid.Column="1" Text="📞" FontSize="18" VerticalOptions="Center">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnCallUsTapped" />
-                </Label.GestureRecognizers>
-            </Label>
+            <Grid xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+                  ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="16" Padding="2,0,16,0">
 
-            <Grid Grid.Column="2" WidthRequest="30" HeightRequest="30">
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnNotificationsTapped" />
-                </Grid.GestureRecognizers>
-                <Label Text="🔔" FontSize="19" HorizontalOptions="Center" VerticalOptions="Center" />
-                <Border x:Name="UnreadBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="#DC2626"
-                        HorizontalOptions="End" VerticalOptions="Start" Padding="4,1" Margin="0,-2,-4,0" IsVisible="False">
-                    <Label x:Name="UnreadBadgeLabel" Text="0" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                <!-- Hamburger — only rendered for the Customer role (see AppShell.xaml.cs),
+                     toggles CustomerDrawerService which each customer page's CustomerDrawer
+                     overlay reacts to. -->
+                <Border x:Name="MenuButton" Grid.Column="0" WidthRequest="34" HeightRequest="34" StrokeShape="RoundRectangle 10"
+                        Stroke="Transparent" BackgroundColor="Transparent" IsVisible="False">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMenuTapped" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center" VerticalOptions="Center">
+                        <BoxView HeightRequest="2" WidthRequest="20" Color="White" CornerRadius="1" />
+                        <BoxView HeightRequest="2" WidthRequest="20" Color="White" CornerRadius="1" />
+                        <BoxView HeightRequest="2" WidthRequest="20" Color="White" CornerRadius="1" />
+                    </VerticalStackLayout>
                 </Border>
-            </Grid>
 
-            <Grid Grid.Column="3" ColumnDefinitions="Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnLogoutClicked" />
-                </Grid.GestureRecognizers>
-                <Label Grid.Column="0" Text="&#x23FB;" TextColor="White" FontSize="15" VerticalOptions="Center" />
-                <Label Grid.Column="1" Text="Logout" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
+                <Label x:Name="GreetingLabel" Grid.Column="1" Text="Hello" TextColor="White" FontAttributes="Bold" FontSize="15"
+                       VerticalOptions="Center" LineBreakMode="TailTruncation" />
+
+                <!-- Call: the standard telephone-receiver silhouette (Material "call"
+                     glyph, as path data since there's no icon font in this project) —
+                     the previous phone-body-outline design didn't read as a call icon. -->
+                <Grid Grid.Column="2" WidthRequest="26" HeightRequest="26">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCallUsTapped" />
+                    </Grid.GestureRecognizers>
+                    <shapes:Path Fill="White" Aspect="Uniform" WidthRequest="18" HeightRequest="18"
+                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                 Data="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                </Grid>
+
+                <Grid Grid.Column="3" WidthRequest="30" HeightRequest="30">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNotificationsTapped" />
+                    </Grid.GestureRecognizers>
+                    <Label Text="🔔" FontSize="19" HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Border x:Name="UnreadBadge" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="#DC2626"
+                            HorizontalOptions="End" VerticalOptions="Start" Padding="4,1" Margin="0,-2,-4,0" IsVisible="False">
+                        <Label x:Name="UnreadBadgeLabel" Text="0" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                    </Border>
+                </Grid>
+
+                <!-- Logout: text only now — the icon glyph is dropped, the tap target
+                     stays on the label itself. -->
+                <Label Grid.Column="4" Text="Logout" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLogoutClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
             </Grid>
-        </Grid>
+        </Border>
     </Shell.TitleView>
 
 </Shell>

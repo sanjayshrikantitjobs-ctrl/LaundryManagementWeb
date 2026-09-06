@@ -6,11 +6,10 @@ using LaundryMgmt.Mobile.Services;
 
 namespace LaundryMgmt.Mobile.ViewModels;
 
-/// <summary>A single slide in the Shop page hero carousel — content-only (no photography
-/// assets in the app), so each slide pairs an emoji "icon" with a short benefit pitch.
-/// Kept identical in spirit to client-web's shop hero carousel (shop.component.ts) so the
-/// two apps read as one product.</summary>
-public record HeroSlide(string Icon, string Title, string Subtitle);
+/// <summary>A single slide in the Shop page hero carousel — real marketing photography
+/// (bundled app images, not fetched from the API) rather than a plain color/icon slide,
+/// so the home screen opens with an actual banner carousel.</summary>
+public record HeroSlide(string ImageSource);
 
 /// <summary>One row in the garment grid for the currently-selected service — wraps
 /// the garment with its resolved price/pricing-type for that service. For non-weight-based
@@ -49,22 +48,26 @@ public partial class ShopViewModel : ObservableObject
     private readonly ApiClient _apiClient;
     private readonly CartService _cartService;
 
-    private List<ServiceListItem> _services = new();
+    private List<ServiceCategoryDto> _categories = new();
+    private List<ServiceListItem> _allServices = new();
     private List<GarmentListItem> _garments = new();
     private Dictionary<(Guid GarmentId, Guid ServiceId), (PricingType Type, decimal Price)> _priceLookup = new();
 
+    public ObservableCollection<ServiceCategoryDto> Categories { get; } = new();
     public ObservableCollection<ServiceListItem> Services { get; } = new();
     public ObservableCollection<ShopGarmentRow> GarmentRows { get; } = new();
-    public ObservableCollection<ActivePromotionDto> Promotions { get; } = new();
 
+    // Bundled marketing banners (Resources/Images/banner_*.png) — a real photo carousel
+    // instead of a plain color/icon slide.
     public List<HeroSlide> HeroSlides { get; } = new()
     {
-        new HeroSlide("🧺", "Doorstep pickup, doorstep delivery", "Book a slot, leave your basket at the door, and we'll handle the rest — no store visits needed."),
-        new HeroSlide("✨", "Care that matches every fabric", "Delicate silks, everyday cottons, or stubborn stains — cleaned the right way, every time."),
-        new HeroSlide("⚡", "In a hurry? Go Express", "Same-day and rush options get your clothes back fast, without cutting corners."),
-        new HeroSlide("🎁", "Subscribe once, save every cycle", "Monthly plans bundle your regular wash and dry-cleaning at a lower price.")
+        new HeroSlide("banner_fresh_clothes.png"),
+        new HeroSlide("banner_fabric_care.png"),
+        new HeroSlide("banner_eco.png"),
+        new HeroSlide("banner_home_linen.png")
     };
 
+    [ObservableProperty] private ServiceCategoryDto? selectedCategory;
     [ObservableProperty] private ServiceListItem? selectedService;
     [ObservableProperty] private string garmentSearch = string.Empty;
     [ObservableProperty] private bool isLoading = true;
@@ -72,7 +75,11 @@ public partial class ShopViewModel : ObservableObject
 
     public int CartItemCount => _cartService.ItemCount;
     public bool HasCartItems => CartItemCount > 0;
-    public bool HasPromotions => Promotions.Count > 0;
+    public bool HasServices => Services.Count > 0;
+
+    // GarmentListPage's service picker default — "All" (no single service chosen)
+    // shows garments from every service in the selected category.
+    public bool IsAllSelected => SelectedService is null;
 
     public ShopViewModel(ApiClient apiClient, CartService cartService)
     {
@@ -84,21 +91,43 @@ public partial class ShopViewModel : ObservableObject
             OnPropertyChanged(nameof(HasCartItems));
             SyncCartQuantities();
         };
+        Services.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasServices));
     }
+
+    private bool _hasLoaded;
+
+    // True only while InitializeAsync is assigning the *default* category — suppresses
+    // the auto-navigate-to-GarmentListPage behavior in OnSelectedCategoryChanged so the
+    // app doesn't jump off ShopPage the instant it finishes loading. A real tap on a
+    // category card always happens with this false.
+    private bool _isApplyingDefaultCategory;
 
     [RelayCommand]
     public async Task InitializeAsync()
     {
+        // ShopViewModel is a singleton (shared with GarmentListPage so the two pages
+        // browse the same in-progress selection) — OnAppearing calls this every time
+        // the page is shown, including when the customer navigates *back* from
+        // GarmentListPage. Without this guard that would re-fetch the whole catalogue
+        // and reset SelectedCategory/SelectedService back to the defaults every time.
+        if (_hasLoaded) return;
+
         IsLoading = true;
         ErrorMessage = null;
 
         try
         {
+            var categoriesResult = await _apiClient.GetServiceCategoriesAsync();
+            _categories = (categoriesResult ?? new List<ServiceCategoryDto>())
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.DisplayOrder)
+                .ToList();
+            Categories.Clear();
+            foreach (var category in _categories)
+                Categories.Add(category);
+
             var servicesResult = await _apiClient.GetServicesAsync(pageSize: 50);
-            _services = servicesResult?.Items ?? new List<ServiceListItem>();
-            Services.Clear();
-            foreach (var service in _services.OrderBy(s => s.Priority))
-                Services.Add(service);
+            _allServices = servicesResult?.Items ?? new List<ServiceListItem>();
 
             var garmentsResult = await _apiClient.GetGarmentsAsync(pageSize: 200);
             _garments = garmentsResult?.Items ?? new List<GarmentListItem>();
@@ -106,13 +135,12 @@ public partial class ShopViewModel : ObservableObject
             var matrix = await _apiClient.GetPricingMatrixAsync();
             _priceLookup = BuildPriceLookup(matrix);
 
-            var promotions = await _apiClient.GetActivePromotionsAsync();
-            Promotions.Clear();
-            foreach (var promo in promotions ?? new List<ActivePromotionDto>())
-                Promotions.Add(promo);
-            OnPropertyChanged(nameof(HasPromotions));
-
-            SelectedService = Services.FirstOrDefault();
+            // Defaults to the first category that actually has a service, not just
+            // Categories[0] — an empty category would otherwise open to a dead end.
+            _isApplyingDefaultCategory = true;
+            SelectedCategory = Categories.FirstOrDefault(c => _allServices.Any(s => s.CategoryId == c.Id));
+            _isApplyingDefaultCategory = false;
+            _hasLoaded = true;
         }
         catch (Exception ex)
         {
@@ -134,20 +162,69 @@ public partial class ShopViewModel : ObservableObject
         return lookup;
     }
 
-    partial void OnSelectedServiceChanged(ServiceListItem? value) => RebuildGarmentRows();
+    // Category -> Garments, with an in-between service filter: picking a category
+    // populates its services and navigates straight to GarmentListPage, which opens on
+    // "All" (SelectedService null) — every service in that category — and narrows to a
+    // single service only if the customer taps a chip there.
+    partial void OnSelectedCategoryChanged(ServiceCategoryDto? value)
+    {
+        Services.Clear();
+        SelectedService = null;
+        if (value is null) return;
+
+        foreach (var service in _allServices.Where(s => s.CategoryId == value.Id).OrderBy(s => s.Priority))
+            Services.Add(service);
+
+        RebuildGarmentRows();
+
+        if (!_isApplyingDefaultCategory)
+            _ = Shell.Current.GoToAsync(nameof(Views.GarmentListPage));
+    }
+
+    partial void OnSelectedServiceChanged(ServiceListItem? value)
+    {
+        OnPropertyChanged(nameof(IsAllSelected));
+        RebuildGarmentRows();
+    }
+
+    [RelayCommand]
+    private void SelectAllServices() => SelectedService = null;
+
     partial void OnGarmentSearchChanged(string value) => RebuildGarmentRows();
 
     private void RebuildGarmentRows()
     {
         GarmentRows.Clear();
-        if (SelectedService is null) return;
-
         var term = GarmentSearch.Trim();
 
-        foreach (var garment in _garments)
-            if (_priceLookup.TryGetValue((garment.Id, SelectedService.Id), out var priced)
-                && (term.Length == 0 || garment.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
-                GarmentRows.Add(new ShopGarmentRow(garment, SelectedService, priced.Type, priced.Price));
+        if (term.Length > 0)
+        {
+            // A search should find a garment under any service/category, not just
+            // whichever service chip happens to be selected — the selected service
+            // only scopes browsing when the customer isn't actively searching.
+            foreach (var garment in _garments)
+            {
+                if (!garment.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) continue;
+                foreach (var service in _allServices)
+                    if (_priceLookup.TryGetValue((garment.Id, service.Id), out var priced))
+                        GarmentRows.Add(new ShopGarmentRow(garment, service, priced.Type, priced.Price));
+            }
+        }
+        else if (SelectedService is not null)
+        {
+            foreach (var garment in _garments)
+                if (_priceLookup.TryGetValue((garment.Id, SelectedService.Id), out var priced))
+                    GarmentRows.Add(new ShopGarmentRow(garment, SelectedService, priced.Type, priced.Price));
+        }
+        else
+        {
+            // "All" — every service within the selected category, not every service
+            // app-wide (Services is already scoped to SelectedCategory).
+            foreach (var garment in _garments)
+                foreach (var service in Services)
+                    if (_priceLookup.TryGetValue((garment.Id, service.Id), out var priced))
+                        GarmentRows.Add(new ShopGarmentRow(garment, service, priced.Type, priced.Price));
+        }
 
         SyncCartQuantities();
     }

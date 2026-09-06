@@ -53,7 +53,7 @@ public record CreateGarmentRequest(string Name, Guid CategoryId, string? Special
 public record UpdateGarmentRequest(string Name, Guid CategoryId, string? SpecialInstructions, string? ImageUrl);
 
 public record ServiceListItem(
-    Guid Id, string Name, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
+    Guid Id, string Name, Guid CategoryId, string CategoryName, decimal BasePrice, int EstimatedTimeHours, decimal GstPercentage, int Priority,
     string? ImageUrl, decimal ExpressSurcharge, int ExpressEtaHours);
 
 public record ServiceDetailDto(

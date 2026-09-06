@@ -14,19 +14,29 @@ public partial class OrdersPage : ContentPage
         BindingContext = viewModel;
 
         // OrdersPage is shared between Customer ("My Orders") and management roles
-        // ("Orders") — both lose the bottom TabBar in favor of a top nav strip (avoids
-        // Android's "More" overflow once a role has more than ~5 tabs); only the top
-        // strip's content differs (scrollable CustomerNavBar vs. ModuleBreadcrumb).
+        // ("Orders") — both lose the bottom TabBar (avoids Android's "More" overflow
+        // once a role has more than ~5 tabs) in favor of the hamburger-driven drawer;
+        // which drawer overlay is shown depends on which chrome the role uses.
         if (authService.Role == "Customer")
-        {
-            ManagementNavBar.IsVisible = false;
-            CustomerNav.IsVisible = true;
-        }
+            CustomerDrawerOverlay.IsVisible = true;
+        else
+            AdminDrawerOverlay.IsVisible = true;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
         _viewModel.RefreshCommand.Execute(null);
+        _viewModel.RefreshCountsCommand.Execute(null);
+    }
+
+    /// <summary>Purely decorative press-feedback for a status filter chip — a quick
+    /// scale bounce alongside the TapGestureRecognizer's Command (which still drives
+    /// SetTabCommand/ActiveTab exactly as before). Doesn't touch any binding or command.</summary>
+    private static async void OnStatusChipTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not VisualElement chip) return;
+        await chip.ScaleTo(0.95, 60, Easing.CubicOut);
+        await chip.ScaleTo(1.0, 90, Easing.CubicOut);
     }
 }

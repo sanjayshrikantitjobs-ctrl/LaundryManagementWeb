@@ -9,18 +9,53 @@
              x:DataType="vm:SettingsViewModel"
              Title="Settings">
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <views:CustomerNavBar Grid.Row="0" CurrentPage="settings" />
+    <Grid>
+        <Grid RowDefinitions="Auto,*">
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="8" Padding="16,8">
-            <Button Text="General" CommandParameter="{x:Static vm:SettingsTab.General}" Command="{Binding SetTabCommand}" />
-            <Button Text="Address" CommandParameter="{x:Static vm:SettingsTab.Address}" Command="{Binding SetTabCommand}" />
-        </HorizontalStackLayout>
+        <Border Grid.Row="0" StrokeShape="RoundRectangle 20" Stroke="Transparent" BackgroundColor="{StaticResource PrimaryLight}"
+                Margin="16,12,16,0" Padding="4">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                <Border Grid.Column="0" StrokeShape="RoundRectangle 16" Stroke="Transparent" Padding="0,9">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:SettingsTab.General}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsGeneralTab}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="General" HorizontalTextAlignment="Center" FontAttributes="Bold" FontSize="13" TextColor="{StaticResource Primary}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsGeneralTab}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+                <Border Grid.Column="1" StrokeShape="RoundRectangle 16" Stroke="Transparent" Padding="0,9">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer CommandParameter="{x:Static vm:SettingsTab.Address}" Command="{Binding SetTabCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAddressTab}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Address" HorizontalTextAlignment="Center" FontAttributes="Bold" FontSize="13" TextColor="{StaticResource Primary}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsAddressTab}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource White}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+            </Grid>
+        </Border>
 
-        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                             Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-        <ScrollView Grid.Row="2" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
             <VerticalStackLayout Padding="16" Spacing="14">
 
                 <VerticalStackLayout IsVisible="{Binding IsGeneralTab}" Spacing="10">
@@ -103,6 +138,9 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
+        </Grid>
+
+        <views:CustomerDrawer CurrentPage="settings" />
     </Grid>
 
 </ContentPage>

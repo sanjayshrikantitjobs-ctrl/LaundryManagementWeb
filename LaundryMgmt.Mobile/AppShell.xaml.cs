@@ -10,14 +10,22 @@ public partial class AppShell : Shell
     private readonly IServiceProvider _serviceProvider;
     private readonly AuthService _authService;
     private readonly ApiClient _apiClient;
+    private readonly CustomerDrawerService _drawerService;
     private IDispatcherTimer? _unreadPollTimer;
 
-    public AppShell(IServiceProvider serviceProvider, AuthService authService, ApiClient apiClient)
+    public AppShell(IServiceProvider serviceProvider, AuthService authService, ApiClient apiClient, CustomerDrawerService drawerService)
     {
         InitializeComponent();
         _serviceProvider = serviceProvider;
         _authService = authService;
         _apiClient = apiClient;
+        _drawerService = drawerService;
+
+        // Hamburger + drawer nav for Customer and every management role (Admin,
+        // StoreManager, Staff, DepartmentHead) — each hosts its own drawer overlay
+        // (CustomerDrawer or AdminDrawer) driven by the same CustomerDrawerService.
+        // PickupAgent/DeliveryAgent keep their single-tab queue view with no drawer.
+        MenuButton.IsVisible = authService.Role is "Customer" or "Admin" or "StoreManager" or "Staff" or "DepartmentHead";
 
         Routing.RegisterRoute(nameof(OrderFormPage), typeof(OrderFormPage));
         Routing.RegisterRoute(nameof(OrderDetailPage), typeof(OrderDetailPage));
@@ -32,6 +40,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(CartPage), typeof(CartPage));
         Routing.RegisterRoute(nameof(SubscriptionPlanFormPage), typeof(SubscriptionPlanFormPage));
         Routing.RegisterRoute(nameof(NotificationsPage), typeof(NotificationsPage));
+        Routing.RegisterRoute(nameof(GarmentListPage), typeof(GarmentListPage));
 
         GreetingLabel.Text = BuildGreeting(authService.FullName);
         BuildTabsForRole(authService.Role);
@@ -67,6 +76,8 @@ public partial class AppShell : Shell
 
     private async void OnNotificationsTapped(object? sender, EventArgs e) =>
         await GoToAsync(nameof(NotificationsPage));
+
+    private void OnMenuTapped(object? sender, EventArgs e) => _drawerService.Toggle();
 
     private static async void OnCallUsTapped(object? sender, EventArgs e)
     {

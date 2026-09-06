@@ -9,26 +9,23 @@
              x:DataType="vm:SubscriptionsViewModel"
              Title="Subscriptions">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
-        <views:ModuleBreadcrumb x:Name="ManagementNavBar" Grid.Row="0" CurrentModule="subscriptions" />
-        <views:CustomerNavBar x:Name="CustomerNav" Grid.Row="0" CurrentPage="membership" IsVisible="False" />
-
-        <Button Grid.Row="1" Text="+ New Plan" HorizontalOptions="End" Margin="16,8"
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <Button Grid.Row="0" Text="+ New Plan" HorizontalOptions="End" Margin="16,8"
                 Command="{Binding NewPlanCommand}" IsVisible="{Binding CanEditMasterData}" />
 
-        <Label Grid.Row="2" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+        <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
                Padding="16,8" BackgroundColor="{StaticResource DangerLight}" />
 
-        <ActivityIndicator Grid.Row="3" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                             Color="{StaticResource Primary}" VerticalOptions="Center" />
 
-        <CollectionView Grid.Row="4" ItemsSource="{Binding Plans}"
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Plans}"
                          IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.EmptyView>
                 <VerticalStackLayout Padding="24" Spacing="8" VerticalOptions="Center">
-                    <Label Text="🏷️" FontSize="40" HorizontalTextAlignment="Center" />
-                    <Label Text="No subscription plans yet." HorizontalTextAlignment="Center" Style="{StaticResource SubtleLabel}" />
+                    <Label Text="No subscription plans yet." FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="{StaticResource Gray600}" />
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
 
@@ -58,13 +55,17 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
 
-                            <Label Text="✏️ Tap to edit" FontSize="11" Style="{StaticResource SubtleLabel}" HorizontalOptions="End"
+                            <Label Text="Tap to edit" FontSize="11" Style="{StaticResource SubtleLabel}" HorizontalOptions="End"
                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanEditMasterData}" />
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </Grid>
+
+        <views:CustomerDrawer x:Name="CustomerDrawerOverlay" CurrentPage="membership" IsVisible="False" />
+        <views:AdminDrawer x:Name="AdminDrawerOverlay" CurrentPage="subscriptions" IsVisible="False" />
     </Grid>
 
 </ContentPage>

@@ -16,4 +16,18 @@
     <Color x:Key="Success">#15803D</Color>
     <Color x:Key="Danger">#DC2626</Color>
     <Color x:Key="DangerLight">#FEE2E2</Color>
+
+    <!-- Shrios Laundry Wala identity: a deep navy app bar/drawer (trust, premium feel)
+         paired with the fresh green for primary actions — navy is chrome, green is "do this". -->
+    <Color x:Key="HeaderNavy">#101B33</Color>
+    <Color x:Key="HeaderNavyDark">#0A1226</Color>
+    <Color x:Key="HeaderNavyLight">#22304F</Color>
+    <!-- Brand blue lifted from the logo's cloud — used for the header gradient so the
+         app bar reads richer than flat navy and gives white icons real contrast. -->
+    <Color x:Key="HeaderBlue">#0E4E85</Color>
+    <Color x:Key="NavyMuted">#8E9AB8</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="Background">#F4F6F9</Color>
+    <Color x:Key="Border">#E7EAF0</Color>
+    <Color x:Key="Overlay">#66101B33</Color>
 </ResourceDictionary>

@@ -217,11 +217,22 @@ public partial class CartViewModel : ObservableObject
         return Math.Min(discount, subtotal);
     }
 
+    // CommandParameter on a XAML TapGestureRecognizer always arrives as the literal
+    // string from the attribute (e.g. "11") since the property is typed `object` —
+    // MVVM Toolkit's generated int-typed command does a hard (int)parameter cast that
+    // throws InvalidCastException on that string, crashing the app. Taking the raw
+    // string and parsing it here avoids that entirely.
     [RelayCommand]
-    private void SelectPickupSlot(int hour) => PickupSlotHour = hour;
+    private void SelectPickupSlot(string hourText)
+    {
+        if (int.TryParse(hourText, out var hour)) PickupSlotHour = hour;
+    }
 
     [RelayCommand]
-    private void SelectDeliverySlot(int hour) => DeliverySlotHour = hour;
+    private void SelectDeliverySlot(string hourText)
+    {
+        if (int.TryParse(hourText, out var hour)) DeliverySlotHour = hour;
+    }
 
     private static DateTimeOffset? BuildScheduled(DateTime date, int? hour) =>
         hour is int h ? new DateTimeOffset(date.Date.AddHours(h), DateTimeOffset.Now.Offset) : null;

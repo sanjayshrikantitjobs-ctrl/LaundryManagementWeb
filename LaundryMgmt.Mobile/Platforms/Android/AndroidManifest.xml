@@ -3,7 +3,7 @@
 	<!-- Remove explicit icon references to avoid build-time missing resource errors.
          Restore android:icon/android:roundIcon if you add appropriate mipmap resources
          or re-enable MauiIcon in the project file. -->
-	<application android:allowBackup="true" android:supportsRtl="true" android:label="Laundry Wala"></application>
+	<application android:allowBackup="true" android:supportsRtl="true" android:label="Shrios Laundry Wala" android:icon="@mipmap/appicon"></application>
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-feature android:name="android.hardware.camera" android:required="false" />
