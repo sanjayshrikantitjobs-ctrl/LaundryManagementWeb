@@ -2,15 +2,17 @@ using System.Globalization;
 
 namespace LaundryMgmt.Mobile.Converters;
 
-/// <summary>Image URLs are baked in at upload time as
-/// "{Request.Scheme}://{Request.Host}/uploads/{file}" (see UploadsController) — whatever
-/// host issued the upload request. That's fine for the web app (same-origin as the
-/// browser), but on a physical device an image uploaded from the admin's desktop browser
-/// comes back as "https://localhost:5101/..." which means the phone itself, not the dev
-/// PC (same class of bug as MauiProgram.ApiBaseUrl). This rewrites the scheme/host/port
-/// to whatever the running app is currently using to reach the API, keeping only the
-/// path, so the same file always resolves correctly regardless of which host originally
-/// uploaded it.</summary>
+/// <summary>Legacy local-disk image URLs were baked in at upload time as
+/// "{Request.Scheme}://{Request.Host}/uploads/{file}" (see UploadsController's old
+/// implementation) — whatever host issued the upload request. That's fine for the web
+/// app (same-origin as the browser), but on a physical device an image uploaded from
+/// the admin's desktop browser came back as "https://localhost:5101/..." which means
+/// the phone itself, not the dev PC (same class of bug as MauiProgram.ApiBaseUrl). For
+/// any URL still shaped like that (old data, or a fresh /uploads/ path), this rewrites
+/// the scheme/host/port to whatever the app is currently using to reach the API.
+/// Uploads now go to Azure Blob Storage instead (a different host entirely,
+/// *.blob.core.windows.net) — those URLs are already correct as issued and must be
+/// left untouched, or rewriting them to the API's host would just break them.</summary>
 public class ResolvedImageUrlConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -19,6 +21,9 @@ public class ResolvedImageUrlConverter : IValueConverter
             return null;
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return url;
+
+        if (!uri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
             return url;
 
         var apiBase = new Uri(MauiProgram.ApiBaseUrl);

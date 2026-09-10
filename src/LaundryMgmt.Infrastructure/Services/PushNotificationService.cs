@@ -71,32 +71,48 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    public async Task SendToUserAsync(Guid userId, string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default)
+    public Task SendToUserAsync(Guid userId, string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default) =>
+        SendSafeAsync(async () =>
+        {
+            if (!_available) return;
+
+            var tokens = await _db.DeviceTokens
+                .Where(d => d.UserId == userId)
+                .Select(d => d.Token)
+                .ToListAsync(cancellationToken);
+
+            if (tokens.Count > 0)
+                await SendToTokensAsync(tokens, title, body, entityId, type, cancellationToken);
+        });
+
+    public Task SendToAllCustomersAsync(string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default) =>
+        SendSafeAsync(async () =>
+        {
+            if (!_available) return;
+
+            var tokens = await _db.DeviceTokens
+                .Select(d => d.Token)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            if (tokens.Count > 0)
+                await SendToTokensAsync(tokens, title, body, entityId, type, cancellationToken);
+        });
+
+    // Wraps the *entire* send path (DB query included, not just the FCM call) — a
+    // missing DeviceTokens table (migration not yet applied) or any other DB hiccup
+    // must degrade to "no push sent" exactly like a Firebase failure does, never break
+    // the order-status-change/promotion-creation request that triggered this.
+    private async Task SendSafeAsync(Func<Task> action)
     {
-        if (!_available) return;
-
-        var tokens = await _db.DeviceTokens
-            .Where(d => d.UserId == userId)
-            .Select(d => d.Token)
-            .ToListAsync(cancellationToken);
-
-        if (tokens.Count == 0) return;
-
-        await SendToTokensAsync(tokens, title, body, entityId, type, cancellationToken);
-    }
-
-    public async Task SendToAllCustomersAsync(string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default)
-    {
-        if (!_available) return;
-
-        var tokens = await _db.DeviceTokens
-            .Select(d => d.Token)
-            .Distinct()
-            .ToListAsync(cancellationToken);
-
-        if (tokens.Count == 0) return;
-
-        await SendToTokensAsync(tokens, title, body, entityId, type, cancellationToken);
+        try
+        {
+            await action();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send push notification.");
+        }
     }
 
     private async Task SendToTokensAsync(List<string> tokens, string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken)
@@ -113,18 +129,8 @@ public class PushNotificationService : IPushNotificationService
             Data = data
         }).ToList();
 
-        try
-        {
-            var response = await FirebaseMessaging.DefaultInstance.SendEachAsync(messages, cancellationToken);
-            if (response.FailureCount > 0)
-                _logger.LogWarning("Push send: {Success} succeeded, {Failure} failed out of {Total}.",
-                    response.SuccessCount, response.FailureCount, messages.Count);
-        }
-        catch (Exception ex)
-        {
-            // Best-effort — a push failure should never fail the command that triggered it
-            // (order status change / promotion creation already committed to the DB).
-            _logger.LogError(ex, "Failed to send push notification.");
-        }
+        var response = await FirebaseMessaging.DefaultInstance.SendEachAsync(messages, cancellationToken);
+        _logger.LogInformation("Push send: {Success} succeeded, {Failure} failed out of {Total}.",
+            response.SuccessCount, response.FailureCount, messages.Count);
     }
 }

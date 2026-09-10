@@ -1,16 +1,13 @@
 using LaundryMgmt.Application.Common.Constants;
+using LaundryMgmt.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LaundryMgmt.API.Controllers;
 
-/// <summary>
-/// Local-disk image upload for garment/service catalog photos, served back out via
-/// app.UseStaticFiles() under /uploads. Fine for local dev/single-instance deployment;
-/// swap the body of UploadImage for an Azure Blob Storage (or S3) write if you move to
-/// a multi-instance/production hosting setup, since local disk storage won't survive
-/// a redeploy or be shared across instances.
-/// </summary>
+/// <summary>Image upload for garment/service/category/promotion photos, stored in
+/// Azure Blob Storage (see IImageStorageService) — not local disk, which doesn't
+/// survive a redeploy or scale across instances.</summary>
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize(Roles = AppRoles.ImageUploadRoles)]
@@ -19,9 +16,9 @@ public class UploadsController : ControllerBase
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
 
-    private readonly IWebHostEnvironment _env;
+    private readonly IImageStorageService _imageStorage;
 
-    public UploadsController(IWebHostEnvironment env) => _env = env;
+    public UploadsController(IImageStorageService imageStorage) => _imageStorage = imageStorage;
 
     /// <summary>Uploads an image (garment/service photo) and returns its public URL.</summary>
     [HttpPost("images")]
@@ -40,17 +37,11 @@ public class UploadsController : ControllerBase
         if (!AllowedExtensions.Contains(extension))
             return BadRequest($"Unsupported file type. Allowed: {string.Join(", ", AllowedExtensions)}");
 
-        var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-        var uploadsFolder = Path.Combine(webRoot, "uploads");
-        Directory.CreateDirectory(uploadsFolder);
-
         var fileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsFolder, fileName);
 
-        await using (var stream = System.IO.File.Create(filePath))
-            await file.CopyToAsync(stream, cancellationToken);
+        await using var stream = file.OpenReadStream();
+        var url = await _imageStorage.UploadAsync(stream, fileName, file.ContentType, cancellationToken);
 
-        var url = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
         return Ok(new UploadedImageDto(url));
     }
 }

@@ -60,7 +60,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // serves wwwroot/uploads/* (see UploadsController) at /uploads/*
+app.UseStaticFiles(); // catalog images now live in Azure Blob Storage (see UploadsController) — this just serves whatever's still in wwwroot, if anything
 app.UseCors(AngularCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();

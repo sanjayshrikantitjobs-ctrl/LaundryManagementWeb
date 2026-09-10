@@ -38,6 +38,10 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IPushNotificationService, PushNotificationService>();
 
+        // Singleton — BlobContainerClient is thread-safe/reusable, and this avoids a
+        // CreateIfNotExists round-trip to Azure on every single image upload request.
+        services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>();
+
         // WhatsApp OTP sender — Strategy pattern (see IWhatsAppSender). Defaults to logging
         // only; set "WhatsApp:Provider" to "Twilio" once you have real Twilio credentials
         // (WhatsApp:Twilio:AccountSid/AuthToken/FromNumber) to actually send messages.

@@ -69,3 +69,12 @@ public interface IPushNotificationService
     Task SendToUserAsync(Guid userId, string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default);
     Task SendToAllCustomersAsync(string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default);
 }
+
+/// <summary>Stores uploaded catalog/promotion images (garment/service/category photos).
+/// Implemented in Infrastructure via Azure Blob Storage — deliberately NOT local disk,
+/// which doesn't survive a redeploy or scale across instances (see UploadsController's
+/// prior implementation, replaced by this).</summary>
+public interface IImageStorageService
+{
+    Task<string> UploadAsync(Stream content, string fileName, string contentType, CancellationToken cancellationToken = default);
+}

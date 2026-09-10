@@ -103,11 +103,22 @@ public class AuthService
             }
 
             if (!string.IsNullOrEmpty(token))
-                await _apiClient.RegisterDeviceTokenAsync(token, "Android");
+            {
+                var response = await _apiClient.RegisterDeviceTokenAsync(token, "Android");
+                System.Diagnostics.Debug.WriteLine(
+                    $"[Push] RegisterDeviceTokenAsync -> {(int)response.StatusCode} {response.StatusCode}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[Push] No FCM token available to register.");
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Best-effort — see summary above.
+            // Best-effort — see summary above. Logged (not swallowed silently) so a
+            // failed registration is visible in logcat/Output instead of just showing
+            // up as "push never arrives" with no diagnostic trail.
+            System.Diagnostics.Debug.WriteLine($"[Push] RegisterPushTokenAsync failed: {ex}");
         }
     }
 

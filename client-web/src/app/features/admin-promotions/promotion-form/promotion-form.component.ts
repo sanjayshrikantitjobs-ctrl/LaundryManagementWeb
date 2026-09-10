@@ -96,8 +96,8 @@ export class PromotionFormComponent implements OnInit {
       code: value.code || undefined,
       discountPercent: value.discountPercent,
       discountAmount: value.discountAmount,
-      validFrom: value.validFrom ? new Date(value.validFrom).toISOString() : null,
-      validTo: value.validTo ? new Date(value.validTo).toISOString() : null,
+      validFrom: value.validFrom ? this.toStartOfDayIso(value.validFrom) : null,
+      validTo: value.validTo ? this.toEndOfDayIso(value.validTo) : null,
       isActive: value.isActive!
     };
 
@@ -116,5 +116,21 @@ export class PromotionFormComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/admin/promotions']);
+  }
+
+  // `new Date("2026-09-11")` parses a bare date-only string as UTC midnight, not local
+  // midnight — for anyone east of UTC (e.g. IST, UTC+5:30) that makes "Valid To: today"
+  // actually expire hours into the local morning, so a same-day promotion could look
+  // expired the moment it's created. Building the Date from local y/m/d components
+  // instead (the multi-arg constructor is local-time, unlike the string one) keeps
+  // "today" meaning today in whatever timezone the admin is actually in.
+  private toStartOfDayIso(dateStr: string): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 0, 0, 0, 0).toISOString();
+  }
+
+  private toEndOfDayIso(dateStr: string): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 23, 59, 59, 999).toISOString();
   }
 }
