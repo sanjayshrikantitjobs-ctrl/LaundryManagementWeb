@@ -4,7 +4,8 @@ public enum NotificationType
 {
     NewOrder = 0,
     OrderUpdated = 1,
-    NewCustomerRegistered = 2
+    NewCustomerRegistered = 2,
+    PromotionCreated = 3
 }
 
 public record NotificationDto(

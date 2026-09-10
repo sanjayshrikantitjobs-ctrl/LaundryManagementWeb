@@ -56,11 +56,8 @@ public partial class NotificationsViewModel : ObservableObject
                 Notifications[index] = notification with { IsRead = true };
         }
 
-        if (string.IsNullOrEmpty(notification.EntityId)) return;
-
-        var route = notification.Type == NotificationType.NewCustomerRegistered
-            ? $"{nameof(Views.CustomerDetailPage)}?customerId={notification.EntityId}"
-            : $"{nameof(Views.OrderDetailPage)}?orderId={notification.EntityId}";
+        var route = NotificationRouting.BuildRoute(notification.Type, notification.EntityId);
+        if (route is null) return;
 
         await Shell.Current.GoToAsync(route);
     }

@@ -18,6 +18,7 @@
                 </LinearGradientBrush>
             </Border.Background>
 
+            <Grid>
             <Grid xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
                   ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="16" Padding="2,0,16,0">
 
@@ -69,6 +70,16 @@
                         <TapGestureRecognizer Tapped="OnLogoutClicked" />
                     </Label.GestureRecognizers>
                 </Label>
+            </Grid>
+
+            <!-- Global "page loading" indicator: a slim bar that sweeps in the instant
+                 any Shell navigation starts (OnShellNavigating/OnShellNavigated below)
+                 so a tap that's about to open another page — which then has to fetch
+                 its own data before it can render — gets immediate visual feedback
+                 instead of a silent gap. Lives in the title view because that's the one
+                 piece of chrome that stays mounted across every page navigation. -->
+            <BoxView x:Name="LoadingBar" HeightRequest="4" Color="{StaticResource Primary}"
+                     VerticalOptions="End" HorizontalOptions="Fill" AnchorX="0" ScaleX="0" IsVisible="False" />
             </Grid>
         </Border>
     </Shell.TitleView>

@@ -1,4 +1,5 @@
 using LaundryMgmt.Shared.Auth;
+using Plugin.FirebasePushNotifications;
 
 namespace LaundryMgmt.Mobile.Services;
 
@@ -17,12 +18,22 @@ public class AuthService
     private readonly ApiClient _apiClient;
     private readonly AuthTokenStore _tokenStore;
     private readonly CartService _cartService;
+    private readonly IFirebasePushNotification _pushNotification;
+    private readonly INotificationPermissions _notificationPermissions;
 
-    public AuthService(ApiClient apiClient, AuthTokenStore tokenStore, CartService cartService)
+    public AuthService(
+        ApiClient apiClient, AuthTokenStore tokenStore, CartService cartService,
+        IFirebasePushNotification pushNotification, INotificationPermissions notificationPermissions)
     {
         _apiClient = apiClient;
         _tokenStore = tokenStore;
         _cartService = cartService;
+        _pushNotification = pushNotification;
+        _notificationPermissions = notificationPermissions;
+
+        // A token can rotate at any time (not just on our own registration call) —
+        // re-send it whenever that happens, for whoever's currently logged in.
+        _pushNotification.TokenRefreshed += async (_, e) => await RegisterPushTokenAsync(e.Token);
     }
 
     public string? FullName => Preferences.Default.Get<string?>(FullNameKey, null);
@@ -38,6 +49,11 @@ public class AuthService
 
         _apiClient.SetBearerToken(token);
         _cartService.SetCurrentUser(UserId);
+
+        // Covers FCM token rotation for a customer who stays logged in across app
+        // restarts without ever hitting LoginAsync/ApplySessionAsync again.
+        _ = RegisterPushTokenAsync();
+
         return true;
     }
 
@@ -61,6 +77,38 @@ public class AuthService
 
         _apiClient.SetBearerToken(response.AccessToken);
         _cartService.SetCurrentUser(response.UserId);
+
+        _ = RegisterPushTokenAsync();
+    }
+
+    /// <summary>Android-only for now (see LaundryMgmt.Mobile.csproj/AndroidManifest —
+    /// no GoogleService-Info.plist/iOS wiring yet). Fire-and-forget by design: a push
+    /// registration failure (no network, permission denied, emulator without Play
+    /// Services) should never block login.</summary>
+    private async Task RegisterPushTokenAsync(string? token = null)
+    {
+        if (DeviceInfo.Platform != DevicePlatform.Android) return;
+
+        try
+        {
+            if (token is null)
+            {
+                // Android 13+ shows nothing unless the user has granted POST_NOTIFICATIONS
+                // at runtime — the plugin doesn't request this itself, so this has to
+                // happen before/alongside registration or the token would be pointless.
+                await _notificationPermissions.RequestPermissionAsync();
+
+                await _pushNotification.RegisterForPushNotificationsAsync();
+                token = _pushNotification.Token;
+            }
+
+            if (!string.IsNullOrEmpty(token))
+                await _apiClient.RegisterDeviceTokenAsync(token, "Android");
+        }
+        catch
+        {
+            // Best-effort — see summary above.
+        }
     }
 
     public void Logout()

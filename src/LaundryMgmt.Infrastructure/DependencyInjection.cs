@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
 
         // WhatsApp OTP sender — Strategy pattern (see IWhatsAppSender). Defaults to logging
         // only; set "WhatsApp:Provider" to "Twilio" once you have real Twilio credentials

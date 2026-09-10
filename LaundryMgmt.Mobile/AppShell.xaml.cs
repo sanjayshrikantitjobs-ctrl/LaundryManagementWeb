@@ -46,6 +46,54 @@ public partial class AppShell : Shell
         BuildTabsForRole(authService.Role);
 
         Loaded += (_, _) => StartUnreadPolling();
+
+        // Every GoToAsync in the app — row taps, drawer items, form saves that
+        // navigate away, etc. — flows through Shell's own navigation pipeline, so
+        // hooking these two events here is enough to show a "something is happening"
+        // indicator for literally every navigation, without touching any of the
+        // ~25 ViewModels that call GoToAsync themselves.
+        Navigating += OnShellNavigating;
+        Navigated += OnShellNavigated;
+    }
+
+    private uint _loadingBarToken;
+    private DateTime _loadingBarShownAtUtc;
+
+    private async void OnShellNavigating(object? sender, ShellNavigatingEventArgs e)
+    {
+        var token = ++_loadingBarToken;
+        LoadingBar.CancelAnimations();
+        LoadingBar.ScaleX = 0;
+        LoadingBar.IsVisible = true;
+        _loadingBarShownAtUtc = DateTime.UtcNow;
+        // Eases up to ~75% and holds — never claims to be "done" before the
+        // destination page has actually finished loading its own data (Navigated,
+        // below, still owns the trip to 100%).
+        await LoadingBar.ScaleXTo(0.75, 550, Easing.CubicOut);
+        _ = token; // CancelAnimations already stops this if a newer navigation started
+    }
+
+    private async void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
+    {
+        var token = ++_loadingBarToken;
+
+        // A navigation resolved entirely from already-cached data (e.g. reopening a
+        // page whose ViewModel already loaded once) can finish in well under 100ms —
+        // too fast for the bar to register as visible feedback at all. Hold it on
+        // screen for a short minimum so it's still noticeable without adding a
+        // perceptible extra wait on top of the actual navigation.
+        var elapsed = DateTime.UtcNow - _loadingBarShownAtUtc;
+        var minVisible = TimeSpan.FromMilliseconds(150);
+        if (elapsed < minVisible)
+            await Task.Delay(minVisible - elapsed);
+        if (token != _loadingBarToken) return; // a newer navigation started meanwhile
+
+        LoadingBar.CancelAnimations();
+        await LoadingBar.ScaleXTo(1.0, 150, Easing.CubicOut);
+        await Task.Delay(120);
+        if (token != _loadingBarToken) return; // a newer navigation started meanwhile
+        LoadingBar.IsVisible = false;
+        LoadingBar.ScaleX = 0;
     }
 
     // Mirrors client-web's notification-bell polling (25s interval, see

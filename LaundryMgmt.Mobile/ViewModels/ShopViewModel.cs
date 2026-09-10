@@ -73,6 +73,12 @@ public partial class ShopViewModel : ObservableObject
     [ObservableProperty] private bool isLoading = true;
     [ObservableProperty] private string? errorMessage;
 
+    // Drives a full-screen "Loading garments…" overlay on ShopPage for the brief gap
+    // between tapping a category and GarmentListPage actually appearing — a thin
+    // top-of-screen progress bar (AppShell's global one) wasn't prominent enough for
+    // customers to notice, so this is a big, impossible-to-miss dimmed overlay instead.
+    [ObservableProperty] private bool isNavigatingToGarments;
+
     public int CartItemCount => _cartService.ItemCount;
     public bool HasCartItems => CartItemCount > 0;
     public bool HasServices => Services.Count > 0;
@@ -135,12 +141,23 @@ public partial class ShopViewModel : ObservableObject
             var matrix = await _apiClient.GetPricingMatrixAsync();
             _priceLookup = BuildPriceLookup(matrix);
 
+            // Categories becomes populated (and tappable) right after the very first
+            // of these four awaits — on a slow connection, a category tapped before
+            // the rest finish gets caught by OnSelectedCategoryChanged's `!_hasLoaded`
+            // guard below and silently ignored (services/garments aren't ready yet).
+            // Capture it here, before the default-category assignment can overwrite
+            // it, so it can be replayed for real once everything has loaded.
+            var pendingTap = SelectedCategory;
+
             // Defaults to the first category that actually has a service, not just
             // Categories[0] — an empty category would otherwise open to a dead end.
             _isApplyingDefaultCategory = true;
-            SelectedCategory = Categories.FirstOrDefault(c => _allServices.Any(s => s.CategoryId == c.Id));
+            SelectedCategory ??= Categories.FirstOrDefault(c => _allServices.Any(s => s.CategoryId == c.Id));
             _isApplyingDefaultCategory = false;
             _hasLoaded = true;
+
+            if (pendingTap is not null)
+                ApplyCategorySelection(pendingTap);
         }
         catch (Exception ex)
         {
@@ -172,13 +189,46 @@ public partial class ShopViewModel : ObservableObject
         SelectedService = null;
         if (value is null) return;
 
+        if (!_hasLoaded)
+        {
+            // Tapped before services/garments/pricing finished loading (see the
+            // pendingTap capture in InitializeAsync) — can't filter or navigate yet
+            // with empty data, and IsLoading is still true so the customer can see
+            // the page is still busy. InitializeAsync replays this once it's done.
+            return;
+        }
+
+        ApplyCategorySelection(value);
+    }
+
+    private void ApplyCategorySelection(ServiceCategoryDto value)
+    {
         foreach (var service in _allServices.Where(s => s.CategoryId == value.Id).OrderBy(s => s.Priority))
             Services.Add(service);
 
         RebuildGarmentRows();
 
         if (!_isApplyingDefaultCategory)
-            _ = Shell.Current.GoToAsync(nameof(Views.GarmentListPage));
+            _ = NavigateToGarmentsAsync();
+    }
+
+    private async Task NavigateToGarmentsAsync()
+    {
+        IsNavigatingToGarments = true;
+        try
+        {
+            // A cache-hit navigation (the common case — the catalogue is already
+            // loaded) can otherwise finish inside a single UI-thread tick, before the
+            // overlay ever gets a chance to actually paint a frame. One short delay is
+            // enough to guarantee a render pass without adding a noticeable wait —
+            // GoToAsync's own page-push transition (~250-300ms) is on top of this.
+            await Task.Delay(60);
+            await Shell.Current.GoToAsync(nameof(Views.GarmentListPage));
+        }
+        finally
+        {
+            IsNavigatingToGarments = false;
+        }
     }
 
     partial void OnSelectedServiceChanged(ServiceListItem? value)

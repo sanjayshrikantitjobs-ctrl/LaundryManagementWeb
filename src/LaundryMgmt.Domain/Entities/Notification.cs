@@ -6,7 +6,8 @@ public enum NotificationType
 {
     NewOrder = 0,
     OrderUpdated = 1,
-    NewCustomerRegistered = 2
+    NewCustomerRegistered = 2,
+    PromotionCreated = 3
 }
 
 /// <summary>In-app notification shown in the bell icon. Targets either a shared

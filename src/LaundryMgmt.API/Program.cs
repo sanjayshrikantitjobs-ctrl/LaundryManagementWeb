@@ -19,8 +19,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // MediatR only scans the Application assembly by default (see
 // LaundryMgmt.Application.DependencyInjection). Also scan this assembly so
 // API-layer notification handlers, like OrderStatusChangedSignalRHandler
-// (needs IHubContext<OrderStatusHub>, an API-layer type), get registered too.
+// (needs IHubContext<OrderStatusHub>, an API-layer type), get registered too —
+// and the Infrastructure assembly, for handlers like OrderStatusChangedPushHandler/
+// PromotionCreatedPushHandler that only need Infrastructure-layer types
+// (IApplicationDbContext, IPushNotificationService) and so live there instead.
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<LaundryMgmt.Infrastructure.Services.PushNotificationService>());
 
 // ---- Web / API plumbing ----
 builder.Services.AddControllers();

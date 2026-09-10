@@ -183,6 +183,11 @@ public class ApiClient
     public Task<HttpResponseMessage> MarkNotificationReadAsync(Guid id) =>
         _http.PutAsJsonAsync($"api/v1/notifications/{id}/read", new { });
 
+    // ---- Devices (push notifications) ----
+
+    public Task<HttpResponseMessage> RegisterDeviceTokenAsync(string token, string platform) =>
+        _http.PostAsJsonAsync("api/v1/devices/register", new { token, platform });
+
     // ---- Users (Admin-only) ----
 
     public Task<PaginatedList<UserSummaryDto>?> GetUsersAsync(

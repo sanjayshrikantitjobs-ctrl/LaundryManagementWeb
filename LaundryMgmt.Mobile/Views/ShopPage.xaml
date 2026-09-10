@@ -93,6 +93,22 @@
             </VerticalStackLayout>
         </Grid>
 
+        <!-- Full-screen "loading garments" overlay for the gap between tapping a
+             category and GarmentListPage actually appearing — big and impossible to
+             miss (a thin top-of-screen progress bar wasn't prominent enough). Driven
+             by ShopViewModel.IsNavigatingToGarments; navigation itself is unchanged. -->
+        <Grid IsVisible="{Binding IsNavigatingToGarments}" BackgroundColor="{StaticResource Overlay}"
+              InputTransparent="False">
+            <Border BackgroundColor="{StaticResource Surface}" StrokeShape="RoundRectangle 16" Stroke="Transparent"
+                    Padding="30,26" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding IsNavigatingToGarments}" Color="{StaticResource Primary}"
+                                       WidthRequest="38" HeightRequest="38" />
+                    <Label Text="Loading garments…" TextColor="{StaticResource Gray900}" FontSize="14" FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
         <views:CustomerDrawer CurrentPage="shop" />
     </Grid>
 

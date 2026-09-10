@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1054321728879",
+    "project_id": "shrios-laundry-wala",
+    "storage_bucket": "shrios-laundry-wala.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054321728879:android:0470799c44a23a85ba1c9a",
+        "android_client_info": {
+          "package_name": "com.laundarywala.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSvExMxKj6hre87hM8z-8kUrd5r21b6nY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

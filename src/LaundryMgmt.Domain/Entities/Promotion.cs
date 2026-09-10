@@ -1,4 +1,5 @@
 using LaundryMgmt.Domain.Common;
+using LaundryMgmt.Domain.Events;
 
 namespace LaundryMgmt.Domain.Entities;
 
@@ -15,4 +16,11 @@ public class Promotion : AuditableEntity
     public DateTimeOffset? ValidFrom { get; set; }
     public DateTimeOffset? ValidTo { get; set; }
     public bool IsActive { get; set; } = true;
+
+    /// <summary>Raises <see cref="PromotionCreatedEvent"/> — called once, right after
+    /// the entity is added, by CreatePromotionCommandHandler. A method rather than a
+    /// constructor because the handler still builds this via an object initializer
+    /// (matches the existing style here); mirrors how Order.AdvanceTo/SetStatus keep
+    /// event-raising inside the entity rather than the command handler.</summary>
+    public void MarkCreated() => AddDomainEvent(new PromotionCreatedEvent(Id, Title));
 }

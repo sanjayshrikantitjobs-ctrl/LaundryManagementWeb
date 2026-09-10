@@ -43,12 +43,21 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
+    <PackageReference Include="Plugin.FirebasePushNotifications" Version="3.2.11" />
     <PackageReference Include="ZXing.Net.MAUI" Version="0.10.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\LaundryMgmt.Shared\LaundryMgmt.Shared.csproj" />
+  </ItemGroup>
+
+  <!-- Wires the Firebase project config (already downloaded, package name
+       com.laundarywala.app matches AndroidManifest.xml's explicit <manifest package>)
+       into the Android build — this is what actually lets FCM identify which Firebase
+       project a token belongs to. -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+    <GoogleServicesJson Include="Platforms\Android\google-services.json" />
   </ItemGroup>
 
 </Project>

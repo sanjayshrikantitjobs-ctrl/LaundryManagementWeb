@@ -2,6 +2,7 @@ using LaundryMgmt.Mobile.Services;
 using LaundryMgmt.Mobile.ViewModels;
 using LaundryMgmt.Mobile.Views;
 using Microsoft.Extensions.Logging;
+using Plugin.FirebasePushNotifications;
 
 namespace LaundryMgmt.Mobile;
 
@@ -46,6 +47,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseFirebasePushNotifications()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

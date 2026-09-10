@@ -61,6 +61,7 @@ public class CreatePromotionCommandHandler : IRequestHandler<CreatePromotionComm
             IsActive = request.IsActive
         };
 
+        promotion.MarkCreated();
         _db.Promotions.Add(promotion);
         await _db.SaveChangesAsync(cancellationToken);
 

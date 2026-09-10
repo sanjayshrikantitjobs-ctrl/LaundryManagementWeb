@@ -35,6 +35,7 @@ public interface IApplicationDbContext
     DbSet<SubscriptionPlan> SubscriptionPlans { get; }
     DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; }
     DbSet<CustomerSubscription> CustomerSubscriptions { get; }
+    DbSet<DeviceToken> DeviceTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
@@ -56,4 +57,15 @@ public interface IDateTimeProvider
 public interface INotificationService
 {
     Task SendOrderStatusNotificationAsync(Guid orderId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>OS-level push notifications (Android via Firebase Cloud Messaging).
+/// Implemented in Infrastructure by wrapping the FirebaseAdmin SDK. Distinct from
+/// <see cref="INotificationService"/> (SMS/WhatsApp, currently unimplemented) and from
+/// the in-app <see cref="Notification"/> feed — this is the only one of the three that
+/// reaches a customer while the app isn't open.</summary>
+public interface IPushNotificationService
+{
+    Task SendToUserAsync(Guid userId, string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default);
+    Task SendToAllCustomersAsync(string title, string body, string? entityId, NotificationType type, CancellationToken cancellationToken = default);
 }
