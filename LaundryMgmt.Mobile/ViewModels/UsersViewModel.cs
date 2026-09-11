@@ -21,7 +21,7 @@ public partial class UsersViewModel : PagedListViewModel<UserSummaryDto>
         _apiClient.GetUsersAsync(search: SearchText, pageNumber: pageNumber, pageSize: pageSize);
 
     [RelayCommand]
-    private async Task NewUserAsync() => await Shell.Current.GoToAsync(nameof(Views.UserFormPage));
+    private async Task NewUserAsync() => await SafeNavigation.GoToAsync(nameof(Views.UserFormPage));
 
     /// <summary>Row tap opens the read-only detail page, where Edit/Deactivate now
     /// live (replacing the old inline per-row buttons — see UserDetailViewModel).</summary>
@@ -29,6 +29,6 @@ public partial class UsersViewModel : PagedListViewModel<UserSummaryDto>
     private async Task OpenUserAsync(UserSummaryDto? user)
     {
         if (user is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.UserDetailPage)}?userId={user.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.UserDetailPage)}?userId={user.Id}");
     }
 }

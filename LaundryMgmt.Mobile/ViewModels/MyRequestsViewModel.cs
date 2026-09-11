@@ -49,6 +49,6 @@ public partial class MyRequestsViewModel : ObservableObject
     private async Task OpenOrderAsync(OrderListItem? order)
     {
         if (order is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.Id}");
     }
 }

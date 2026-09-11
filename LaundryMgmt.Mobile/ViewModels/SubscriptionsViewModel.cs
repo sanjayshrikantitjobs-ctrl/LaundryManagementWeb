@@ -48,7 +48,7 @@ public partial class SubscriptionsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NewPlanAsync() => await Shell.Current.GoToAsync(nameof(Views.SubscriptionPlanFormPage));
+    private async Task NewPlanAsync() => await SafeNavigation.GoToAsync(nameof(Views.SubscriptionPlanFormPage));
 
     /// <summary>Row tap opens the plan for editing (and, from there, deleting) — replacing
     /// the old inline per-row Delete button, matching the Customers list's
@@ -57,6 +57,6 @@ public partial class SubscriptionsViewModel : ObservableObject
     private async Task OpenPlanAsync(SubscriptionPlanDto? plan)
     {
         if (plan is null || !CanEditMasterData) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.SubscriptionPlanFormPage)}?planId={plan.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.SubscriptionPlanFormPage)}?planId={plan.Id}");
     }
 }

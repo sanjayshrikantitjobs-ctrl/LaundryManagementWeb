@@ -146,7 +146,7 @@ public partial class ServiceFormViewModel : ObservableObject
                     ImageUrl, expressSurcharge, expressEtaHours));
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to save service.";
         }

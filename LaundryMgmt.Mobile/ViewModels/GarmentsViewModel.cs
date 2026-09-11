@@ -56,7 +56,7 @@ public partial class GarmentsViewModel : PagedListViewModel<GarmentListItem>
             pageNumber: pageNumber, pageSize: pageSize);
 
     [RelayCommand]
-    private async Task NewGarmentAsync() => await Shell.Current.GoToAsync(nameof(Views.GarmentFormPage));
+    private async Task NewGarmentAsync() => await SafeNavigation.GoToAsync(nameof(Views.GarmentFormPage));
 
     /// <summary>Row tap opens the read-only detail page (with the real photo), where
     /// Edit/Delete now live — see GarmentDetailViewModel.</summary>
@@ -64,6 +64,6 @@ public partial class GarmentsViewModel : PagedListViewModel<GarmentListItem>
     private async Task OpenGarmentAsync(GarmentListItem? garment)
     {
         if (garment is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.GarmentDetailPage)}?garmentId={garment.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.GarmentDetailPage)}?garmentId={garment.Id}");
     }
 }

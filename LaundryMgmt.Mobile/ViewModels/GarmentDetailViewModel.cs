@@ -51,7 +51,7 @@ public partial class GarmentDetailViewModel : ObservableObject
     private async Task EditAsync()
     {
         if (Garment is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.GarmentFormPage)}?garmentId={Garment.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.GarmentFormPage)}?garmentId={Garment.Id}");
     }
 
     [RelayCommand]
@@ -68,6 +68,6 @@ public partial class GarmentDetailViewModel : ObservableObject
         if (reason is null) return; // cancelled
 
         await _apiClient.DeleteGarmentAsync(Garment.Id, reason);
-        await Shell.Current.GoToAsync("..");
+        await SafeNavigation.GoToAsync("..");
     }
 }

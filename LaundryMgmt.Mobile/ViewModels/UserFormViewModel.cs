@@ -90,7 +90,7 @@ public partial class UserFormViewModel : ObservableObject
             }
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to save user. The username/email may already be in use.";
         }

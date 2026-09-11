@@ -224,7 +224,7 @@ public partial class ShopViewModel : ObservableObject
             // enough to guarantee a render pass without adding a noticeable wait —
             // GoToAsync's own page-push transition (~250-300ms) is on top of this.
             await Task.Delay(60);
-            await Shell.Current.GoToAsync(nameof(Views.GarmentListPage));
+            await SafeNavigation.GoToAsync(nameof(Views.GarmentListPage));
         }
         finally
         {
@@ -328,5 +328,5 @@ public partial class ShopViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenCartAsync() => await Shell.Current.GoToAsync(nameof(Views.CartPage));
+    private async Task OpenCartAsync() => await SafeNavigation.GoToAsync(nameof(Views.CartPage));
 }

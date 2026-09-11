@@ -34,6 +34,6 @@ public partial class OrderQueueViewModel : PagedListViewModel<MyPickupDeliveryDt
         if (order is null) return;
 
         var idParam = IsPickupAgent ? "pickupId" : "deliveryId";
-        await Shell.Current.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.OrderId}&{idParam}={order.PickupDeliveryId}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.OrderId}&{idParam}={order.PickupDeliveryId}");
     }
 }

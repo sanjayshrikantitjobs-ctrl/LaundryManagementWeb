@@ -128,7 +128,7 @@ public partial class GarmentFormViewModel : ObservableObject
                     new CreateGarmentRequest(Name, SelectedCategory.Id, SpecialInstructions));
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to save garment.";
         }

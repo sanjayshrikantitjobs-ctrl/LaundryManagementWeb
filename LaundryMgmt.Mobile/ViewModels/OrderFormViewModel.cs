@@ -146,7 +146,7 @@ public partial class OrderFormViewModel : ObservableObject
                 new CreateOrderRequest(SelectedCustomer.Id, Channel, IsExpress, itemRequests));
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to create order. Check that every item has a price configured.";
         }
@@ -161,7 +161,7 @@ public partial class OrderFormViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task GoToPricingAsync() => await Shell.Current.GoToAsync("//pricing");
+    private async Task GoToPricingAsync() => await SafeNavigation.GoToAsync("//pricing");
 
     private (PricingType, decimal)? LookupPrice(Guid garmentId, Guid serviceId) =>
         _priceLookup.TryGetValue(Key(garmentId, serviceId), out var value) ? value : null;

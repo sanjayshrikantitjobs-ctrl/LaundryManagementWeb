@@ -63,7 +63,7 @@ public partial class CustomerDetailViewModel : ObservableObject
     private async Task EditAsync()
     {
         if (Customer is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.CustomerFormPage)}?customerId={Customer.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.CustomerFormPage)}?customerId={Customer.Id}");
     }
 
     [RelayCommand]
@@ -95,6 +95,6 @@ public partial class CustomerDetailViewModel : ObservableObject
         if (reason is null) return; // cancelled
 
         await _apiClient.DeleteCustomerAsync(Customer.Id, reason);
-        await Shell.Current.GoToAsync("..");
+        await SafeNavigation.GoToAsync("..");
     }
 }

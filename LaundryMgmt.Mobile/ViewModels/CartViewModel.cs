@@ -278,7 +278,7 @@ public partial class CartViewModel : ObservableObject
             _cartService.Clear();
             AppliedPromo = null;
             PromoCodeText = string.Empty;
-            await Shell.Current.GoToAsync("//MyRequestsPage");
+            await SafeNavigation.GoToAsync("//MyRequestsPage");
         }
         catch (Exception ex)
         {

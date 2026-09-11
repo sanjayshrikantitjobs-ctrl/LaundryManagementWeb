@@ -323,7 +323,7 @@ public partial class OrderDetailViewModel : ObservableObject
         {
             var response = await _apiClient.ConfirmPickupAsync(id);
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("//queue");
+                await SafeNavigation.GoToAsync("//queue");
             else
                 ConfirmError = "Upload at least one pickup photo before confirming.";
         }
@@ -348,7 +348,7 @@ public partial class OrderDetailViewModel : ObservableObject
         {
             var response = await _apiClient.ConfirmDeliveryLegAsync(id);
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("//queue");
+                await SafeNavigation.GoToAsync("//queue");
             else
                 ConfirmError = "Upload at least one delivery photo before confirming.";
         }

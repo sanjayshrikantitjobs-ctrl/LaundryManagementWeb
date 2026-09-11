@@ -51,7 +51,7 @@ public partial class ServiceDetailViewModel : ObservableObject
     private async Task EditAsync()
     {
         if (Service is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.ServiceFormPage)}?serviceId={Service.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.ServiceFormPage)}?serviceId={Service.Id}");
     }
 
     [RelayCommand]
@@ -68,6 +68,6 @@ public partial class ServiceDetailViewModel : ObservableObject
         if (reason is null) return; // cancelled
 
         await _apiClient.DeleteServiceAsync(Service.Id, reason);
-        await Shell.Current.GoToAsync("..");
+        await SafeNavigation.GoToAsync("..");
     }
 }

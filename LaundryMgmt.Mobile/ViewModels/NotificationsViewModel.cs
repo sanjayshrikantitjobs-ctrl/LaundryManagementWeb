@@ -59,6 +59,6 @@ public partial class NotificationsViewModel : ObservableObject
         var route = NotificationRouting.BuildRoute(notification.Type, notification.EntityId);
         if (route is null) return;
 
-        await Shell.Current.GoToAsync(route);
+        await SafeNavigation.GoToAsync(route);
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LaundryMgmt.Mobile.Models;
+using LaundryMgmt.Mobile.Services;
 
 namespace LaundryMgmt.Mobile.ViewModels;
 
@@ -22,5 +23,5 @@ public partial class ServiceInfoViewModel : ObservableObject
     private async Task ChatOnWhatsAppAsync() => await Launcher.Default.OpenAsync(WhatsAppUri);
 
     [RelayCommand]
-    private async Task SchedulePickupAsync() => await Shell.Current.GoToAsync("//ShopPage");
+    private async Task SchedulePickupAsync() => await SafeNavigation.GoToAsync("//ShopPage");
 }

@@ -25,7 +25,7 @@ public partial class ServicesViewModel : PagedListViewModel<ServiceListItem>
         _apiClient.GetServicesAsync(pageNumber: pageNumber, pageSize: pageSize);
 
     [RelayCommand]
-    private async Task NewServiceAsync() => await Shell.Current.GoToAsync(nameof(Views.ServiceFormPage));
+    private async Task NewServiceAsync() => await SafeNavigation.GoToAsync(nameof(Views.ServiceFormPage));
 
     /// <summary>Row tap opens the read-only detail page, where Edit/Delete now live
     /// (replacing the old inline Delete-only button — see ServiceDetailViewModel).</summary>
@@ -33,6 +33,6 @@ public partial class ServicesViewModel : PagedListViewModel<ServiceListItem>
     private async Task OpenServiceAsync(ServiceListItem? service)
     {
         if (service is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.ServiceDetailPage)}?serviceId={service.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.ServiceDetailPage)}?serviceId={service.Id}");
     }
 }

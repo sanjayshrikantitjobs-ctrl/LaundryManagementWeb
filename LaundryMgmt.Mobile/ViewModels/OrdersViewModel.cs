@@ -107,12 +107,12 @@ public partial class OrdersViewModel : PagedListViewModel<OrderListItem>
     }
 
     [RelayCommand]
-    private async Task NewOrderAsync() => await Shell.Current.GoToAsync(nameof(Views.OrderFormPage));
+    private async Task NewOrderAsync() => await SafeNavigation.GoToAsync(nameof(Views.OrderFormPage));
 
     [RelayCommand]
     private async Task OpenOrderAsync(OrderListItem? order)
     {
         if (order is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.OrderDetailPage)}?orderId={order.Id}");
     }
 }

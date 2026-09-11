@@ -93,7 +93,7 @@ public partial class SubscriptionPlanFormViewModel : ObservableObject
             }
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to save plan.";
         }
@@ -117,7 +117,7 @@ public partial class SubscriptionPlanFormViewModel : ObservableObject
 
         var response = await _apiClient.DeleteSubscriptionPlanAsync(id);
         if (response.IsSuccessStatusCode)
-            await Shell.Current.GoToAsync("..");
+            await SafeNavigation.GoToAsync("..");
         else
             ErrorMessage = "Couldn't delete this plan — it may still have active subscribers.";
     }

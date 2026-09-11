@@ -80,7 +80,7 @@ public partial class CustomerFormViewModel : ObservableObject
             }
 
             if (response.IsSuccessStatusCode)
-                await Shell.Current.GoToAsync("..");
+                await SafeNavigation.GoToAsync("..");
             else
                 ErrorMessage = "Failed to save customer. The phone number may already be in use.";
         }

@@ -114,7 +114,6 @@ public partial class AdminDrawer : ContentView
     private async Task NavigateAsync(string route)
     {
         _drawerService?.Close();
-        if (Shell.Current is not null)
-            await Shell.Current.GoToAsync($"//{route}");
+        await SafeNavigation.GoToAsync($"//{route}");
     }
 }

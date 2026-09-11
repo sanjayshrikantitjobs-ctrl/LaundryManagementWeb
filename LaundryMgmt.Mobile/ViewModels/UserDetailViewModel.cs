@@ -44,7 +44,7 @@ public partial class UserDetailViewModel : ObservableObject
     private async Task EditAsync()
     {
         if (User is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.UserFormPage)}?userId={User.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.UserFormPage)}?userId={User.Id}");
     }
 
     [RelayCommand]

@@ -116,7 +116,7 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
     }
 
     [RelayCommand]
-    private async Task NewCustomerAsync() => await Shell.Current.GoToAsync(nameof(Views.CustomerFormPage));
+    private async Task NewCustomerAsync() => await SafeNavigation.GoToAsync(nameof(Views.CustomerFormPage));
 
     /// <summary>Row tap opens the read-only detail page, where Edit/Deactivate/Delete now
     /// live (replacing the old inline per-row buttons — see CustomerDetailViewModel).</summary>
@@ -124,6 +124,6 @@ public partial class CustomersViewModel : PagedListViewModel<CustomerListItem>
     private async Task OpenCustomerAsync(CustomerListItem? customer)
     {
         if (customer is null) return;
-        await Shell.Current.GoToAsync($"{nameof(Views.CustomerDetailPage)}?customerId={customer.Id}");
+        await SafeNavigation.GoToAsync($"{nameof(Views.CustomerDetailPage)}?customerId={customer.Id}");
     }
 }

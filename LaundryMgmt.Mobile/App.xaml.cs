@@ -37,8 +37,7 @@ public partial class App : Application
         for (var attempt = 0; attempt < 10 && Shell.Current is null; attempt++)
             await Task.Delay(300);
 
-        if (Shell.Current is not null)
-            await Shell.Current.GoToAsync(route);
+        await SafeNavigation.GoToAsync(route);
     }
 
     protected override Window CreateWindow(IActivationState? activationState) =>
