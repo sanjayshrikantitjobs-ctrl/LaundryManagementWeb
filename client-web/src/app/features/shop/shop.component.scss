@@ -6,22 +6,21 @@
 }
 
 .hero {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: #fff;
   border-radius: var(--radius-lg);
-  padding: 20px 40px 16px;
+  padding: 0 0 16px;
   margin-bottom: 24px;
-  box-shadow: var(--shadow-md);
 
   .hero-greeting {
-    margin: 0 0 4px;
+    margin: 0 0 8px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--color-text-muted);
   }
 
   .hero-carousel {
     overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
   }
 
   .hero-track {
@@ -31,33 +30,21 @@
 
   .hero-slide {
     flex: 0 0 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    min-height: 96px;
-  }
+    // Fixed aspect ratio (matching the wide banner images) instead of sizing to each
+    // image's own natural height — the banners aren't all the same aspect ratio, and
+    // without this the flex row stretches every slide to match the tallest one,
+    // leaving blank space under the shorter slides.
+    aspect-ratio: 2069 / 760;
+    background: #fff;
 
-  .hero-copy {
-    h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0 0 8px;
-    }
-    p {
-      margin: 0;
-      color: rgba(255, 255, 255, 0.85);
-    }
-  }
-
-  .hero-art {
-    flex-shrink: 0;
-    width: 84px;
-    height: 84px;
-
-    svg {
+    img {
       width: 100%;
       height: 100%;
+      display: block;
+      // contain, not cover — these banners have their headline/CTA text baked in
+      // near the edges, and cover would crop it on the one banner with a taller
+      // (non-matching) aspect ratio.
+      object-fit: contain;
     }
   }
 
@@ -744,22 +731,6 @@
 @media (max-width: 640px) {
   .shop {
     padding: 16px;
-  }
-
-  .hero {
-    padding: 18px 20px 14px;
-
-    .hero-slide {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      min-height: 0;
-    }
-
-    .hero-art {
-      width: 64px;
-      height: 64px;
-    }
   }
 
   .cart-drawer {
