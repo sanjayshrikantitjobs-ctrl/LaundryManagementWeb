@@ -13,6 +13,7 @@ namespace LaundryMgmt.Mobile.Services;
 public class ApiClient
 {
     private readonly HttpClient _http;
+    private readonly HttpClient _imageHttp;
 
     public ApiClient(string baseUrl)
     {
@@ -24,6 +25,20 @@ public class ApiClient
         handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
 #endif
         _http = new HttpClient(handler) { BaseAddress = new Uri(baseUrl) };
+
+        // Separate client, deliberately with no BaseAddress and no Authorization header,
+        // for DownloadImageBytesAsync. Catalog/order images now live in Azure Blob
+        // Storage, a different host entirely — sending the user's Bearer token there
+        // (which _http does automatically, as a default header applied to every
+        // request) makes Azure reject the request with 403 AuthenticationFailed, even
+        // though the container is public, because Blob Storage treats any *present but
+        // unrecognized* Authorization header as a failed auth attempt instead of
+        // falling back to anonymous access.
+        var imageHandler = new HttpClientHandler();
+#if DEBUG
+        imageHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+#endif
+        _imageHttp = new HttpClient(imageHandler);
     }
 
     public void SetBearerToken(string? token) =>
@@ -234,7 +249,7 @@ public class ApiClient
     {
         try
         {
-            return await _http.GetByteArrayAsync(url);
+            return await _imageHttp.GetByteArrayAsync(url);
         }
         catch
         {

@@ -34,6 +34,13 @@ public class ExceptionHandlingMiddleware
                     errors = validationEx.Errors.Select(e => new { e.PropertyName, e.ErrorMessage })
                 }),
                 DomainException domainEx => ((int)HttpStatusCode.Conflict, new { title = domainEx.Message }),
+                // Application handlers across the codebase (Customers in particular:
+                // duplicate phone number, "no customer profile linked to this login",
+                // etc.) throw this for expected business-rule failures — same intent as
+                // DomainException, just predating it. Without this case every one of
+                // those fell through to the generic 500 below instead of surfacing the
+                // actual reason.
+                InvalidOperationException invalidOpEx => ((int)HttpStatusCode.Conflict, new { title = invalidOpEx.Message }),
                 KeyNotFoundException notFoundEx => ((int)HttpStatusCode.NotFound, new { title = notFoundEx.Message }),
                 UnauthorizedAccessException => ((int)HttpStatusCode.Forbidden, new { title = "Access denied." }),
                 _ => ((int)HttpStatusCode.InternalServerError, new { title = "An unexpected error occurred." })

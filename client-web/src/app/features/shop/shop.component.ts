@@ -25,8 +25,6 @@ interface PriceLookup {
   isActive: boolean;
 }
 
-type HeroIconKey = 'pickup' | 'care' | 'express' | 'loyalty';
-
 export interface TimeSlot {
   label: string;
   hour: number;
@@ -43,37 +41,22 @@ export const TIME_SLOTS: TimeSlot[] = [
 ];
 
 interface HeroSlide {
-  iconKey: HeroIconKey;
-  title: string;
-  subtitle: string;
+  image: string;
+  alt: string;
 }
 
 const HERO_SLIDE_INTERVAL_MS = 5000;
 
-// Kept identical in spirit to the mobile app's ShopViewModel.HeroSlides so the two
-// apps' home screens read as one product. iconKey selects one of the inline SVG
-// illustrations in shop.component.html (no external image assets to keep licensed).
+// Kept identical to the mobile app's ShopViewModel.HeroSlides (same 5 bundled
+// marketing banners, in the same order) so the two apps' home screens read as one
+// product. Each image is a complete, self-contained banner (headline, subtitle and
+// CTA already baked into the graphic), so no separate text overlay is rendered here.
 const HERO_SLIDES: HeroSlide[] = [
-  {
-    iconKey: 'pickup',
-    title: 'Doorstep pickup, doorstep delivery',
-    subtitle: "Book a slot, leave your basket at the door, and we'll handle the rest — no store visits needed."
-  },
-  {
-    iconKey: 'care',
-    title: 'Care that matches every fabric',
-    subtitle: 'Delicate silks, everyday cottons, or stubborn stains — cleaned the right way, every time.'
-  },
-  {
-    iconKey: 'express',
-    title: 'In a hurry? Go Express',
-    subtitle: 'Same-day and rush options get your clothes back fast, without cutting corners.'
-  },
-  {
-    iconKey: 'loyalty',
-    title: 'Subscribe once, save every cycle',
-    subtitle: 'Monthly plans bundle your regular wash and dry-cleaning at a lower price.'
-  }
+  { image: 'assets/banners/banner-express.png', alt: 'In a hurry? Go Express — same-day and rush options.' },
+  { image: 'assets/banners/banner-subscribe.png', alt: 'Subscribe once, save every cycle — monthly plans.' },
+  { image: 'assets/banners/banner-care.png', alt: 'Care that matches every fabric.' },
+  { image: 'assets/banners/banner-doorstep.png', alt: 'Doorstep pickup & delivery.' },
+  { image: 'assets/banners/banner-professional-care.jpg', alt: 'Professional care for every fabric.' }
 ];
 
 @Component({

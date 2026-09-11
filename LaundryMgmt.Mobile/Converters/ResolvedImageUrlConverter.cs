@@ -8,11 +8,14 @@ namespace LaundryMgmt.Mobile.Converters;
 /// app (same-origin as the browser), but on a physical device an image uploaded from
 /// the admin's desktop browser came back as "https://localhost:5101/..." which means
 /// the phone itself, not the dev PC (same class of bug as MauiProgram.ApiBaseUrl). For
-/// any URL still shaped like that (old data, or a fresh /uploads/ path), this rewrites
-/// the scheme/host/port to whatever the app is currently using to reach the API.
-/// Uploads now go to Azure Blob Storage instead (a different host entirely,
-/// *.blob.core.windows.net) — those URLs are already correct as issued and must be
-/// left untouched, or rewriting them to the API's host would just break them.</summary>
+/// any URL still shaped like that (old data), this rewrites the scheme/host/port to
+/// whatever the app is currently using to reach the API.
+/// Uploads now go to Azure Blob Storage instead, into a container that is ALSO named
+/// "uploads" — so a blob URL's path is "/uploads/{file}" too, the exact same shape as
+/// the legacy local-disk path. Do not key off the path to decide what to rewrite: that
+/// would (and did) mistake fresh, correct blob URLs for legacy ones and mangle them
+/// onto the API host, where the file doesn't exist. Key off host instead — anything
+/// already on *.blob.core.windows.net is correct as issued and must be left untouched.</summary>
 public class ResolvedImageUrlConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -23,7 +26,7 @@ public class ResolvedImageUrlConverter : IValueConverter
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
             return url;
 
-        if (!uri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+        if (uri.Host.EndsWith(".blob.core.windows.net", StringComparison.OrdinalIgnoreCase))
             return url;
 
         var apiBase = new Uri(MauiProgram.ApiBaseUrl);

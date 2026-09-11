@@ -57,14 +57,15 @@ public partial class ShopViewModel : ObservableObject
     public ObservableCollection<ServiceListItem> Services { get; } = new();
     public ObservableCollection<ShopGarmentRow> GarmentRows { get; } = new();
 
-    // Bundled marketing banners (Resources/Images/banner_*.png) — a real photo carousel
+    // Bundled marketing banners (Resources/Images/banner_*) — a real photo carousel
     // instead of a plain color/icon slide.
     public List<HeroSlide> HeroSlides { get; } = new()
     {
-        new HeroSlide("banner_fresh_clothes.png"),
-        new HeroSlide("banner_fabric_care.png"),
-        new HeroSlide("banner_eco.png"),
-        new HeroSlide("banner_home_linen.png")
+        new HeroSlide("banner_express.png"),
+        new HeroSlide("banner_subscribe.png"),
+        new HeroSlide("banner_care.png"),
+        new HeroSlide("banner_doorstep.png"),
+        new HeroSlide("banner_professional_care.jpg")
     };
 
     [ObservableProperty] private ServiceCategoryDto? selectedCategory;
