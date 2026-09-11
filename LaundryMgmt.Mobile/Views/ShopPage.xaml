@@ -18,16 +18,19 @@
              grid into its own tiny nested scroll region instead of just fitting. -->
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="0">
 
-            <!-- Hero: a real photo carousel (bundled marketing banners). AspectFit
-                 (never AspectFill) so the banner is always shown in full — the
-                 source images aren't the same aspect ratio as the device width, and
-                 AspectFill was cropping the headline text off the top/bottom. The
-                 surrounding Surface fill means any left/right letterboxing blends
-                 into the images' own light background instead of showing bars. -->
+            <!-- Hero: a real photo carousel (bundled marketing banners, all normalized to the
+                 same ~2.72:1 aspect ratio). A *fixed* HeightRequest here would fight that
+                 ratio on different screen widths — since the box's own width/height ratio
+                 wouldn't match the images' ratio, AspectFit would letterbox every slide
+                 regardless of how well the assets themselves match each other. Instead the
+                 box's height is computed in code-behind (OnHeroCarouselSizeChanged) from its
+                 actual width every time it's arranged, so the box's ratio always equals the
+                 images' ratio and AspectFit renders them full-bleed with zero crop and zero
+                 letterbox on any device width. -->
             <VerticalStackLayout Grid.Row="0" Spacing="6" Margin="14,10,14,0">
-                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource Surface}" Padding="0">
-                    <CarouselView x:Name="HeroCarousel" ItemsSource="{Binding HeroSlides}" HeightRequest="190"
-                                  Loop="True" IndicatorView="{x:Reference HeroIndicator}">
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource Surface}" Padding="0" ClipToBounds="True">
+                    <CarouselView x:Name="HeroCarousel" ItemsSource="{Binding HeroSlides}"
+                                  Loop="True" IndicatorView="{x:Reference HeroIndicator}" SizeChanged="OnHeroCarouselSizeChanged">
                         <CarouselView.ItemTemplate>
                             <DataTemplate x:DataType="vm:HeroSlide">
                                 <Image Source="{Binding ImageSource}" Aspect="AspectFit" />

@@ -17,12 +17,21 @@
   z-index: 30;
 
   .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
     font-size: 1.15rem;
     color: var(--color-primary-dark);
     cursor: pointer;
     white-space: nowrap;
-    padding-top: 4px;
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: block;
+    }
   }
 
   .menu-toggle {

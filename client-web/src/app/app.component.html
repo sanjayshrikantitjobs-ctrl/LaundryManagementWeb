@@ -4,7 +4,10 @@
       <span></span><span></span><span></span>
     </button>
 
-    <span class="brand" (click)="closeMenu()" [routerLink]="homeLink">🧺 Laundry Mgmt</span>
+    <span class="brand" (click)="closeMenu()" [routerLink]="homeLink">
+      <img src="assets/branding/logo-icon.png" alt="Shrios Laundry Wala" class="brand-icon" />
+      Shrios Laundry Wala
+    </span>
 
     <nav [class.open]="isMenuOpen()">
       @if (isCustomer) {
